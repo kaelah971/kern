@@ -4,7 +4,7 @@
 
 Kern turns an advertised offer into a frozen, merchant-approved contract, sends Kane CLI through the real customer journey in a browser, compares what the customer was actually charged against what was promised, and — when the store is wrong — gets the source code repaired and has Kane rerun the same challenge unchanged.
 
-Status: **specification only. Nothing is built.** No Kane run has been made, no storefront exists, no customer has used this.
+Status: **first slice built.** A real Kane preflight passed on 22 Nov 2026 (`run_end` passed, exit 0). The demo storefront, seeded shipping defect, frozen promise contract and oracle tests exist. The campaign wizard, worker, repair flow and receipt are **not** built.
 
 ---
 
@@ -37,7 +37,17 @@ Status: **specification only. Nothing is built.** No Kane run has been made, no 
 
 Kane preflight (real, installed CLI) → demo store with a real seeded shipping bug → unit-tested promise oracle including the $50 boundary.
 
-Nothing else. No dashboard, no repair flow, no receipt until the store and the bug are real and reproducible.
+Nothing else in this slice. No dashboard, no repair flow, no receipt until the store and the bug are real and reproducible.
+
+## Run what exists
+
+```bash
+npm install
+npm test          # contract hash, oracle boundary, pre-repair acceptance
+npm start         # http://127.0.0.1:4173
+```
+
+The store has three deterministic demo carts: `$60.00 eligible`, `$50.00 boundary` and `$35.00 control`. Each one lands on a server-calculated shipping quote. The deliberate defect is documented in `docs/demo-defect.md`; the real Kane preflight is in `docs/proof-ledger.md`.
 
 ---
 

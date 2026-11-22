@@ -1,0 +1,34 @@
+{
+  "id": "kern-demo-free-shipping-v1",
+  "campaignId": "kern-demo-campaign",
+  "version": 1,
+  "type": "free_shipping_threshold",
+  "thresholdBasis": "after_discount_merchandise_subtotal",
+  "operator": "greater_than_or_equal",
+  "threshold": {
+    "currency": "USD",
+    "cents": 5000
+  },
+  "qualifyingProductIds": [
+    "tote",
+    "notebook",
+    "apron"
+  ],
+  "destinationCountry": "US",
+  "shippingMethod": "standard",
+  "expectedEligibleShipping": {
+    "currency": "USD",
+    "cents": 0
+  },
+  "expectedIneligibleShipping": {
+    "currency": "USD",
+    "cents": 900
+  },
+  "adTextSnapshot": "Free standard shipping on orders over $50. US only.",
+  "statedInterpretation": "The ad says 'over $50'. The approved contract interprets the boundary as inclusive: an after-discount merchandise subtotal of exactly $50.00 qualifies. The ad wording is preserved here and is not silently rewritten.",
+  "baselineSource": "docs/store-policy.md#sp-01 (approved US standard shipping policy: $9.00 baseline)",
+  "destinationOrigin": "http://127.0.0.1:4173",
+  "approvedAt": "2026-11-21T23:45:00.000Z",
+  "approvedBy": "demo-merchant",
+  "specSha256": "032dbd00ff1f5c236f8c72be4aeba464bb181e71a7cffc138b22ef3e5a4323f4"
+}
