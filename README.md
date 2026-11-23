@@ -1,123 +1,119 @@
 # Kern
 
-**Every ad makes a promise. Kern checks whether it survives the click.**
+Kern turns an advertised checkout promise into a frozen, merchant-approved contract, sends Kane CLI through the real storefront in a browser, and compares the rendered charge with a deterministic oracle. When the store is wrong, a bounded source repair is followed by the same challenge rerun unchanged. The demo has one storefront, one `free_shipping_threshold` promise, three carts, and two real audits.
 
-Kern turns an advertised offer into a frozen, merchant-approved contract, sends Kane CLI through the real customer journey in a browser, compares what the customer was actually charged against what was promised, and — when the store is wrong — gets the source code repaired and has Kane rerun the same challenge unchanged.
+## The proof
 
-Status: **broken promise proven, repaired, and re-verified.** The pre-repair audit observed **$9.00** on the $60.00 and exact $50.00 carts against a **$0.00** promise; the $35.00 control paid **$9.00**. After the one-line repair, an unchanged six-run audit observed **$0.00 / $0.00 / $9.00**, every assert exited 0, overall **HONORED**. The read-only audit app, Promise Receipt and closed-loop view are built. The campaign wizard and automation are **not** built.
+**Pre-repair audit** `2026-11-22T00-53-05-669Z-f5230a` — **BROKEN**
 
----
+| Cart | Promised | Observed |
+|---|---:|---:|
+| $60.00 eligible | $0.00 | **$9.00** |
+| $50.00 boundary | $0.00 | **$9.00** |
+| $35.00 control | $9.00 | $9.00 |
 
-## The demo in five lines
+Kane's assert runs returned `status: failed`, `result_code: 740`, `reason_code: assertion_error.confirmed_product_bug`, `verdict.confirmed: true` for the two broken carts. The control passed.
 
-1. The store advertises free standard shipping on orders over $50 (after-discount merchandise subtotal, USD, US).
-2. A $60 cart is charged $9 at checkout. That breaks the promise.
-3. A $35 cart is correctly charged $9. That control must keep passing.
-4. A coding agent fixes the shipping calculation. A human approves the diff.
-5. Kane reruns both carts unchanged: $0 and $9. A scoped receipt records both runs and what was never tested.
+**The repair:** remove the `* 100` in `src/lib/shipping.ts` that compared a cents subtotal with a dollar-denominated threshold.
 
----
+**Post-repair audit** `2026-11-23T12-35-29-692Z-48b993` — **HONORED**, `postRepair: true`, answers the pre-repair audit, and all six objective SHA-256 values are identical:
 
-## Read in this order
+| Cart | Promised | Observed |
+|---|---:|---:|
+| $60.00 eligible | $0.00 | **$0.00** |
+| $50.00 boundary | $0.00 | **$0.00** |
+| $35.00 control | $9.00 | **$9.00** |
 
-| File | Why |
-|---|---|
-| `docs/decisions.md` | **Start here.** Name change, corrections to the specs, scope, claim limits |
-| `docs/project idea.md` | The product in one document |
-| `docs/prd.md` | Requirements and acceptance criteria |
-| `docs/trd.md` | Stack, Kane integration, data model |
-| `docs/architecture.md` | Trust boundaries and run/repair flows |
-| `docs/full mvp_plan.md` | Slice-by-slice build order |
-| `docs/project plan.md` | Milestones and submission checklist |
-| `docs/market-research.md` | Who else is doing this, and what is actually different |
+Every assert exited 0; every evidence pack is present.
 
----
+The four numbers: **$60 → $9.00 (promised $0.00)** and **$35 → $9.00 (promised $9.00)** before the repair; **$60 → $0.00** and **$35 → $9.00** after it. The exact $50 boundary also moved from $9.00 to $0.00.
 
-## First slice
+The $60 row in the full pre-repair audit is a provided real Kane capture; the live replacement `2026-11-23T12-27-07-978Z-a0c39f` repeats the $60.00/$9.00 observation with process exit codes. The $50 and $35 rows are live in the full audit. The post-repair audit is all live.
 
-Kane preflight (real, installed CLI) → demo store with a real seeded shipping bug → unit-tested promise oracle including the $50 boundary.
+Full session/exits/reason/evidence ledger: [`docs/proof-ledger.md`](docs/proof-ledger.md).
 
-Nothing else in this slice. No dashboard, no repair flow, no receipt until the store and the bug are real and reproducible.
-
-## Run what exists
+## Judge it in five minutes
 
 ```bash
-npm install
-npm test                              # 56 tests; replay characterization excluded
-npm run demo:replay-pre-repair        # restores ed3dbaf, runs replay test, restores
-npm start                             # store: http://127.0.0.1:4173
-npm run app                           # app:   http://127.0.0.1:3000
-npm run dev                           # both processes
+npm install && npm test && npm run dev
 ```
 
-The store has three deterministic demo carts: `$60.00 eligible`, `$50.00 boundary` and `$35.00 control`. Each one lands on a server-calculated shipping quote. The pre-repair defect is documented in `docs/demo-defect.md`; both real Kane audits are in `docs/proof-ledger.md`.
+Open **http://127.0.0.1:3000**.
 
-`tests/replay/pre-repair.test.ts` is preserved unchanged and excluded from the
-default glob. It asserts the old $9.00 defect; `npm run demo:replay-pre-repair`
-temporarily restores `ed3dbaf:src/lib/shipping.ts`, runs only that file, then
-restores the current file and verifies the hash.
+**The app works with no Kane account.** It ships sanitized copies of the two real audits in [`recorded/`](recorded/README.md). If `.data/audits` is absent — a public clone — the app reads `recorded/` and shows a visible banner on every recorded page: **“Recorded audit: replay of real runs, not a live session.”** No mock data is substituted. On the recording machine, `.data/audits` exists and the app prefers the live records.
 
-## Audit engine
+What to click:
 
-The audit engine is a CLI; the read-only app reads its JSON records. With the store running in one process:
+1. `/` — the ad snapshot and the merchant's interpretation as separate blocks, the frozen contract, the policy source behind $9.00, the three carts, and the latest audit.
+2. **Audits** — every readable audit, newest first, with status, source, post-repair provenance, runs and credits.
+3. **`2026-11-22T00-53-05-669Z-f5230a`** — Journey X-Ray: $60 Promised $0.00 / Observed $9.00, Kane's confirmed verdict; the $50 boundary and $35 control follow.
+4. **Closed loop** — the actual `git diff ed3dbaf HEAD -- src/lib/shipping.ts`, then the post-repair audit and the 6/6 objective-hash comparison.
+5. **`2026-11-23T12-35-29-692Z-48b993` → Promise Receipt** — the scoped status, contract hash, pre-repair audit id, per-scenario and per-run evidence, and the “what this does not prove” section.
+
+The store is on `http://127.0.0.1:4173`. A 3:30 recording plan is in [`docs/demo-script.md`](docs/demo-script.md).
+
+## Run it yourself with Kane
+
+This is the second path, and it spends credits. A full three-scenario audit is six Kane runs and costs **roughly 140 credits**. The recorded runs reported 117–142 credits; exact per-run values are in each `audit.json`. The balance at recording time was **4,796.83**.
 
 ```bash
-# in another process
-node scripts/kane-audit.ts          # 3 scenarios, observe + assert each
-node scripts/kane-audit.ts --scenario boundary-50 --kind observe
+kane-cli login        # OAuth, or username/access-key
+kane-cli whoami       # must say Authenticated
+npm start             # store on 4173; leave it running
+# in another terminal:
+node scripts/kane-audit.ts
 ```
 
-Each scenario runs two real Kane objectives: an **observe** run that reads the rendered amounts, and an **assert** run that checks the shipping amount against the contract. The audit writes `.data/audits/<auditId>/audit.json`, copies each real `.evidence` pack into the audit directory, and hashes it. Statuses are `HONORED`, `BROKEN`, `INCONCLUSIVE` or `INFRA_ERROR`; they fail closed.
+`0.10.6` was used; do not upgrade mid-evidence. The CLI writes `.data/audits/<auditId>/audit.json`, copies the real `.evidence` packs, and the app prefers those files. The app never starts Kane itself.
 
-`--reuse-capture eligible-60` imports the supplied real capture only when its recorded objective hash is byte-identical to the generated challenge. The audit record labels it `provided_capture` and does not pretend it was run again. The final pre-repair evidence uses a live eligible-60 run; the earlier capture audit is preserved.
+A cheap smoke run is `node scripts/kane-audit.ts --scenario control-35 --kind observe` (one run, roughly 20 credits).
 
-On a `repair/*` branch the audit auto-links to the latest complete pre-repair
-audit, requires all six objective SHA-256 values to be identical, and aborts
-before spending credits if any hash moved. The record carries `postRepair: true`,
-`answersAuditId`, and every pre/post hash comparison.
+## What is built
+
+- One local storefront on 4173 with server-calculated shipping, three deterministic carts, and no payment fields.
+- A frozen promise contract with SHA-256, a deterministic oracle, and boundary tests at 4,999 / 5,000 / 5,001 cents.
+- A two-run Kane audit engine (observe + assert), strict NDJSON/USD parsing, fail-closed statuses, evidence copy and hash.
+- A bounded repair and an unchanged post-repair audit gated by all six objective hashes.
+- A read-only server-rendered app on 3000: campaign, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff.
+- Public `recorded/` copies, a restore-safe pre-repair replay, and a pre-repair store runner for filming.
+
+## What is not built
+
+- Campaign wizard or contract-authoring UI.
+- Automated coding-agent repair and approval UI; the fix is the committed branch change shown as a diff.
+- Database, auth, multi-tenancy, or deployment.
+- Live Kane execution from the app; the app is read-only.
+- Screenshot viewer or fabricated evidence imagery.
+- Signed or certified receipts.
+
+## Limitations
+
+- One owned demo store, one promise type (`free_shipping_threshold`), USD/US only, standard shipping.
+- The evidence is **hash-linked, not signed or certified**. The receipt says “verified for the tested conditions at the recorded time” and explicitly lists what it does not prove.
+- **Boundary-50 recording quirk:** the pre-repair boundary assert has an empty `final_state`; the observed `$9.00` is only in the run's `context.memory`. The parser reads that recorded value; the raw NDJSON remains the source of truth, and `tests/boundary-50.test.ts` pins it. Kane's boundary verdict describes the boundary rule, while the actual code defect was the `* 100` cents/dollars error. Treat the verdict as an observation, not a code diagnosis.
+- Recorded copies keep the evidence SHA-256 values but not the `.evidence` files. A live `.data` audit keeps the files.
+- A public clone uses `recorded/`; live `.data` evidence is local and gitignored.
+
+## History
+
+The buggy revision is reachable at `ed3dbaf`. Replay the defect without rewriting history:
 
 ```bash
+git checkout ed3dbaf -- src/lib/shipping.ts
 npm start
-node scripts/kane-audit.ts --reuse-capture eligible-60
+# the $60 cart is charged $9.00 again
+git checkout HEAD -- src/lib/shipping.ts
 ```
 
-Both audit commands require an authenticated `kane-cli` and spend Kane credits.
-The audit stops before any run if the store or authentication is unavailable.
+`npm run demo:store-pre-repair` does the swap, prints **“PRE-REPAIR REVISION — seeded defect active”**, serves the store on 4173, and restores the fixed file when stopped. Narrate it as the revision that was audited, not a live audit.
 
-## Repair verified
+The pre-repair characterization lives at `tests/replay/pre-repair.test.ts` and is excluded from `npm test`; `npm run demo:replay-pre-repair` restores `ed3dbaf`, runs only that file, restores the current file, and verifies the hash.
 
-| Audit | Result | Role |
-|---|---|---|
-| `2026-11-22T00-53-05-669Z-f5230a` | BROKEN | Pre-repair full audit |
-| `2026-11-23T12-27-07-978Z-a0c39f` | BROKEN | Live eligible-60 replacement for the borrowed capture |
-| `2026-11-23T12-35-29-692Z-48b993` | **HONORED** | Post-repair full audit; answers the pre-repair audit, six identical objective hashes |
+## Deeper docs
 
-Replay the pre-repair defect: `git checkout ed3dbaf -- src/lib/shipping.ts`.
-
-## App
-
-A read-only, server-rendered Node app on **http://127.0.0.1:3000**, in the same
-paper/ink/accent palette as the storefront. It reads real files and does not mock
-a missing one:
-
-| Route | What it shows |
-|---|---|
-| `/` | Campaign: ad snapshot, merchant interpretation, frozen contract, policy source for $9.00, three scenarios, latest audit |
-| `/audits` | Every readable audit on disk, newest first, with status, post-repair provenance, runs and credits |
-| `/audits/:id` | Journey X-Ray: per scenario, Promised / Observed lanes, assert result, Kane verdict, session, exit, result/reason, objective and evidence hashes, `kane-cli evidence serve` command |
-| `/audits/:id/receipt` | Promise Receipt: contract id/hash, ad snapshot, policy reference, expected/observed, per-run table, evidence hashes, limits |
-| `/repair/:preAuditId` | Closed loop: what failed and Kane's verdict, the actual `git diff ed3dbaf HEAD -- src/lib/shipping.ts`, and the post-repair audit with the six-hash comparison |
-
-The app reads `.data/audits/*/audit.json` (and `docs/store-policy.md`). If that
-directory or a file is missing, it renders an explicit empty state. The repair
-diff is read from git; there are no fabricated screenshots.
-
----
-
-## Deadline
-
-Kane CLI Online Hackathon: **26 November 2026, 11:59 PM IST** (18:29 UTC / 7:29 PM WAT). Judging: Ships 25%, Verified 25%, Closed loop 25%, Craft 25%.
-
-## What this is not
-
-No Shopify or Meta integration. No payments. No production monitoring. No multi-tenant SaaS. No certification that a store is honest — only that named conditions were observed at a recorded time.
+- [`docs/proof-ledger.md`](docs/proof-ledger.md) — real runs, sessions, exits, reasons, evidence hashes, spend.
+- [`docs/decisions.md`](docs/decisions.md) — scope, boundary, claim rules.
+- [`docs/demo-script.md`](docs/demo-script.md) — 3:30 shot list.
+- [`docs/publish.md`](docs/publish.md) — publication commands, scan findings, post drafts.
+- [`recorded/README.md`](recorded/README.md) — what was stripped, how to verify the originals.
+- [`LICENSE`](LICENSE) — MIT.

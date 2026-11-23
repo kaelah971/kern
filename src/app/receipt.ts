@@ -3,6 +3,7 @@ import type { PromiseContract } from '../lib/contract.ts';
 import type { PolicyInfo } from './data.ts';
 import { formatCents, formatTimestamp } from './data.ts';
 import { escapeHtml, layout, sessionId, statusChip } from './render.ts';
+import { isRecorded, type RecordedAudit } from './audits.ts';
 
 export function receiptStatusStatement(status: AuditStatus): string {
   switch (status) {
@@ -88,6 +89,17 @@ ${
 }`
     : `<div class="warning" role="status">Policy source not found at <code>docs/store-policy.md</code>. The $9.00 expectation is still recorded in the frozen contract, but its separate policy source is missing on disk.</div>`;
 
+  const recorded = isRecorded(audit);
+  const originalAuditSha256 = (audit as RecordedAudit).originalAuditSha256;
+  const recordedBanner = recorded
+    ? `<div class="recorded-banner" role="status"><strong>Recorded audit: replay of real runs, not a live session.</strong>${originalAuditSha256 ? `<br><span class="meta">Original audit SHA-256: <code class="hash">${escapeHtml(originalAuditSha256)}</code></span>` : ''}</div>`
+    : '';
+  const hasRecordedEvidence = audit.scenarios.some((scenario) =>
+    [scenario.observe, scenario.assert].some(
+      (run) => Boolean(run?.evidence?.sha256) && !run?.evidence?.sourcePath && !run?.evidence?.copiedPath,
+    ),
+  );
+
   const hasUserReportedExitCodes = audit.scenarios.some((scenario) =>
     [scenario.observe, scenario.assert].some(
       (run) => run?.artifacts.exitCodeSource === 'provided_capture_user_reported',
@@ -112,6 +124,7 @@ ${
     <p class="receipt-status">${statusChip(audit.overallStatus)}</p>
   </header>
 
+  ${recordedBanner}
   ${hashWarning}
 
   <dl class="receipt-grid">
@@ -161,6 +174,11 @@ ${
     ${
       hasUserReportedExitCodes
         ? '<p class="meta">Some runs above are provided real captures; their exit codes are user-reported because the NDJSON does not record process exit codes.</p>'
+        : ''
+    }
+    ${
+      hasRecordedEvidence
+        ? '<p class="meta">The recorded copy keeps the evidence SHA-256 values; the .evidence files themselves are not included.</p>'
         : ''
     }
   </section>

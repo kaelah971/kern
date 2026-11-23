@@ -1,0 +1,583 @@
+{
+  "auditVersion": 1,
+  "auditId": "2026-11-22T00-53-05-669Z-f5230a",
+  "startedAt": "2026-11-22T00:53:05.669Z",
+  "finishedAt": "2026-11-22T00:59:38.157Z",
+  "storeUrl": "http://127.0.0.1:4173/",
+  "contract": {
+    "id": "kern-demo-free-shipping-v1",
+    "version": 1,
+    "specSha256": "032dbd00ff1f5c236f8c72be4aeba464bb181e71a7cffc138b22ef3e5a4323f4",
+    "thresholdCents": 5000,
+    "expectedEligibleShippingCents": 0,
+    "expectedIneligibleShippingCents": 900
+  },
+  "scenarios": [
+    {
+      "scenarioId": "eligible-60",
+      "presetLabel": "$60.00 eligible",
+      "expectedSubtotalCents": 6000,
+      "thresholdCents": 5000,
+      "objectives": {
+        "observe": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $60.00 eligible cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "0a6c2a3c1736f019d6295906162e97dd958bed0552c48005b38c42b5da30c6ca"
+        },
+        "assert": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $60.00 eligible cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
+          "sha256": "bac28a215bb8227a1548a5f16d56d169c1f382b6bf6647598a0597c69c15cd8d"
+        },
+        "oracleExpectedCents": 0
+      },
+      "observe": {
+        "kind": "observe",
+        "source": "provided_capture",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $60.00 eligible cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "0a6c2a3c1736f019d6295906162e97dd958bed0552c48005b38c42b5da30c6ca",
+          "matchesProvidedCapture": true
+        },
+        "artifacts": {
+          "exitCode": 0,
+          "exitCodeSource": "provided_capture_user_reported",
+          "timedOut": false,
+          "durationMs": null
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "passed",
+          "resultCode": 100,
+          "reasonCode": "success.complete",
+          "finalState": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$60.00",
+            "observed_shipping": "$9.00"
+          },
+          "finalStateStrings": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$60.00",
+            "observed_shipping": "$9.00"
+          },
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$9.00",
+              "expectedValue": "",
+              "reasoning": "value: '$9.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$60.00",
+              "expectedValue": "",
+              "reasoning": "value: '$60.00' (stored, no comparison)"
+            }
+          },
+          "verdict": null,
+          "duration": 61.6,
+          "credits": 21.776589999999995,
+          "runId": "run-0",
+          "observedShippingCents": 900,
+          "observedSubtotalCents": 6000,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "sessionId": "4def2d81-cc1e-450e-9ac6-72e61e6e22e3"
+        },
+        "evidence": {
+          "sha256": "946432f6e59d07c492e98e8a47975cbcb320043dcf5ef41a44637329483dad45",
+          "bytes": 627490
+        }
+      },
+      "assert": {
+        "kind": "assert",
+        "source": "provided_capture",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $60.00 eligible cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
+          "sha256": "bac28a215bb8227a1548a5f16d56d169c1f382b6bf6647598a0597c69c15cd8d",
+          "matchesProvidedCapture": true
+        },
+        "artifacts": {
+          "exitCode": 1,
+          "exitCodeSource": "provided_capture_user_reported",
+          "timedOut": false,
+          "durationMs": null
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "failed",
+          "resultCode": 740,
+          "reasonCode": "assertion_error.confirmed_product_bug",
+          "finalState": {},
+          "finalStateStrings": {},
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$9.00",
+              "expectedValue": "",
+              "reasoning": "value: '$9.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$60.00",
+              "expectedValue": "",
+              "reasoning": "value: '$60.00' (stored, no comparison)"
+            },
+            "observed_shipping_zero_check": {
+              "extractedValue": "$9.00",
+              "expectedValue": "$0.00",
+              "reasoning": "value: '$9.00' -> '$9.00' after ['strip']; equals '$0.00' -> FAIL"
+            }
+          },
+          "verdict": {
+            "confirmed": true,
+            "status": "failed",
+            "family": "application_issue",
+            "category": "ui_data_defect",
+            "severity": "major",
+            "rootCause": "The store applied a shipping charge even though the cart subtotal was $60.00 and the store says US orders of $50.00 or more receive free standard shipping.",
+            "bugTitle": "Eligible $60 cart is charged standard shipping",
+            "suggestion": "Fix the free-shipping rule so US standard-shipping carts with an after-discount merchandise subtotal of $50.00 or more show $0.00 shipping, then add a regression check for the $60.00 eligible-cart fixture.",
+            "oneLiner": "The $60 eligible cart showed a $9.00 standard-shipping charge instead of free shipping.",
+            "confidence": 0.98,
+            "signals": [
+              {
+                "step": "0-6",
+                "kind": "objective_contradiction",
+                "excerpt": "Shipping — Standard (3–5 business days) $9.00"
+              },
+              {
+                "step": "0-6",
+                "kind": "objective_contradiction",
+                "excerpt": "Merchandise subtotal (after discounts) $60.00"
+              },
+              {
+                "step": "0-2",
+                "kind": "objective_contradiction",
+                "excerpt": "Free standard shipping on US orders of $50.00 or more. After-discount merchandise subtotal, USD, standard shipping."
+              }
+            ],
+            "raw": {
+              "confirmed": true,
+              "status": "failed",
+              "family": "application_issue",
+              "category": "ui_data_defect",
+              "category_proposal": "",
+              "severity": "major",
+              "root_cause": "The store applied a shipping charge even though the cart subtotal was $60.00 and the store says US orders of $50.00 or more receive free standard shipping.",
+              "agent_fault_assessment": "The agent followed the requested path: it clicked the exact '$60.00 eligible cart' fixture, reached the shipping quote, and evaluated the stated shipping condition. It did not cause the $9.00 charge or misread the requested line; the displayed subtotal, destination, shipping method, and policy all establish eligibility for free standard shipping.",
+              "bug_title": "Eligible $60 cart is charged standard shipping",
+              "signals": [
+                {
+                  "step": "0-6",
+                  "kind": "objective_contradiction",
+                  "excerpt": "Shipping — Standard (3–5 business days) $9.00"
+                },
+                {
+                  "step": "0-6",
+                  "kind": "objective_contradiction",
+                  "excerpt": "Merchandise subtotal (after discounts) $60.00"
+                },
+                {
+                  "step": "0-2",
+                  "kind": "objective_contradiction",
+                  "excerpt": "Free standard shipping on US orders of $50.00 or more. After-discount merchandise subtotal, USD, standard shipping."
+                }
+              ],
+              "confidence": 0.98,
+              "suggestion": "Fix the free-shipping rule so US standard-shipping carts with an after-discount merchandise subtotal of $50.00 or more show $0.00 shipping, then add a regression check for the $60.00 eligible-cart fixture.",
+              "one_liner": "The $60 eligible cart showed a $9.00 standard-shipping charge instead of free shipping.",
+              "relevant_steps": [
+                2,
+                4,
+                5,
+                6
+              ],
+              "culprit_step": "0-6",
+              "credits_consumed": 4.5156,
+              "mode": "terminal"
+            }
+          },
+          "duration": 81.1,
+          "credits": 31.26625,
+          "runId": "run-0",
+          "observedShippingCents": 900,
+          "observedSubtotalCents": 6000,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "sessionId": "29a8116c-55ae-4a6e-829a-89b12629780e"
+        },
+        "evidence": {
+          "sha256": "b15a33b0838a447b261d53f05a47dfb185cdc831db6bf7b84a3c9b77c0b18e79",
+          "bytes": 672163
+        }
+      },
+      "oracle": {
+        "expectedShippingCents": 0,
+        "observedShippingCents": 900,
+        "observedSubtotalCents": 6000
+      },
+      "assertVerdict": {
+        "status": "failed",
+        "confirmed": true,
+        "family": "application_issue",
+        "category": "ui_data_defect",
+        "severity": "major",
+        "rootCause": "The store applied a shipping charge even though the cart subtotal was $60.00 and the store says US orders of $50.00 or more receive free standard shipping.",
+        "bugTitle": "Eligible $60 cart is charged standard shipping"
+      },
+      "status": "BROKEN",
+      "reasons": [
+        "oracle expected 0 cents; Kane observed 900; assert failed with a confirmed verdict"
+      ],
+      "notes": [
+        "observe and assert are provided real captures; exit codes are user-reported because the NDJSON does not record them."
+      ]
+    },
+    {
+      "scenarioId": "boundary-50",
+      "presetLabel": "$50.00 boundary",
+      "expectedSubtotalCents": 5000,
+      "thresholdCents": 5000,
+      "objectives": {
+        "observe": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "943d13847c0f4a99968878343425e5852a45869a947c305514213d03ff5d8b8a"
+        },
+        "assert": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
+          "sha256": "d6fd99ab4c6fc021b68fe9a1ff21b9898df2a39e5bb78a9e043dd700751fe57e"
+        },
+        "oracleExpectedCents": 0
+      },
+      "observe": {
+        "kind": "observe",
+        "source": "live",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "943d13847c0f4a99968878343425e5852a45869a947c305514213d03ff5d8b8a"
+        },
+        "artifacts": {
+          "exitCode": 0,
+          "exitCodeSource": "process",
+          "timedOut": false,
+          "durationMs": 95169
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "passed",
+          "resultCode": 100,
+          "reasonCode": "success.complete",
+          "finalState": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$50.00",
+            "observed_shipping": "$9.00"
+          },
+          "finalStateStrings": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$50.00",
+            "observed_shipping": "$9.00"
+          },
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$9.00",
+              "expectedValue": "",
+              "reasoning": "value: '$9.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$50.00",
+              "expectedValue": "",
+              "reasoning": "value: '$50.00' (stored, no comparison)"
+            }
+          },
+          "verdict": null,
+          "duration": 56.2,
+          "credits": 21.199952500000002,
+          "runId": "run-0",
+          "observedShippingCents": 900,
+          "observedSubtotalCents": 5000,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "sessionId": "d32b9e35-ad8e-4ec1-816e-cc086a2fda18"
+        },
+        "evidence": {
+          "sha256": "72054121ca02113291b6f476457911631f7a9d0f2e483e0541aa5e1097654298",
+          "bytes": 618152
+        }
+      },
+      "assert": {
+        "kind": "assert",
+        "source": "live",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
+          "sha256": "d6fd99ab4c6fc021b68fe9a1ff21b9898df2a39e5bb78a9e043dd700751fe57e"
+        },
+        "artifacts": {
+          "exitCode": 1,
+          "exitCodeSource": "process",
+          "timedOut": false,
+          "durationMs": 99995
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "failed",
+          "resultCode": 740,
+          "reasonCode": "assertion_error.confirmed_product_bug",
+          "finalState": {},
+          "finalStateStrings": {},
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$9.00",
+              "expectedValue": "",
+              "reasoning": "value: '$9.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$50.00",
+              "expectedValue": "",
+              "reasoning": "value: '$50.00' (stored, no comparison)"
+            },
+            "observed_shipping_zero_check": {
+              "extractedValue": "$9.00",
+              "expectedValue": "$0.00",
+              "reasoning": "value: '$9.00' -> '$9.00' after ['strip']; equals '$0.00' -> FAIL"
+            }
+          },
+          "verdict": {
+            "confirmed": true,
+            "status": "failed",
+            "family": "application_issue",
+            "category": "ui_data_defect",
+            "severity": "major",
+            "rootCause": "The store did not apply its free-shipping rule at the exact $50.00 merchandise-subtotal boundary.",
+            "bugTitle": "$50.00 boundary cart is charged standard shipping",
+            "suggestion": "Fix the free-shipping threshold comparison so a $50.00 after-discount merchandise subtotal receives $0.00 standard shipping, then add a boundary test for exactly $50.00.",
+            "oneLiner": "The $50.00 boundary cart showed $9.00 shipping even though orders of $50.00 or more are advertised as eligible for free standard shipping.",
+            "confidence": 0.98,
+            "signals": [
+              {
+                "step": "0-3",
+                "kind": "objective_contradiction",
+                "excerpt": "Free standard shipping on US orders of $50.00 or more."
+              }
+            ],
+            "raw": {
+              "confirmed": true,
+              "status": "failed",
+              "family": "application_issue",
+              "category": "ui_data_defect",
+              "category_proposal": "",
+              "severity": "major",
+              "root_cause": "The store did not apply its free-shipping rule at the exact $50.00 merchandise-subtotal boundary.",
+              "agent_fault_assessment": "The agent clicked the requested boundary-cart fixture and waited for the shipping quote. It did incorrectly record the observed shipping as $0.00 in step 0-5 even though the displayed quote was $9.00, but that recording error did not create the incorrect charge or the failed expected result; the page itself shows a $50.00 subtotal with paid shipping.",
+              "bug_title": "$50.00 boundary cart is charged standard shipping",
+              "signals": [
+                {
+                  "step": "0-3",
+                  "kind": "objective_contradiction",
+                  "excerpt": "Free standard shipping on US orders of $50.00 or more."
+                }
+              ],
+              "confidence": 0.98,
+              "suggestion": "Fix the free-shipping threshold comparison so a $50.00 after-discount merchandise subtotal receives $0.00 standard shipping, then add a boundary test for exactly $50.00.",
+              "one_liner": "The $50.00 boundary cart showed $9.00 shipping even though orders of $50.00 or more are advertised as eligible for free standard shipping.",
+              "relevant_steps": [
+                3,
+                4,
+                5,
+                6
+              ],
+              "culprit_step": "0-6",
+              "credits_consumed": 4.0809,
+              "mode": "terminal"
+            }
+          },
+          "duration": 72.7,
+          "credits": 24.063415,
+          "runId": "run-0",
+          "observedShippingCents": 900,
+          "observedSubtotalCents": 5000,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "sessionId": "fdfab30d-2f96-42cd-a09c-aa6fab6b50c6"
+        },
+        "evidence": {
+          "sha256": "4f4b4322a01875f2fd99cb2bb7acfbb44ae298426db44c4563691542e6aa2521",
+          "bytes": 690583
+        }
+      },
+      "oracle": {
+        "expectedShippingCents": 0,
+        "observedShippingCents": 900,
+        "observedSubtotalCents": 5000
+      },
+      "assertVerdict": {
+        "status": "failed",
+        "confirmed": true,
+        "family": "application_issue",
+        "category": "ui_data_defect",
+        "severity": "major",
+        "rootCause": "The store did not apply its free-shipping rule at the exact $50.00 merchandise-subtotal boundary.",
+        "bugTitle": "$50.00 boundary cart is charged standard shipping"
+      },
+      "status": "BROKEN",
+      "reasons": [
+        "oracle expected 0 cents; Kane observed 900; assert failed with a confirmed verdict"
+      ],
+      "notes": []
+    },
+    {
+      "scenarioId": "control-35",
+      "presetLabel": "$35.00 control",
+      "expectedSubtotalCents": 3500,
+      "thresholdCents": 5000,
+      "objectives": {
+        "observe": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "75a02fea8548d919e523f3957e5e3a2f218b6514189f83beb4fcae5333827e75"
+        },
+        "assert": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $9.00.",
+          "sha256": "73cea5ea958c75e2b41fd2904aaec7a50f9d26b6d883a06318d241cd6f5d73e0"
+        },
+        "oracleExpectedCents": 900
+      },
+      "observe": {
+        "kind": "observe",
+        "source": "live",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "75a02fea8548d919e523f3957e5e3a2f218b6514189f83beb4fcae5333827e75"
+        },
+        "artifacts": {
+          "exitCode": 0,
+          "exitCodeSource": "process",
+          "timedOut": false,
+          "durationMs": 82927
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "passed",
+          "resultCode": 100,
+          "reasonCode": "success.complete",
+          "finalState": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$35.00",
+            "observed_shipping": "$9.00"
+          },
+          "finalStateStrings": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$35.00",
+            "observed_shipping": "$9.00"
+          },
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$9.00",
+              "expectedValue": "",
+              "reasoning": "value: '$9.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$35.00",
+              "expectedValue": "",
+              "reasoning": "value: '$35.00' (stored, no comparison)"
+            }
+          },
+          "verdict": null,
+          "duration": 46.6,
+          "credits": 15.870901500000002,
+          "runId": "run-0",
+          "observedShippingCents": 900,
+          "observedSubtotalCents": 3500,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "sessionId": "8007dfd7-cd09-47db-a13b-b6a7d9ebf25e"
+        },
+        "evidence": {
+          "sha256": "c06d3eaf2a8284c21457114949916659e8a45fc1a033ac5c50dc58a4dc537c48",
+          "bytes": 617684
+        }
+      },
+      "assert": {
+        "kind": "assert",
+        "source": "live",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $9.00.",
+          "sha256": "73cea5ea958c75e2b41fd2904aaec7a50f9d26b6d883a06318d241cd6f5d73e0"
+        },
+        "artifacts": {
+          "exitCode": 0,
+          "exitCodeSource": "process",
+          "timedOut": false,
+          "durationMs": 114289
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "passed",
+          "resultCode": 100,
+          "reasonCode": "success.complete",
+          "finalState": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_shipping": "$9.00",
+            "observed_subtotal": "$35.00"
+          },
+          "finalStateStrings": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_shipping": "$9.00",
+            "observed_subtotal": "$35.00"
+          },
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$9.00",
+              "expectedValue": "",
+              "reasoning": "value: '$9.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$35.00",
+              "expectedValue": "",
+              "reasoning": "value: '$35.00' (stored, no comparison)"
+            },
+            "observed_shipping_amount_check": {
+              "extractedValue": "$9.00",
+              "expectedValue": "$9.00",
+              "reasoning": "value: '$9.00' -> '$9.00' after ['strip']; equals '$9.00' -> PASS"
+            }
+          },
+          "verdict": null,
+          "duration": 74.6,
+          "credits": 27.821929999999995,
+          "runId": "run-0",
+          "observedShippingCents": 900,
+          "observedSubtotalCents": 3500,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "sessionId": "53274d6d-57ac-41a3-90bb-f0ab28323308"
+        },
+        "evidence": {
+          "sha256": "d1d07f40f03a0358d78f046cc69ead92cf967baba780f9a8b4f4bfae29f76866",
+          "bytes": 734231
+        }
+      },
+      "oracle": {
+        "expectedShippingCents": 900,
+        "observedShippingCents": 900,
+        "observedSubtotalCents": 3500
+      },
+      "assertVerdict": null,
+      "status": "HONORED",
+      "reasons": [
+        "oracle and observation agree at 900 cents; assert passed"
+      ],
+      "notes": []
+    }
+  ],
+  "overallStatus": "BROKEN",
+  "totals": {
+    "runs": 6,
+    "credits": 141.999039,
+    "liveRuns": 4,
+    "liveCredits": 88.956199,
+    "providedCaptureRuns": 2,
+    "providedCaptureCredits": 53.04284
+  },
+  "source": "recorded",
+  "originalAuditSha256": "f42f8359bb40b9dc36114a125e7ce65e4b6a63bbd6d6523d726e4dd12fb425af"
+}

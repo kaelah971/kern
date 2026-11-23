@@ -29,6 +29,14 @@ export function statusChip(status: AuditStatus): string {
   return `<span class="status ${statusClass(status)}"><span class="status-mark" aria-hidden="true"></span>${escapeHtml(status)}</span>`;
 }
 
+export function recordedBanner(summary: AuditSummary | null): string {
+  if (!summary?.recorded) return '';
+  const original = summary.originalAuditSha256
+    ? `<span class="meta">Original audit SHA-256: <code class="hash">${escapeHtml(summary.originalAuditSha256)}</code></span>`
+    : '';
+  return `<div class="recorded-banner" role="status"><strong>Recorded audit: replay of real runs, not a live session.</strong>${original ? `<br>${original}` : ''}</div>`;
+}
+
 function credits(value: number | null | undefined): string {
   return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(2) : '—';
 }
@@ -39,6 +47,8 @@ function exitCode(run: RunAudit | null): string {
 }
 
 export function sessionId(run: RunAudit | null): string {
+  const explicit = (run?.parsed as { sessionId?: string } | undefined)?.sessionId;
+  if (explicit) return explicit;
   const directory = run?.parsed.sessionDir;
   if (!directory) return '—';
   return directory.split(/[\\/]/).filter(Boolean).pop() ?? directory;
@@ -159,7 +169,7 @@ export function renderCampaign(input: {
   const latest = latestAudit(index);
 
   const latestBlock = latest
-    ? `<div class="audit-banner">
+    ? `${recordedBanner(latest)}<div class="audit-banner">
   <div>
     <p class="eyebrow">Latest audit</p>
     <p>${statusChip(latest.audit.overallStatus)} <a href="/audits/${encodeURIComponent(
@@ -186,7 +196,7 @@ export function renderCampaign(input: {
 ${auditContractWarning(latest, contract)}`
     : `<div class="empty">
   <h3>No audit records yet</h3>
-  <p>No <code>audit.json</code> exists under <code>.data/audits</code>. Start the store on port 4173, then run <code>node scripts/kane-audit.ts</code>. This page will read the real file; it does not mock a result.</p>
+  <p>No <code>audit.json</code> exists under <code>.data/audits</code> or <code>recorded/</code>. Start the store on port 4173, then run <code>node scripts/kane-audit.ts</code>, or restore the committed recorded audits. This page does not mock a result.</p>
 </div>`;
 
   const policyBlock = policy
@@ -288,6 +298,7 @@ export function renderAuditList(index: AuditIndex): string {
         audit.auditId,
       )}</a></td>
   <td>${statusChip(audit.overallStatus)}</td>
+  <td>${summary.recorded ? 'Recorded' : 'Live'}</td>
   <td>${audit.postRepair ? 'Yes' : 'No'}</td>
   <td>${answers}</td>
   <td class="num">${audit.totals.runs}</td>
@@ -295,6 +306,12 @@ export function renderAuditList(index: AuditIndex): string {
 </tr>`;
     })
     .join('\n');
+
+  const recordedCount = index.audits.filter((summary) => summary.recorded).length;
+  const recordedNotice =
+    recordedCount > 0
+      ? `<div class="recorded-banner" role="status"><strong>Recorded audit: replay of real runs, not a live session.</strong> ${recordedCount} of ${index.audits.length} records below are recorded copies.</div>`
+      : '';
 
   const content =
     index.audits.length === 0
@@ -306,7 +323,7 @@ export function renderAuditList(index: AuditIndex): string {
 <table>
   <caption class="sr-only">Audit records, newest first</caption>
   <thead>
-    <tr><th scope="col">Started</th><th scope="col">Audit</th><th scope="col">Status</th><th scope="col">Post-repair</th><th scope="col">Answers</th><th scope="col" class="num">Runs</th><th scope="col" class="num">Credits</th></tr>
+    <tr><th scope="col">Started</th><th scope="col">Audit</th><th scope="col">Status</th><th scope="col">Source</th><th scope="col">Post-repair</th><th scope="col">Answers</th><th scope="col" class="num">Runs</th><th scope="col" class="num">Credits</th></tr>
   </thead>
   <tbody>
 ${rows}
@@ -320,6 +337,7 @@ ${rows}
 <h1>Audits</h1>
 <p class="lede">Every readable <code>audit.json</code> under <code>.data/audits</code>, newest first. Missing or unreadable files are called out rather than filled in.</p>
 ${incompleteWarnings(index)}
+${recordedNotice}
 ${content}`,
     'audits',
   );
@@ -396,7 +414,9 @@ function runCard(run: RunAudit | null, label: string): string {
   ${
     command
       ? `<div class="evidence"><p>Evidence pack command</p><code>${escapeHtml(command)}</code></div>`
-      : '<p class="meta">No evidence pack is recorded, so no serve command is shown.</p>'
+      : run.evidence?.sha256
+        ? `<div class="evidence"><p>Recorded evidence SHA-256; the .evidence file is not included in this recorded copy.</p><code class="hash">${escapeHtml(run.evidence.sha256)}</code></div>`
+        : '<p class="meta">No evidence pack is recorded, so no serve command is shown.</p>'
   }
 </article>`;
 }
@@ -492,6 +512,7 @@ function scenarioBlock(scenario: ScenarioAudit, contract: PromiseContract): stri
 
 export function renderAuditDetail(summary: AuditSummary, contract: PromiseContract): string {
   const audit = summary.audit;
+  const banner = recordedBanner(summary);
   const postRepair = audit.postRepair
     ? audit.answersAuditId
       ? `<div class="warning" role="status">Post-repair audit. It answers <a href="/repair/${encodeURIComponent(
@@ -517,6 +538,7 @@ export function renderAuditDetail(summary: AuditSummary, contract: PromiseContra
   <div>${statusChip(audit.overallStatus)}</div>
 </div>
 
+${banner}
 <div class="audit-banner">
   <div>
     <p class="meta"><strong>Started</strong> ${formatTimestamp(audit.startedAt)}</p>
@@ -530,6 +552,13 @@ export function renderAuditDetail(summary: AuditSummary, contract: PromiseContra
     <p><a class="button button--secondary" href="/audits/${encodeURIComponent(
       audit.auditId,
     )}/receipt">Promise Receipt</a></p>
+    ${
+      !audit.postRepair
+        ? `<p><a class="button button--secondary" href="/repair/${encodeURIComponent(
+            audit.auditId,
+          )}">Closed loop</a></p>`
+        : ''
+    }
   </div>
 </div>
 ${auditContractWarning(summary, contract)}
@@ -621,6 +650,7 @@ export function renderRepair(input: {
   diff: DiffResult;
 }): string {
   const { pre, post, diff } = input;
+  const banners = `${recordedBanner(pre)}${post ? recordedBanner(post) : ''}`;
   const diffBlock = diff.ok
     ? diff.diff.trim().length > 0
       ? renderDiff(diff.diff)
@@ -661,6 +691,7 @@ export function renderRepair(input: {
 <p class="lede">Pre-repair audit <a href="/audits/${encodeURIComponent(
       pre.audit.auditId,
     )}">${escapeHtml(pre.audit.auditId)}</a>. The diff is read from git; the objective hashes are read from the audit artifacts.</p>
+${banners}
 
 <div class="repair-grid">
   <section class="repair-col" aria-labelledby="failed-heading">

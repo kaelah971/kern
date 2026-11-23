@@ -67,6 +67,7 @@ counted as a run and was not used in any verdict.
 - **Contract:** `kern-demo-free-shipping-v1` v1,
   `specSha256 032dbd00ff1f5c236f8c72be4aeba464bb181e71a7cffc138b22ef3e5a4323f4`
 - **Audit JSON:** `.data/audits/2026-11-22T00-53-05-669Z-f5230a/audit.json`
+- **Audit JSON SHA-256:** `f42f8359bb40b9dc36114a125e7ce65e4b6a63bbd6d6523d726e4dd12fb425af`
 - **Finished:** `2026-11-22T00:59:38.157Z`
 - **Overall:** `BROKEN`
 - **Runs:** 6 total — 4 live, 2 provided real captures. Every run used the

@@ -4,10 +4,21 @@ import type { AuditRecord, AuditStatus } from '../lib/audit.ts';
 
 const STATUSES = new Set<AuditStatus>(['HONORED', 'BROKEN', 'INCONCLUSIVE', 'INFRA_ERROR']);
 
+export type RecordedAudit = AuditRecord & {
+  source?: 'recorded';
+  originalAuditSha256?: string;
+};
+
+export function isRecorded(audit: AuditRecord): boolean {
+  return (audit as RecordedAudit).source === 'recorded';
+}
+
 export type AuditSummary = {
-  audit: AuditRecord;
+  audit: RecordedAudit;
   path: string;
   mtime: string;
+  recorded: boolean;
+  originalAuditSha256: string | null;
 };
 
 export type AuditIndex = {
@@ -26,12 +37,42 @@ export function defaultAuditRoot(repoRoot = process.cwd()): string {
   return join(repoRoot, '.data', 'audits');
 }
 
+export function recordedAuditRoot(repoRoot = process.cwd()): string {
+  return join(repoRoot, 'recorded');
+}
+
+function hasAuditJson(root: string): boolean {
+  try {
+    return readdirSync(root, { withFileTypes: true }).some(
+      (entry) => entry.isDirectory() && existsSync(join(root, entry.name, 'audit.json')),
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Prefer live `.data/audits` evidence when it exists. A public clone has no
+ * `.data`, so fall back to the committed, sanitized `recorded/` copies.
+ */
+export function resolveAuditRoot(
+  repoRoot = process.cwd(),
+): { root: string; source: 'live' | 'recorded' } {
+  const live = defaultAuditRoot(repoRoot);
+  if (hasAuditJson(live)) return { root: live, source: 'live' };
+
+  const recorded = recordedAuditRoot(repoRoot);
+  if (hasAuditJson(recorded)) return { root: recorded, source: 'recorded' };
+
+  return { root: live, source: 'live' };
+}
+
 function isSafeId(id: string): boolean {
   return /^[0-9A-Za-z][0-9A-Za-z._-]*$/.test(id) && !id.includes('..');
 }
 
-function parseAuditFile(path: string): AuditRecord {
-  const parsed = JSON.parse(readFileSync(path, 'utf8')) as AuditRecord;
+function parseAuditFile(path: string): RecordedAudit {
+  const parsed = JSON.parse(readFileSync(path, 'utf8')) as RecordedAudit;
   if (typeof parsed.auditId !== 'string' || parsed.auditId.length === 0) {
     throw new Error('auditId is missing');
   }
@@ -73,10 +114,13 @@ export function loadAudits(root = defaultAuditRoot()): AuditIndex {
       continue;
     }
     try {
+      const parsed = parseAuditFile(path);
       audits.push({
-        audit: parseAuditFile(path),
+        audit: parsed,
         path,
         mtime: statSync(path).mtime.toISOString(),
+        recorded: parsed.source === 'recorded',
+        originalAuditSha256: parsed.originalAuditSha256 ?? null,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -108,12 +152,15 @@ export function loadAudit(id: string, root = defaultAuditRoot()): AuditLoad {
     };
   }
   try {
+    const parsed = parseAuditFile(file);
     return {
       ok: true,
       summary: {
-        audit: parseAuditFile(file),
+        audit: parsed,
         path: file,
         mtime: statSync(file).mtime.toISOString(),
+        recorded: parsed.source === 'recorded',
+        originalAuditSha256: parsed.originalAuditSha256 ?? null,
       },
     };
   } catch (error) {

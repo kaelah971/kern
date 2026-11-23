@@ -262,6 +262,15 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   margin: 1rem 0 2rem;
 }
 .empty h3 { color: var(--ink); }
+.recorded-banner {
+  border: 1px solid var(--warning);
+  border-left: 5px solid var(--warning);
+  background: var(--warning-surface);
+  padding: .75rem 1rem;
+  margin: 0 0 1.25rem;
+  font-size: .9rem;
+}
+.recorded-banner .meta { display: block; margin-top: .3rem; }
 .warning {
   border: 1px solid var(--warning);
   background: var(--warning-surface);

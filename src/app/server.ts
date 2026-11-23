@@ -2,10 +2,10 @@ import { createServer as createHttpServer, type IncomingMessage, type ServerResp
 import { pathToFileURL } from 'node:url';
 import type { AddressInfo } from 'node:net';
 import {
-  defaultAuditRoot,
   findPostRepairAudit,
   loadAudit,
   loadAudits,
+  resolveAuditRoot,
   type AuditSummary,
 } from './audits.ts';
 import { loadAppContract, readPolicy } from './data.ts';
@@ -84,7 +84,7 @@ export function createAppServer(
   options: AppServerOptions = {},
 ): ReturnType<typeof createHttpServer> {
   const repoRoot = options.repoRoot ?? process.cwd();
-  const auditRoot = options.auditRoot ?? defaultAuditRoot(repoRoot);
+  const auditRoot = options.auditRoot ?? resolveAuditRoot(repoRoot).root;
 
   async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const method = req.method ?? 'GET';
@@ -102,13 +102,19 @@ export function createAppServer(
     const url = new URL(req.url ?? '/', 'http://localhost');
     const path = url.pathname;
 
+    const index = loadAudits(auditRoot);
+
     if (path === '/health') {
-      sendJson(res, 200, { ok: true, app: 'kern', auditRoot });
+      sendJson(res, 200, {
+        ok: true,
+        app: 'kern',
+        auditRoot,
+        auditSource: index.audits.some((summary) => summary.recorded) ? 'recorded' : 'live',
+      });
       return;
     }
 
     const contract = loadAppContract();
-    const index = loadAudits(auditRoot);
     const policy = readPolicy(repoRoot);
 
     if (path === '/') {
@@ -237,12 +243,12 @@ if (isMain) {
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error(`PORT must be an integer between 1 and 65535, got ${process.env.PORT}`);
   }
-  const auditRoot = defaultAuditRoot(process.cwd());
-  const server = createAppServer();
+  const { root: auditRoot, source } = resolveAuditRoot(process.cwd());
+  const server = createAppServer({ auditRoot });
   server.listen(port, '127.0.0.1', () => {
     const address = server.address() as AddressInfo;
     console.log(`Kern app: http://127.0.0.1:${address.port}`);
-    console.log(`Reading audits from: ${auditRoot}`);
+    console.log(`Reading ${source} audits from: ${auditRoot}`);
   });
 
   const shutdown = (): void => {
