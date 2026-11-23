@@ -19,37 +19,57 @@ git ls-files recorded
 - `LICENSE` is MIT.
 - The app works without a Kane account because `recorded/` is committed.
 
-## 2. Secret scan (result of the current tree and history)
+## 1b. Clean-clone verification (2026-11-23)
+
+Run from `C:\dev\kern` at commit `515e6cf` (before the fixture sanitation and
+screenshot layout fixes; the recorded fallback is unchanged in substance):
+
+```bash
+git clone . ../kern-clone-verify
+cd ../kern-clone-verify
+npm ci
+npm test
+PORT=3100 npm run app
+```
+
+Result:
+
+- `.data` absent in the clone.
+- `npm test`: **61 tests, 61 pass, 0 fail**.
+- `GET /health`: `{"ok":true,"app":"kern","auditRoot":"C:\\dev\\kern-clone-verify\\recorded","auditSource":"recorded"}`.
+- `/` 200 with the recorded banner; `/audits` 200 with the banner and exactly
+  the two canonical audit IDs.
+- Both detail pages and both receipts returned 200 with the banner.
+- The BROKEN receipt says BROKEN and does not use the verified phrase; the
+  HONORED receipt uses “Verified for the tested conditions at the recorded time”
+  and names the pre-repair audit.
+- `/repair/2026-11-22T00-53-05-669Z-f5230a` 200 with the banner, the `* 100`
+  diff, `MATCH`, and the post-repair audit.
+- App log clean: no stack trace, no ENOENT or missing-file request.
+- The clone was deleted; it is not committed.
+
+## 2. Secret scan (current tree and history)
 
 No `.env`, access key, Kane token, private key or password was found in tracked
 files. The only credential-like match is the generic `username/password` phrase
 in `docs/trd.md` (an SSRF policy sentence).
 
-There is one **privacy** finding, not a credential: four committed test fixtures
-contain the recording machine's home path `C:\Users\emman` and Kane session
-paths:
+There is one **privacy history** finding, not a credential: four test fixtures
+were committed in `ed3dbaf` and `8677948` with the recording machine's home
+directory and Kane session paths. The current tree is clean: those fixtures now
+use the placeholders `C:\Users\<user>` and `<session-dir>`, and the public
+evidence copies in `recorded/` were already sanitized. The literal paths remain
+in those earlier commits; history was not rewritten.
 
-- `tests/fixtures/audits/broken-audit.json`
-- `tests/fixtures/audits/honored-audit.json`
-- `tests/fixtures/kane/assert-eligible-60.ndjson`
-- `tests/fixtures/kane/observe-eligible-60.ndjson`
-
-They were committed in `ed3dbaf` and `8677948`. History has not been rewritten.
-The public evidence copies in `recorded/` are sanitized: no home paths, no
-`test_url`, no `session_dir`, no `rawRunEnd`, no `argv`, no evidence paths. The
-recorded copies keep the session IDs, objective/evidence SHA-256 values and
-Kane verdicts.
-
-If the recording username must not appear in the public repository, sanitize
-those four test fixtures in a **new commit** (and update the tests that use
-their `sessionDir` fields), or keep the fixtures out of the public tree. Do not
-rewrite history. The recorded audits are already safe to publish.
+The public `recorded/` copies contain no home paths, no `test_url`, no
+`session_dir`, no `rawRunEnd`, no `argv` and no evidence paths. They keep the
+session IDs, objective/evidence SHA-256 values and Kane verdicts.
 
 Useful scan commands:
 
 ```bash
-git grep -n -I 'emman' -- .
-git log --all --oneline -G 'Users.{0,4}emman' -- .
+git grep -n -I -E 'Users[\/][^"<]' -- .
+git log --all --oneline -- tests/fixtures
 git grep -n -I -E '(access[_-]?key|accessKey|client_secret|password|AKIA|BEGIN [A-Z ]*PRIVATE KEY)' -- .
 git ls-files | grep -Ei '(^|/)\.env|\.testmuai|^\.data/'
 ```

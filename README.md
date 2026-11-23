@@ -32,6 +32,18 @@ The $60 row in the full pre-repair audit is a provided real Kane capture; the li
 
 Full session/exits/reason/evidence ledger: [`docs/proof-ledger.md`](docs/proof-ledger.md).
 
+![Campaign: ad snapshot, merchant interpretation, frozen contract and latest audit](docs/screenshots/01-campaign.png)
+
+![Journey X-Ray: promised versus observed, with Kane's confirmed verdict](docs/screenshots/02-journey-x-ray.png)
+
+*Real captures from the live local app on 2026-11-23. A public clone shows the recorded-audit banner instead.*
+
+## The closed loop
+
+The repair is the committed one-line diff. The post-repair audit answers the pre-repair audit and compares all six objective hashes; none moved.
+
+![Closed-loop view: failed verdict, the actual git diff, and the unchanged rerun](docs/screenshots/03-closed-loop.png)
+
 ## Judge it in five minutes
 
 ```bash

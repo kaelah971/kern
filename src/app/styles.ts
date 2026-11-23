@@ -339,11 +339,12 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .signals li { margin-bottom: .3rem; }
 .runs {
   display: grid;
+  min-width: 0;
   grid-template-columns: 1fr 1fr;
   gap: 0;
   border-top: 1px solid var(--line);
 }
-.run-card { padding: 1.1rem 1.3rem 1.25rem; background: var(--paper-2); }
+.run-card { min-width: 0; padding: 1.1rem 1.3rem 1.25rem; background: var(--paper-2); }
 .run-card + .run-card { border-left: 1px solid var(--line); }
 .run-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .6rem; }
 .run-head h3 { margin: 0; font-size: 1rem; }
@@ -364,6 +365,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   white-space: nowrap;
 }
 .diff {
+  max-width: 100%;
   background: #241f19;
   color: #eee6d7;
   font-family: var(--mono);
@@ -380,12 +382,13 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .diff-meta { color: #b9ac97; }
 .repair-grid {
   display: grid;
+  min-width: 0;
   grid-template-columns: 1fr 1.35fr 1fr;
   gap: 1rem;
   align-items: start;
   margin-top: 1.5rem;
 }
-.repair-col { border: 1px solid var(--line); background: var(--paper-2); padding: 1.1rem 1.2rem; }
+.repair-col { min-width: 0; border: 1px solid var(--line); background: var(--paper-2); padding: 1.1rem 1.2rem; }
 .repair-col h2 { font-size: 1.2rem; }
 .repair-col .scenario { margin: .8rem 0 0; }
 .repair-col .scenario-head { padding: .7rem .8rem; }

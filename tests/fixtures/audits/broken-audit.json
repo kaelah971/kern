@@ -76,11 +76,11 @@
             }
           },
           "verdict": null,
-          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\4def2d81-cc1e-450e-9ac6-72e61e6e22e3",
+          "sessionDir": "<session-dir>",
           "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M80AMKFC2GNVE1QEZE8W2HSF/dashboard/share/US_DENS74R6QGTAL52E8N4QJNSI0O40OZDTUN28SVM2D88C39Q4U34AGSEJF0OUMOPB?type=summary&agentView=true&fqdn=summary-page",
           "duration": 61.6,
           "credits": 21.776589999999995,
-          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\4def2d81-cc1e-450e-9ac6-72e61e6e22e3\\evidence\\61f2a491-b773-44ab-b5f9-db4f5532ede4.evidence",
+          "evidencePath": "<session-dir>\\evidence\\61f2a491-b773-44ab-b5f9-db4f5532ede4.evidence",
           "runId": "run-0",
           "observedShippingCents": 900,
           "observedSubtotalCents": 6000,
@@ -164,8 +164,8 @@
               "pointer": "(passed) loaded a $60.00 eligible cart on the Kern demo store"
             },
             "credits_consumed": 21.776589999999995,
-            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\4def2d81-cc1e-450e-9ac6-72e61e6e22e3",
-            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\4def2d81-cc1e-450e-9ac6-72e61e6e22e3\\runs\\0",
+            "session_dir": "<session-dir>",
+            "run_dir": "<session-dir>\\runs\\0",
             "result_code": 100,
             "reason_code": "success.complete",
             "per_flow_metadata": [
@@ -188,7 +188,7 @@
           }
         },
         "evidence": {
-          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\4def2d81-cc1e-450e-9ac6-72e61e6e22e3\\evidence\\61f2a491-b773-44ab-b5f9-db4f5532ede4.evidence",
+          "sourcePath": "<session-dir>\\evidence\\61f2a491-b773-44ab-b5f9-db4f5532ede4.evidence",
           "copiedPath": ".data/audits/2026-11-22T00-53-05-669Z-f5230a/eligible-60/observe.evidence",
           "sha256": "946432f6e59d07c492e98e8a47975cbcb320043dcf5ef41a44637329483dad45",
           "bytes": 627490
@@ -306,11 +306,11 @@
               "mode": "terminal"
             }
           },
-          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\29a8116c-55ae-4a6e-829a-89b12629780e",
+          "sessionDir": "<session-dir>",
           "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M80ARJ7Q5V5WVATQKZW1ZEZH/dashboard/share/US_F8L39BP88JRFEKIMLYT8Y8MQJ0I06K1IBECDPK7P6PDZB246QYIDFF10TZQNQDZH?type=summary&agentView=true&fqdn=summary-page",
           "duration": 81.1,
           "credits": 31.26625,
-          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\29a8116c-55ae-4a6e-829a-89b12629780e\\evidence\\0e0645c4-7c42-416b-9de6-4efcfefe4d5c.evidence",
+          "evidencePath": "<session-dir>\\evidence\\0e0645c4-7c42-416b-9de6-4efcfefe4d5c.evidence",
           "runId": "run-0",
           "observedShippingCents": 900,
           "observedSubtotalCents": 6000,
@@ -405,8 +405,8 @@
               "pointer": "(failed) The $60 eligible cart showed a $9.00 standard-shipping charge instead of free shipping."
             },
             "credits_consumed": 31.26625,
-            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\29a8116c-55ae-4a6e-829a-89b12629780e",
-            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\29a8116c-55ae-4a6e-829a-89b12629780e\\runs\\0",
+            "session_dir": "<session-dir>",
+            "run_dir": "<session-dir>\\runs\\0",
             "result_code": 740,
             "reason_code": "assertion_error.confirmed_product_bug",
             "per_flow_metadata": [
@@ -469,7 +469,7 @@
           }
         },
         "evidence": {
-          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\29a8116c-55ae-4a6e-829a-89b12629780e\\evidence\\0e0645c4-7c42-416b-9de6-4efcfefe4d5c.evidence",
+          "sourcePath": "<session-dir>\\evidence\\0e0645c4-7c42-416b-9de6-4efcfefe4d5c.evidence",
           "copiedPath": ".data/audits/2026-11-22T00-53-05-669Z-f5230a/eligible-60/assert.evidence",
           "sha256": "b15a33b0838a447b261d53f05a47dfb185cdc831db6bf7b84a3c9b77c0b18e79",
           "bytes": 672163
@@ -530,7 +530,7 @@
           "durationMs": 95169,
           "argv": [
             "C:\\Program Files\\nodejs\\node.exe",
-            "C:\\Users\\emman\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
+            "C:\\Users\\<user>\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
             "run",
             "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
             "--url",
@@ -572,11 +572,11 @@
             }
           },
           "verdict": null,
-          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\d32b9e35-ad8e-4ec1-816e-cc086a2fda18",
+          "sessionDir": "<session-dir>",
           "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M80BW8YXZNDXW86F2ED25X3N/dashboard/share/US_7J0WTA2KCP2OU6ZZ523CR18C1JDQP81AOS7DZIO6C2I5DDOWFTY3INTVOLIRG6BQ?type=summary&agentView=true&fqdn=summary-page",
           "duration": 56.2,
           "credits": 21.199952500000002,
-          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\d32b9e35-ad8e-4ec1-816e-cc086a2fda18\\evidence\\a7492234-5519-48c4-a6c8-12b258b4a2da.evidence",
+          "evidencePath": "<session-dir>\\evidence\\a7492234-5519-48c4-a6c8-12b258b4a2da.evidence",
           "runId": "run-0",
           "observedShippingCents": 900,
           "observedSubtotalCents": 5000,
@@ -660,8 +660,8 @@
               "pointer": "(passed) loaded the $50.00 boundary cart on the Kern demo store"
             },
             "credits_consumed": 21.199952500000002,
-            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\d32b9e35-ad8e-4ec1-816e-cc086a2fda18",
-            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\d32b9e35-ad8e-4ec1-816e-cc086a2fda18\\runs\\0",
+            "session_dir": "<session-dir>",
+            "run_dir": "<session-dir>\\runs\\0",
             "result_code": 100,
             "reason_code": "success.complete",
             "per_flow_metadata": [
@@ -684,7 +684,7 @@
           }
         },
         "evidence": {
-          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\d32b9e35-ad8e-4ec1-816e-cc086a2fda18\\evidence\\a7492234-5519-48c4-a6c8-12b258b4a2da.evidence",
+          "sourcePath": "<session-dir>\\evidence\\a7492234-5519-48c4-a6c8-12b258b4a2da.evidence",
           "copiedPath": ".data/audits/2026-11-22T00-53-05-669Z-f5230a/boundary-50/observe.evidence",
           "sha256": "72054121ca02113291b6f476457911631f7a9d0f2e483e0541aa5e1097654298",
           "bytes": 618152
@@ -707,7 +707,7 @@
           "durationMs": 99995,
           "argv": [
             "C:\\Program Files\\nodejs\\node.exe",
-            "C:\\Users\\emman\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
+            "C:\\Users\\<user>\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
             "run",
             "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
             "--url",
@@ -794,11 +794,11 @@
               "mode": "terminal"
             }
           },
-          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\fdfab30d-2f96-42cd-a09c-aa6fab6b50c6",
+          "sessionDir": "<session-dir>",
           "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M80BZ4W7JE52TSV1BJJECYTG/dashboard/share/US_WW3HQWC6F1HR2S97T31BUTC1N6SOBWE32TH45R14MCV54MIK5F76X15JNPGY2B9T?type=summary&agentView=true&fqdn=summary-page",
           "duration": 72.7,
           "credits": 24.063415,
-          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\fdfab30d-2f96-42cd-a09c-aa6fab6b50c6\\evidence\\b0f9a5b2-4edd-4383-aa58-36d7b267793b.evidence",
+          "evidencePath": "<session-dir>\\evidence\\b0f9a5b2-4edd-4383-aa58-36d7b267793b.evidence",
           "runId": "run-0",
           "observedShippingCents": 900,
           "observedSubtotalCents": 5000,
@@ -905,8 +905,8 @@
               "pointer": "(failed) The $50.00 boundary cart showed $9.00 shipping even though orders of $50.00 or more are advertised as eligible for free standard shipping."
             },
             "credits_consumed": 24.063415,
-            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\fdfab30d-2f96-42cd-a09c-aa6fab6b50c6",
-            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\fdfab30d-2f96-42cd-a09c-aa6fab6b50c6\\runs\\0",
+            "session_dir": "<session-dir>",
+            "run_dir": "<session-dir>\\runs\\0",
             "result_code": 740,
             "reason_code": "assertion_error.confirmed_product_bug",
             "per_flow_metadata": [
@@ -959,7 +959,7 @@
           }
         },
         "evidence": {
-          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\fdfab30d-2f96-42cd-a09c-aa6fab6b50c6\\evidence\\b0f9a5b2-4edd-4383-aa58-36d7b267793b.evidence",
+          "sourcePath": "<session-dir>\\evidence\\b0f9a5b2-4edd-4383-aa58-36d7b267793b.evidence",
           "copiedPath": ".data/audits/2026-11-22T00-53-05-669Z-f5230a/boundary-50/assert.evidence",
           "sha256": "4f4b4322a01875f2fd99cb2bb7acfbb44ae298426db44c4563691542e6aa2521",
           "bytes": 690583
@@ -1018,7 +1018,7 @@
           "durationMs": 82927,
           "argv": [
             "C:\\Program Files\\nodejs\\node.exe",
-            "C:\\Users\\emman\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
+            "C:\\Users\\<user>\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
             "run",
             "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
             "--url",
@@ -1060,11 +1060,11 @@
             }
           },
           "verdict": null,
-          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\8007dfd7-cd09-47db-a13b-b6a7d9ebf25e",
+          "sessionDir": "<session-dir>",
           "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M80C26ZKC74STZA3KDP4R78W/dashboard/share/US_3Y6TA3HVSEHYQ05SU9AIPFGKLH2LVQOYS6WQAKQ8FOGT4O6KN3OZNUDEHJSPBYDK?type=summary&agentView=true&fqdn=summary-page",
           "duration": 46.6,
           "credits": 15.870901500000002,
-          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\8007dfd7-cd09-47db-a13b-b6a7d9ebf25e\\evidence\\99b6741b-2d73-4723-9def-1ba85b0058d5.evidence",
+          "evidencePath": "<session-dir>\\evidence\\99b6741b-2d73-4723-9def-1ba85b0058d5.evidence",
           "runId": "run-0",
           "observedShippingCents": 900,
           "observedSubtotalCents": 3500,
@@ -1148,8 +1148,8 @@
               "pointer": "(passed) loaded the $35.00 control cart on the Kern demo store"
             },
             "credits_consumed": 15.870901500000002,
-            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\8007dfd7-cd09-47db-a13b-b6a7d9ebf25e",
-            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\8007dfd7-cd09-47db-a13b-b6a7d9ebf25e\\runs\\0",
+            "session_dir": "<session-dir>",
+            "run_dir": "<session-dir>\\runs\\0",
             "result_code": 100,
             "reason_code": "success.complete",
             "per_flow_metadata": [
@@ -1172,7 +1172,7 @@
           }
         },
         "evidence": {
-          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\8007dfd7-cd09-47db-a13b-b6a7d9ebf25e\\evidence\\99b6741b-2d73-4723-9def-1ba85b0058d5.evidence",
+          "sourcePath": "<session-dir>\\evidence\\99b6741b-2d73-4723-9def-1ba85b0058d5.evidence",
           "copiedPath": ".data/audits/2026-11-22T00-53-05-669Z-f5230a/control-35/observe.evidence",
           "sha256": "c06d3eaf2a8284c21457114949916659e8a45fc1a033ac5c50dc58a4dc537c48",
           "bytes": 617684
@@ -1195,7 +1195,7 @@
           "durationMs": 114289,
           "argv": [
             "C:\\Program Files\\nodejs\\node.exe",
-            "C:\\Users\\emman\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
+            "C:\\Users\\<user>\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
             "run",
             "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $9.00.",
             "--url",
@@ -1242,11 +1242,11 @@
             }
           },
           "verdict": null,
-          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\53274d6d-57ac-41a3-90bb-f0ab28323308",
+          "sessionDir": "<session-dir>",
           "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M80C4Q0RK248R79S86TTTV21/dashboard/share/US_V5D57NI6YUY1LB84DVND9AZII66PKVGOOY2NKS5S9S24NL8YGBMGS5NKOABUL9JM?type=summary&agentView=true&fqdn=summary-page",
           "duration": 74.6,
           "credits": 27.821929999999995,
-          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\53274d6d-57ac-41a3-90bb-f0ab28323308\\evidence\\8e0deef0-cf2e-41c3-b7bd-474b49063a38.evidence",
+          "evidencePath": "<session-dir>\\evidence\\8e0deef0-cf2e-41c3-b7bd-474b49063a38.evidence",
           "runId": "run-0",
           "observedShippingCents": 900,
           "observedSubtotalCents": 3500,
@@ -1357,8 +1357,8 @@
               "pointer": "(passed) loaded the $35.00 control cart on the Kern demo store"
             },
             "credits_consumed": 27.821929999999995,
-            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\53274d6d-57ac-41a3-90bb-f0ab28323308",
-            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\53274d6d-57ac-41a3-90bb-f0ab28323308\\runs\\0",
+            "session_dir": "<session-dir>",
+            "run_dir": "<session-dir>\\runs\\0",
             "result_code": 100,
             "reason_code": "success.complete",
             "per_flow_metadata": [
@@ -1381,7 +1381,7 @@
           }
         },
         "evidence": {
-          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\53274d6d-57ac-41a3-90bb-f0ab28323308\\evidence\\8e0deef0-cf2e-41c3-b7bd-474b49063a38.evidence",
+          "sourcePath": "<session-dir>\\evidence\\8e0deef0-cf2e-41c3-b7bd-474b49063a38.evidence",
           "copiedPath": ".data/audits/2026-11-22T00-53-05-669Z-f5230a/control-35/assert.evidence",
           "sha256": "d1d07f40f03a0358d78f046cc69ead92cf967baba780f9a8b4f4bfae29f76866",
           "bytes": 734231

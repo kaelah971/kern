@@ -33,7 +33,13 @@ test('observe capture: a real passed run with parsed values and evidence', () =>
   assert.equal(run.observedSubtotalCents, 6_000);
   assert.equal(run.observedShippingCents, 900);
   assert.equal(run.runId, 'run-0');
-  assert.match(run.sessionDir ?? '', /4def2d81-cc1e-450e-9ac6-72e61e6e22e3/);
+  const sessionDir = run.sessionDir;
+  assert.ok(sessionDir, 'sessionDir is present');
+  assert.doesNotMatch(
+    sessionDir,
+    /^[A-Za-z]:/,
+    'sessionDir is a sanitized placeholder, not an absolute Windows path',
+  );
   assert.match(run.testUrl ?? '', /^https:\/\/test-manager\.lambdatest\.com\//);
   assert.equal(run.duration, 61.6);
   assert.equal(run.credits, 21.776589999999995);

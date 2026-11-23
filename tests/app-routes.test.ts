@@ -76,7 +76,11 @@ test('Journey X-Ray renders promised and observed lanes with real run provenance
   const observe = HONORED.scenarios[0]?.observe;
   const session = observe?.parsed.sessionDir?.split(/[\\/]/).filter(Boolean).pop();
   assert.ok(session, 'fixture must carry a session id');
-  assert.match(text, new RegExp(session));
+  const escapedSession = session
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+  assert.ok(text.includes(escapedSession), 'session id is rendered (HTML-escaped)');
   assert.ok(observe?.evidence?.sha256);
   assert.match(text, new RegExp(observe.evidence.sha256));
 });
