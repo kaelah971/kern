@@ -1,5 +1,14 @@
+import { execFileSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { join, relative } from 'node:path';
 import { getPreset, PRESET_CARTS } from './catalog.ts';
 import { loadContract, type PromiseContract } from './contract.ts';
@@ -78,12 +87,30 @@ export type ScenarioAudit = {
   notes: string[];
 };
 
+export type ObjectiveHashComparison = {
+  scenarioId: string;
+  kind: RunKind;
+  preRepairSha256: string;
+  postRepairSha256: string;
+  match: true;
+};
+
+export type PostRepairContext = {
+  answersAuditId: string;
+  preRepairAuditPath: string;
+  comparisons: ObjectiveHashComparison[];
+};
+
 export type AuditRecord = {
   auditVersion: 1;
   auditId: string;
   startedAt: string;
   finishedAt: string | null;
   partial?: boolean;
+  postRepair?: true;
+  answersAuditId?: string;
+  objectiveHashesMatch?: true;
+  objectiveHashComparisons?: ObjectiveHashComparison[];
   storeUrl: string;
   contract: {
     id: string;
@@ -469,6 +496,105 @@ function makeAuditId(startedAt: string): string {
   return `${startedAt.replace(/[:.]/g, '-')}-${randomBytes(3).toString('hex')}`;
 }
 
+function currentGitBranch(): string | null {
+  try {
+    const branch = execFileSync('git', ['branch', '--show-current'], {
+      encoding: 'utf8',
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return branch || null;
+  } catch {
+    return null;
+  }
+}
+
+function findCompletePreRepairAudit(): { record: AuditRecord; path: string } | null {
+  const root = join(process.cwd(), '.data', 'audits');
+  if (!existsSync(root)) return null;
+
+  const candidates: Array<{ record: AuditRecord; path: string }> = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const path = join(root, entry.name, 'audit.json');
+    if (!existsSync(path)) continue;
+    try {
+      const record = JSON.parse(readFileSync(path, 'utf8')) as AuditRecord;
+      if (record.postRepair === true) continue;
+      if (record.scenarios.length !== 3) continue;
+      if (!record.scenarios.every((scenario) => scenario.observe && scenario.assert)) continue;
+      candidates.push({ record, path });
+    } catch {
+      // Ignore partial or malformed audit records; they cannot anchor a rerun.
+    }
+  }
+
+  candidates.sort((left, right) => {
+    if (left.record.startedAt === right.record.startedAt) {
+      return right.record.auditId.localeCompare(left.record.auditId);
+    }
+    return right.record.startedAt.localeCompare(left.record.startedAt);
+  });
+  return candidates[0] ?? null;
+}
+
+/**
+ * A post-repair audit is only a rerun if the exact objective text is unchanged.
+ * Compare all six hashes before preflight or any Kane call. A mismatch aborts
+ * without spending a credit; the fix is to the generator, never the artifact.
+ */
+export function resolvePostRepairContext(
+  contract: PromiseContract,
+  options: { postRepair?: boolean } = {},
+): PostRepairContext | null {
+  const branch = currentGitBranch();
+  const requested = options.postRepair ?? (branch?.startsWith('repair/') ?? false);
+  if (!requested) return null;
+
+  const prior = findCompletePreRepairAudit();
+  if (!prior) {
+    throw new Error(
+      'Post-repair audit requested, but no complete pre-repair audit was found in .data/audits. The rerun does not count without the original challenge.',
+    );
+  }
+
+  const comparisons: ObjectiveHashComparison[] = [];
+  for (const scenarioId of Object.keys(PRESET_CARTS)) {
+    const objectives = buildScenarioObjectives(contract, scenarioId);
+    const priorScenario = prior.record.scenarios.find(
+      (scenario) => scenario.scenarioId === scenarioId,
+    );
+    if (!priorScenario) {
+      throw new Error(
+        `Pre-repair audit ${prior.record.auditId} has no scenario ${scenarioId}; the rerun does not count.`,
+      );
+    }
+
+    for (const kind of ['observe', 'assert'] as const) {
+      const preRepairSha256 = priorScenario.objectives[kind].sha256;
+      const postRepairSha256 = objectives.hashes[kind];
+      if (preRepairSha256 !== postRepairSha256) {
+        throw new Error(
+          `Objective hash changed for ${scenarioId} ${kind}: pre-repair ${preRepairSha256}, current ${postRepairSha256}. The rerun does not count; fix the generator, not the artifact.`,
+        );
+      }
+      comparisons.push({
+        scenarioId,
+        kind,
+        preRepairSha256,
+        postRepairSha256,
+        match: true,
+      });
+    }
+  }
+
+  return {
+    answersAuditId: prior.record.auditId,
+    preRepairAuditPath: prior.path,
+    comparisons,
+  };
+}
+
 function summarizeRuns(scenarios: ScenarioAudit[]): AuditRecord['totals'] {
   const runs = scenarios.flatMap((scenario) =>
     [scenario.observe, scenario.assert].filter((run): run is RunAudit => run !== null),
@@ -498,6 +624,7 @@ function assembleRecord(input: {
   contract: PromiseContract;
   scenarios: ScenarioAudit[];
   partial?: boolean;
+  postRepairContext?: PostRepairContext | null;
 }): AuditRecord {
   return {
     auditVersion: 1,
@@ -505,6 +632,14 @@ function assembleRecord(input: {
     startedAt: input.startedAt,
     finishedAt: input.finishedAt,
     ...(input.partial ? { partial: true } : {}),
+    ...(input.postRepairContext
+      ? {
+          postRepair: true as const,
+          answersAuditId: input.postRepairContext.answersAuditId,
+          objectiveHashesMatch: true as const,
+          objectiveHashComparisons: input.postRepairContext.comparisons,
+        }
+      : {}),
     storeUrl: STORE_URL,
     contract: {
       id: input.contract.id,
@@ -524,6 +659,7 @@ export type AuditOptions = {
   scenarioIds?: string[];
   kind?: 'observe' | 'assert' | 'both';
   reuseCaptureScenarioIds?: string[];
+  postRepair?: boolean;
   onProgress?: (message: string) => void;
 };
 
@@ -552,6 +688,21 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditOutcome
     if (kind !== 'both') {
       throw new Error('provided captures can only be reused with --kind both');
     }
+  }
+
+  const postRepairContext = resolvePostRepairContext(contract, {
+    postRepair: options.postRepair,
+  });
+  if (postRepairContext) {
+    if (scenarioIds.length !== 3) {
+      throw new Error('a post-repair rerun must run all three scenarios');
+    }
+    if (reuseIds.size > 0) {
+      throw new Error('a post-repair rerun cannot reuse provided captures');
+    }
+    log(
+      `post-repair: answering ${postRepairContext.answersAuditId}; all six objective hashes match`,
+    );
   }
 
   log('preflight: checking the store and Kane authentication');
@@ -661,6 +812,7 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditOutcome
       contract,
       scenarios,
       partial: true,
+      postRepairContext,
     });
     writeFileSync(
       join(auditDir, 'audit.partial.json'),
@@ -676,6 +828,7 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditOutcome
     finishedAt,
     contract,
     scenarios,
+    postRepairContext,
   });
 
   writeFileSync(join(auditDir, 'audit.json'), `${JSON.stringify(record, null, 2)}\n`, 'utf8');
