@@ -4,7 +4,7 @@
 
 Kern turns an advertised offer into a frozen, merchant-approved contract, sends Kane CLI through the real customer journey in a browser, compares what the customer was actually charged against what was promised, and — when the store is wrong — gets the source code repaired and has Kane rerun the same challenge unchanged.
 
-Status: **audit engine built and run for real.** A real three-scenario Kane audit on 22 Nov 2026 returned **BROKEN** overall: the $60.00 and exact $50.00 carts were observed at **$9.00** against a **$0.00** contract expectation, and the $35.00 control passed at **$9.00**. The campaign wizard, repair flow and receipt are **not** built.
+Status: **broken promise proven, repaired, and re-verified.** The pre-repair audit observed **$9.00** on the $60.00 and exact $50.00 carts against a **$0.00** promise; the $35.00 control paid **$9.00**. After the one-line repair, an unchanged six-run audit observed **$0.00 / $0.00 / $9.00**, every assert exited 0, overall **HONORED**. The campaign wizard, receipt and UI are **not** built.
 
 ---
 
@@ -43,11 +43,16 @@ Nothing else in this slice. No dashboard, no repair flow, no receipt until the s
 
 ```bash
 npm install
-npm test          # contract hash, oracle boundary, parser, audit status table
 npm start         # http://127.0.0.1:4173
+npm test          # fixed tree: 2 expected pre-repair characterization failures
+node --test tests/post-repair.test.ts   # post-repair acceptance: 3/3
 ```
 
-The store has three deterministic demo carts: `$60.00 eligible`, `$50.00 boundary` and `$35.00 control`. Each one lands on a server-calculated shipping quote. The deliberate defect is documented in `docs/demo-defect.md`; the real Kane audit is in `docs/proof-ledger.md`.
+The store has three deterministic demo carts: `$60.00 eligible`, `$50.00 boundary` and `$35.00 control`. Each one lands on a server-calculated shipping quote. The pre-repair defect is documented in `docs/demo-defect.md`; both real Kane audits are in `docs/proof-ledger.md`.
+
+`tests/acceptance.pre-repair.test.ts` is preserved unchanged. It asserts the old
+$9.00 defect and is expected to fail on the repaired tree; it is a
+characterization, not the post-repair criterion.
 
 ## Audit engine
 
@@ -61,7 +66,12 @@ node scripts/kane-audit.ts --scenario boundary-50 --kind observe
 
 Each scenario runs two real Kane objectives: an **observe** run that reads the rendered amounts, and an **assert** run that checks the shipping amount against the contract. The audit writes `.data/audits/<auditId>/audit.json`, copies each real `.evidence` pack into the audit directory, and hashes it. Statuses are `HONORED`, `BROKEN`, `INCONCLUSIVE` or `INFRA_ERROR`; they fail closed.
 
-`--reuse-capture eligible-60` imports the supplied real capture only when its recorded objective hash is byte-identical to the generated challenge. The audit record labels it `provided_capture` and does not pretend it was run again.
+`--reuse-capture eligible-60` imports the supplied real capture only when its recorded objective hash is byte-identical to the generated challenge. The audit record labels it `provided_capture` and does not pretend it was run again. The final pre-repair evidence uses a live eligible-60 run; the earlier capture audit is preserved.
+
+On a `repair/*` branch the audit auto-links to the latest complete pre-repair
+audit, requires all six objective SHA-256 values to be identical, and aborts
+before spending credits if any hash moved. The record carries `postRepair: true`,
+`answersAuditId`, and every pre/post hash comparison.
 
 ```bash
 npm start
@@ -70,6 +80,16 @@ node scripts/kane-audit.ts --reuse-capture eligible-60
 
 Both audit commands require an authenticated `kane-cli` and spend Kane credits.
 The audit stops before any run if the store or authentication is unavailable.
+
+## Repair verified
+
+| Audit | Result | Role |
+|---|---|---|
+| `2026-11-22T00-53-05-669Z-f5230a` | BROKEN | Pre-repair full audit |
+| `2026-11-23T12-27-07-978Z-a0c39f` | BROKEN | Live eligible-60 replacement for the borrowed capture |
+| `2026-11-23T12-35-29-692Z-48b993` | **HONORED** | Post-repair full audit; answers the pre-repair audit, six identical objective hashes |
+
+Replay the pre-repair defect: `git checkout ed3dbaf -- src/lib/shipping.ts`.
 
 ---
 

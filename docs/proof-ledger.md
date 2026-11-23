@@ -145,6 +145,108 @@ the assert run has no verdict because it passed. Status: **HONORED**.
   charged `$9.00`, matching the policy baseline.
 - Proven: Kane's assert run returned a confirmed product-bug verdict for both
   broken carts, and exited 0 for the control.
-- Not proven: that all shipping is correct, that any other promise type works,
-  or that a repair will pass. The repair has not been attempted.
+- Not proven by this pre-repair audit alone: that all shipping is correct, that
+  any other promise type works, or that a repair will pass. The repair was
+  subsequently attempted and verified in the post-repair audit below.
+
+## 2026-11-23T12:23:27.440Z — credit check — control-35 observe — PASSED
+
+- **Audit:** `2026-11-23T12-23-27-440Z-e4d0ad`
+- **Session:** `560a3f63-af35-4426-a236-ca3108b8301a` (`run-0`)
+- **Exit:** 0; `run_end` passed; `result_code 100`; `reason_code success.complete`
+- **Observed:** subtotal `$35.00`, shipping `$9.00`
+- **Credits:** 20.766805
+- **Status:** INCONCLUSIVE by design (`--kind observe`, no assert run)
+- **Evidence SHA-256:** `a1498c65f7f94b7248e9438262940f48993fd052fccb88751b3344206cd2708c`
+  (618630 bytes)
+- **Files:** `.data/proof/1-credit-check/`
+- **Balance:** `5012.01 → 4988.1726` (reported 20.766805; the delta is 23.8374,
+  with 3.070595 unitemized account usage).
+
+This only proves authentication and credit availability. It is not a verdict.
+
+## 2026-11-23T12:27:07.978Z — live eligible-60 — BROKEN
+
+This replaces the user-provided eligible-60 captures in audit
+`2026-11-22T00-53-05-669Z-f5230a` with a live run. Audit A is preserved
+unedited; only its eligible-60 evidence is superseded, because A's exit codes
+were user-reported while these are process-observed. The objective hashes are
+identical, so the challenge did not change.
+
+- **Audit:** `2026-11-23T12-27-07-978Z-a0c39f`
+- **Store:** pre-repair `main` (`subtotalCents >= 5000 * 100` still present)
+
+| Run | Kane session (unique ID) | Exit | Status | result_code / reason_code | Observed subtotal | Observed shipping | Evidence SHA-256 |
+|---|---|---:|---|---|---|---|---|
+| observe | `d710ff14-8f08-4a93-994f-3339d0130dfb` | 0 | passed | 100 / `success.complete` | `$60.00` | `$9.00` | `ca9ac2bb4104835668f31c223117a673f18b866329df9424e7ef62765aa79ab2` |
+| assert | `1ad1adeb-2294-4ed4-9d3e-bdddb12b1c60` | 1 | failed | 740 / `assertion_error.confirmed_product_bug` | `$60.00` | `$9.00` | `f918dbaee85cb42254c55a7a7bc481d17e238eeac853c5fc3e8917241811965b` |
+
+Observe 19.8454575 credits; assert 28.725905 credits. Assert verdict:
+`confirmed: true`, `application_issue` / `ui_data_defect` / `major`, bug title
+“Eligible $60 cart is charged standard shipping”. Status: **BROKEN**.
+
+- **Objective hashes:** observe
+  `0a6c2a3c1736f019d6295906162e97dd958bed0552c48005b38c42b5da30c6ca`,
+  assert
+  `bac28a215bb8227a1548a5f16d56d169c1f382b6bf6647598a0597c69c15cd8d`
+  — identical to audit A's eligible-60 hashes.
+- **Balance:** `4988.1726 → 4934.1572` (reported 48.5713625; the delta is
+  54.0154, with 5.4440375 unitemized account usage).
+
+## 2026-11-23T12:35:29.692Z — post-repair full audit `2026-11-23T12-35-29-692Z-48b993` — HONORED
+
+- **Branch:** `repair/free-shipping-threshold` (merged after this audit was written)
+- **Command:** `node scripts/kane-audit.ts`
+- **Post-repair binding:** `postRepair: true`; `answersAuditId:
+  2026-11-22T00-53-05-669Z-f5230a`; `objectiveHashesMatch: true`
+- **Objective hashes:** all six match the pre-repair audit exactly:
+
+| Scenario | Observe SHA-256 | Assert SHA-256 |
+|---|---|---|
+| eligible-60 | `0a6c2a3c1736f019d6295906162e97dd958bed0552c48005b38c42b5da30c6ca` | `bac28a215bb8227a1548a5f16d56d169c1f382b6bf6647598a0597c69c15cd8d` |
+| boundary-50 | `943d13847c0f4a99968878343425e5852a45869a947c305514213d03ff5d8b8a` | `d6fd99ab4c6fc021b68fe9a1ff21b9898df2a39e5bb78a9e043dd700751fe57e` |
+| control-35 | `75a02fea8548d919e523f3957e5e3a2f218b6514189f83beb4fcae5333827e75` | `73cea5ea958c75e2b41fd2904aaec7a50f9d26b6d883a06318d241cd6f5d73e0` |
+
+- **Audit JSON SHA-256:** `6d9a2c1ddc078166fe32dbdf1b975ebba59a6598bca3bfaf8e7f2a037eec1eb6`
+- **Overall:** `HONORED`; every assert exited 0; every evidence pack is present.
+
+| Scenario | Run | Kane session (unique ID) | Exit | Status | result_code / reason_code | Observed subtotal | Observed shipping | Evidence SHA-256 |
+|---|---|---|---:|---|---|---|---|---|
+| eligible-60 | observe | `4fba85ca-5869-4cad-bd2e-8c645f387dc0` | 0 | passed | 100 / `success.complete` | `$60.00` | `$0.00` | `bde433436c39421b1d01838ad21f858dc72589aec6c3ea91fcd9d6a6bf60c389` |
+| eligible-60 | assert | `0c633a16-2427-46de-9bfd-b2be5064e58b` | 0 | passed | 100 / `success.complete` | `$60.00` | `$0.00` | `f8baf0603adaaf2596815e49469b07f61a815982a1ac1b516fbd3f7d4fa81208` |
+| boundary-50 | observe | `2909272c-7928-4d51-91cb-1d447165165c` | 0 | passed | 100 / `success.complete` | `$50.00` | `$0.00` | `a5a2bd1251b9f7bffa4bab035416f42b606178fd730cb826fb095e2c37e97f85` |
+| boundary-50 | assert | `78ef2183-27a1-4507-a978-f253bd1982be` | 0 | passed | 100 / `success.complete` | `$50.00` | `$0.00` | `855ecaa4ef3a222a85a21544226bde94b8abb6c4b0605838f810f509507ca086` |
+| control-35 | observe | `244490ef-7e66-4b45-ad54-b62679e2c7c2` | 0 | passed | 100 / `success.complete` | `$35.00` | `$9.00` | `705e4eeeb5a87340f0129c7b373a10df2076906f1d3a6ce89c70b608b516d889` |
+| control-35 | assert | `dd3a1c81-45a5-4f6c-89e3-a87001ab3215` | 0 | passed | 100 / `success.complete` | `$35.00` | `$9.00` | `cce42f1ad08af2f5256a2e84e5b988d764004e98c0f7df53d37b38bb4ace42aa` |
+
+Credits by run: 16.24779, 8.71752, 21.5310425, 26.09917, 9.9782025,
+34.5637425. Total reported: **117.137467**.
+
+**Evidence note:** the control-35 observe run wrote `final_state` keys
+`merchandise_subtotal` and `shipping` rather than `observed_subtotal` and
+`observed_shipping`. The parser read the objective's named `observed_*` memory
+values from the same run, which were `$35.00` / `$9.00`. The raw NDJSON and the
+copied evidence pack are preserved; no value was substituted.
+
+**Balance:** `4934.1572 → 4796.8299` (reported 117.137467; the delta is
+137.3273, with 20.189833 unitemized account usage).
+
+### Spend for this slice
+
+| Phase | Reported credits | Balance delta |
+|---|---:|---:|
+| Credit check (control observe) | 20.766805 | 23.8374 |
+| Live eligible-60 (observe + assert) | 48.5713625 | 54.0154 |
+| Post-repair full audit (6 runs) | 117.137467 | 137.3273 |
+| **Total** | **186.4756345** | **215.1801** |
+
+- Start balance: **5012.01**
+- Remaining balance: **4796.8299**
+- Unitemized account usage: **28.7044655** (balance deltas minus reported
+  `run_end` credits; not attributed to a specific successful run).
+
+The pre-repair audit A remains preserved and unedited. The live eligible-60
+audit B supersedes only A's borrowed eligible-60 evidence. The post-repair
+audit C answers A and carries all six identical objective hashes.
+
 
