@@ -16,6 +16,9 @@ Options:
   --reuse-capture <id>   Use the provided real capture for <id> instead of
                          spending credits. Requires --kind both and an
                          objective-hash match. Only eligible-60 is available.
+  --post-repair          Require all six objective hashes to match the latest
+                         complete pre-repair audit before spending credits.
+                         Auto-enabled on repair/* branches.
   -h, --help             Show this help
 `;
 }
@@ -28,10 +31,12 @@ function parseArgs(argv: string[]): {
   scenario: string | undefined;
   kind: Kind;
   reuse: string[];
+  postRepair: boolean | undefined;
 } {
   let scenario: string | undefined;
   let kind: Kind = 'both';
   const reuse: string[] = [];
+  let postRepair: boolean | undefined;
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -65,10 +70,14 @@ function parseArgs(argv: string[]): {
       reuse.push(value);
       continue;
     }
+    if (arg === '--post-repair') {
+      postRepair = true;
+      continue;
+    }
     fail(`unknown argument "${arg}"`);
   }
 
-  return { scenario, kind, reuse };
+  return { scenario, kind, reuse, postRepair };
 }
 
 function pad(value: string, width: number): string {
@@ -113,11 +122,12 @@ function printTable(record: AuditRecord): void {
 }
 
 async function main(): Promise<void> {
-  const { scenario, kind, reuse } = parseArgs(process.argv.slice(2));
+  const { scenario, kind, reuse, postRepair } = parseArgs(process.argv.slice(2));
   const { record, auditDir } = await runAudit({
     scenarioIds: scenario ? [scenario] : undefined,
     kind,
     reuseCaptureScenarioIds: reuse,
+    postRepair,
     onProgress: (message) => console.error(message),
   });
 
@@ -127,6 +137,11 @@ async function main(): Promise<void> {
   console.log(`Audit:      ${record.auditId}`);
   console.log(`Contract:   ${record.contract.id} (${record.contract.specSha256.slice(0, 16)}…)`);
   console.log(`Overall:    ${record.overallStatus}`);
+  if (record.postRepair) {
+    console.log(
+      `Repair:     post-repair of ${record.answersAuditId}; objective hashes match`,
+    );
+  }
   console.log(
     `Runs:       ${record.totals.runs} (live ${record.totals.liveRuns}, provided ${record.totals.providedCaptureRuns})`,
   );
