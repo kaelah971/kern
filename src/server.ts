@@ -187,7 +187,11 @@ if (isMain) {
   server.listen(port, '127.0.0.1', () => {
     const address = server.address() as AddressInfo;
     console.log(`Kern demo store: http://127.0.0.1:${address.port}`);
-    console.log('SEEDED DEMO DEFECT ACTIVE: see getStandardShippingCents() in src/lib/shipping.ts');
+    console.log(
+      getStandardShippingCents(5_000) === 0
+        ? 'Shipping policy active: $50.00+ after-discount subtotal ships free.'
+        : 'SEEDED DEMO DEFECT ACTIVE: see getStandardShippingCents() in src/lib/shipping.ts',
+    );
   });
 
   const shutdown = (): void => {

@@ -9,6 +9,8 @@
   },
   "scripts": {
     "start": "node src/server.ts",
+    "app": "node src/app/server.ts",
+    "dev": "node scripts/dev.ts",
     "test": "node --test tests/*.test.ts",
     "test:replay": "node --test tests/replay/pre-repair.test.ts",
     "demo:replay-pre-repair": "node scripts/demo-replay-pre-repair.ts",

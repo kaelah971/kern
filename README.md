@@ -4,7 +4,7 @@
 
 Kern turns an advertised offer into a frozen, merchant-approved contract, sends Kane CLI through the real customer journey in a browser, compares what the customer was actually charged against what was promised, and — when the store is wrong — gets the source code repaired and has Kane rerun the same challenge unchanged.
 
-Status: **broken promise proven, repaired, and re-verified.** The pre-repair audit observed **$9.00** on the $60.00 and exact $50.00 carts against a **$0.00** promise; the $35.00 control paid **$9.00**. After the one-line repair, an unchanged six-run audit observed **$0.00 / $0.00 / $9.00**, every assert exited 0, overall **HONORED**. The campaign wizard, receipt and UI are **not** built.
+Status: **broken promise proven, repaired, and re-verified.** The pre-repair audit observed **$9.00** on the $60.00 and exact $50.00 carts against a **$0.00** promise; the $35.00 control paid **$9.00**. After the one-line repair, an unchanged six-run audit observed **$0.00 / $0.00 / $9.00**, every assert exited 0, overall **HONORED**. The read-only audit app, Promise Receipt and closed-loop view are built. The campaign wizard and automation are **not** built.
 
 ---
 
@@ -43,20 +43,23 @@ Nothing else in this slice. No dashboard, no repair flow, no receipt until the s
 
 ```bash
 npm install
-npm start         # http://127.0.0.1:4173
-npm test          # fixed tree: 2 expected pre-repair characterization failures
-node --test tests/post-repair.test.ts   # post-repair acceptance: 3/3
+npm test                              # 56 tests; replay characterization excluded
+npm run demo:replay-pre-repair        # restores ed3dbaf, runs replay test, restores
+npm start                             # store: http://127.0.0.1:4173
+npm run app                           # app:   http://127.0.0.1:3000
+npm run dev                           # both processes
 ```
 
 The store has three deterministic demo carts: `$60.00 eligible`, `$50.00 boundary` and `$35.00 control`. Each one lands on a server-calculated shipping quote. The pre-repair defect is documented in `docs/demo-defect.md`; both real Kane audits are in `docs/proof-ledger.md`.
 
-`tests/acceptance.pre-repair.test.ts` is preserved unchanged. It asserts the old
-$9.00 defect and is expected to fail on the repaired tree; it is a
-characterization, not the post-repair criterion.
+`tests/replay/pre-repair.test.ts` is preserved unchanged and excluded from the
+default glob. It asserts the old $9.00 defect; `npm run demo:replay-pre-repair`
+temporarily restores `ed3dbaf:src/lib/shipping.ts`, runs only that file, then
+restores the current file and verifies the hash.
 
 ## Audit engine
 
-The audit engine is a CLI, not a web UI. With the store running in one process:
+The audit engine is a CLI; the read-only app reads its JSON records. With the store running in one process:
 
 ```bash
 # in another process
@@ -90,6 +93,24 @@ The audit stops before any run if the store or authentication is unavailable.
 | `2026-11-23T12-35-29-692Z-48b993` | **HONORED** | Post-repair full audit; answers the pre-repair audit, six identical objective hashes |
 
 Replay the pre-repair defect: `git checkout ed3dbaf -- src/lib/shipping.ts`.
+
+## App
+
+A read-only, server-rendered Node app on **http://127.0.0.1:3000**, in the same
+paper/ink/accent palette as the storefront. It reads real files and does not mock
+a missing one:
+
+| Route | What it shows |
+|---|---|
+| `/` | Campaign: ad snapshot, merchant interpretation, frozen contract, policy source for $9.00, three scenarios, latest audit |
+| `/audits` | Every readable audit on disk, newest first, with status, post-repair provenance, runs and credits |
+| `/audits/:id` | Journey X-Ray: per scenario, Promised / Observed lanes, assert result, Kane verdict, session, exit, result/reason, objective and evidence hashes, `kane-cli evidence serve` command |
+| `/audits/:id/receipt` | Promise Receipt: contract id/hash, ad snapshot, policy reference, expected/observed, per-run table, evidence hashes, limits |
+| `/repair/:preAuditId` | Closed loop: what failed and Kane's verdict, the actual `git diff ed3dbaf HEAD -- src/lib/shipping.ts`, and the post-repair audit with the six-hash comparison |
+
+The app reads `.data/audits/*/audit.json` (and `docs/store-policy.md`). If that
+directory or a file is missing, it renders an explicit empty state. The repair
+diff is read from git; there are no fabricated screenshots.
 
 ---
 

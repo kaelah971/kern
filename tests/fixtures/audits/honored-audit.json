@@ -1,0 +1,1297 @@
+{
+  "auditVersion": 1,
+  "auditId": "2026-11-23T12-35-29-692Z-48b993",
+  "startedAt": "2026-11-23T12:35:29.692Z",
+  "finishedAt": "2026-11-23T12:46:23.444Z",
+  "postRepair": true,
+  "answersAuditId": "2026-11-22T00-53-05-669Z-f5230a",
+  "objectiveHashesMatch": true,
+  "objectiveHashComparisons": [
+    {
+      "scenarioId": "eligible-60",
+      "kind": "observe",
+      "preRepairSha256": "0a6c2a3c1736f019d6295906162e97dd958bed0552c48005b38c42b5da30c6ca",
+      "postRepairSha256": "0a6c2a3c1736f019d6295906162e97dd958bed0552c48005b38c42b5da30c6ca",
+      "match": true
+    },
+    {
+      "scenarioId": "eligible-60",
+      "kind": "assert",
+      "preRepairSha256": "bac28a215bb8227a1548a5f16d56d169c1f382b6bf6647598a0597c69c15cd8d",
+      "postRepairSha256": "bac28a215bb8227a1548a5f16d56d169c1f382b6bf6647598a0597c69c15cd8d",
+      "match": true
+    },
+    {
+      "scenarioId": "boundary-50",
+      "kind": "observe",
+      "preRepairSha256": "943d13847c0f4a99968878343425e5852a45869a947c305514213d03ff5d8b8a",
+      "postRepairSha256": "943d13847c0f4a99968878343425e5852a45869a947c305514213d03ff5d8b8a",
+      "match": true
+    },
+    {
+      "scenarioId": "boundary-50",
+      "kind": "assert",
+      "preRepairSha256": "d6fd99ab4c6fc021b68fe9a1ff21b9898df2a39e5bb78a9e043dd700751fe57e",
+      "postRepairSha256": "d6fd99ab4c6fc021b68fe9a1ff21b9898df2a39e5bb78a9e043dd700751fe57e",
+      "match": true
+    },
+    {
+      "scenarioId": "control-35",
+      "kind": "observe",
+      "preRepairSha256": "75a02fea8548d919e523f3957e5e3a2f218b6514189f83beb4fcae5333827e75",
+      "postRepairSha256": "75a02fea8548d919e523f3957e5e3a2f218b6514189f83beb4fcae5333827e75",
+      "match": true
+    },
+    {
+      "scenarioId": "control-35",
+      "kind": "assert",
+      "preRepairSha256": "73cea5ea958c75e2b41fd2904aaec7a50f9d26b6d883a06318d241cd6f5d73e0",
+      "postRepairSha256": "73cea5ea958c75e2b41fd2904aaec7a50f9d26b6d883a06318d241cd6f5d73e0",
+      "match": true
+    }
+  ],
+  "storeUrl": "http://127.0.0.1:4173/",
+  "contract": {
+    "id": "kern-demo-free-shipping-v1",
+    "version": 1,
+    "specSha256": "032dbd00ff1f5c236f8c72be4aeba464bb181e71a7cffc138b22ef3e5a4323f4",
+    "thresholdCents": 5000,
+    "expectedEligibleShippingCents": 0,
+    "expectedIneligibleShippingCents": 900
+  },
+  "scenarios": [
+    {
+      "scenarioId": "eligible-60",
+      "presetLabel": "$60.00 eligible",
+      "expectedSubtotalCents": 6000,
+      "thresholdCents": 5000,
+      "objectives": {
+        "observe": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $60.00 eligible cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "0a6c2a3c1736f019d6295906162e97dd958bed0552c48005b38c42b5da30c6ca"
+        },
+        "assert": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $60.00 eligible cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
+          "sha256": "bac28a215bb8227a1548a5f16d56d169c1f382b6bf6647598a0597c69c15cd8d"
+        },
+        "oracleExpectedCents": 0
+      },
+      "observe": {
+        "kind": "observe",
+        "source": "live",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $60.00 eligible cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "0a6c2a3c1736f019d6295906162e97dd958bed0552c48005b38c42b5da30c6ca"
+        },
+        "artifacts": {
+          "stdoutPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/eligible-60/observe.ndjson",
+          "stderrPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/eligible-60/observe.stderr.log",
+          "objectivePath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/eligible-60/observe.objective.txt",
+          "exitCode": 0,
+          "exitCodeSource": "process",
+          "timedOut": false,
+          "durationMs": 96731,
+          "argv": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Users\\emman\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
+            "run",
+            "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $60.00 eligible cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+            "--url",
+            "http://127.0.0.1:4173/",
+            "--agent",
+            "--headless",
+            "--max-steps",
+            "40",
+            "--timeout",
+            "240"
+          ]
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "passed",
+          "resultCode": 100,
+          "reasonCode": "success.complete",
+          "finalState": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$60.00",
+            "observed_shipping": "$0.00"
+          },
+          "finalStateStrings": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$60.00",
+            "observed_shipping": "$0.00"
+          },
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$0.00",
+              "expectedValue": "",
+              "reasoning": "value: '$0.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$60.00",
+              "expectedValue": "",
+              "reasoning": "value: '$60.00' (stored, no comparison)"
+            }
+          },
+          "verdict": null,
+          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\4fba85ca-5869-4cad-bd2e-8c645f387dc0",
+          "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846F7CREAH1KVPGTQAZ2BKN/dashboard/share/US_VKB8UVAWQ33XWYCUPCMNG7Y5URQV2USUC9BDA8VCOG2P2V76C2VLRJO4UKV682CC?type=summary&agentView=true&fqdn=summary-page",
+          "duration": 55.5,
+          "credits": 16.24779,
+          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\4fba85ca-5869-4cad-bd2e-8c645f387dc0\\evidence\\05ff0bd5-2dab-46f5-a896-7f55f4bc534f.evidence",
+          "runId": "run-0",
+          "observedShippingCents": 0,
+          "observedSubtotalCents": 6000,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "rawRunEnd": {
+            "type": "run_end",
+            "status": "passed",
+            "summary": "Opened the Kern demo store and loaded the $60.00 eligible cart.\nThe checkout showed a merchandise subtotal of $60.00 and shipping of $0.00.\nNo order was placed and no payment details were entered.",
+            "one_liner": "loaded a $60.00 eligible cart on the Kern demo store",
+            "final_state": {
+              "url": "http://127.0.0.1:4173/checkout",
+              "observed_subtotal": "$60.00",
+              "observed_shipping": "$0.00"
+            },
+            "reason": "Objective completed",
+            "duration": 55.5,
+            "bifurcated": false,
+            "total_runs": 1,
+            "context": {
+              "memory": {
+                "observed_shipping": {
+                  "extracted_value": "$0.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$0.00' (stored, no comparison)",
+                  "analyzer_type": "textual_visual",
+                  "step": 4,
+                  "query": "the amount on the Shipping line in the checkout summary",
+                  "condition": "The amount shown on the line starting with 'Shipping' is stored as {{observed_shipping}}.",
+                  "human_description": "Reading the shipping amount from the checkout summary",
+                  "expected_value": "",
+                  "code_js": "el(6).querySelector('[data-testid=\"shipping-quote\"]')?.innerText.trim() ?? null",
+                  "wrapped_js": "(els) => {\n  const __m = {6: 0};\n  const el = (i) => els[__m[i]];\n  const __v = (el(6).querySelector('[data-testid=\"shipping-quote\"]')?.innerText.trim() ?? null);\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:text=\"Shipping quote US destination\"i"
+                  ],
+                  "needs_unit_conversion": false
+                },
+                "observed_subtotal": {
+                  "extracted_value": "$60.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$60.00' (stored, no comparison)",
+                  "analyzer_type": "textual_visual",
+                  "step": 4,
+                  "query": "the amount on the Merchandise subtotal line in the checkout summary",
+                  "condition": "The amount shown on the line starting with 'Merchandise subtotal' is stored as {{observed_subtotal}}.",
+                  "human_description": "Reading the merchandise subtotal from the checkout summary",
+                  "expected_value": "",
+                  "code_js": "el(6).querySelector('[data-testid=\"subtotal\"]')?.innerText.trim() ?? null",
+                  "wrapped_js": "(els) => {\n  const __m = {6: 0};\n  const el = (i) => els[__m[i]];\n  const __v = (el(6).querySelector('[data-testid=\"subtotal\"]')?.innerText.trim() ?? null);\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:text=\"Shipping quote US destination\"i"
+                  ],
+                  "needs_unit_conversion": false
+                }
+              },
+              "variables": {
+                "observed_shipping": {
+                  "syntax": "{{observed_shipping}}",
+                  "value": "$0.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                },
+                "observed_subtotal": {
+                  "syntax": "{{observed_subtotal}}",
+                  "value": "$60.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                }
+              },
+              "pointer": "(passed) loaded a $60.00 eligible cart on the Kern demo store"
+            },
+            "credits_consumed": 16.24779,
+            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\4fba85ca-5869-4cad-bd2e-8c645f387dc0",
+            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\4fba85ca-5869-4cad-bd2e-8c645f387dc0\\runs\\0",
+            "result_code": 100,
+            "reason_code": "success.complete",
+            "per_flow_metadata": [
+              {
+                "result_code": "100",
+                "reason_code": "success.complete",
+                "error_message": null,
+                "summary": "Opened the Kern demo store and loaded the $60.00 eligible cart.\nThe checkout showed a merchandise subtotal of $60.00 and shipping of $0.00.\nNo order was placed and no payment details were entered.",
+                "one_liner": "loaded a $60.00 eligible cart on the Kern demo store",
+                "credits_consumed": 16.24779
+              }
+            ],
+            "run_id": "run-0",
+            "test_url": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846F7CREAH1KVPGTQAZ2BKN/dashboard/share/US_VKB8UVAWQ33XWYCUPCMNG7Y5URQV2USUC9BDA8VCOG2P2V76C2VLRJO4UKV682CC?type=summary&agentView=true&fqdn=summary-page",
+            "coverage": {
+              "status": "skipped"
+            },
+            "v": 1,
+            "ts": "2026-11-23T12:37:03.564Z"
+          }
+        },
+        "evidence": {
+          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\4fba85ca-5869-4cad-bd2e-8c645f387dc0\\evidence\\05ff0bd5-2dab-46f5-a896-7f55f4bc534f.evidence",
+          "copiedPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/eligible-60/observe.evidence",
+          "sha256": "bde433436c39421b1d01838ad21f858dc72589aec6c3ea91fcd9d6a6bf60c389",
+          "bytes": 621353
+        }
+      },
+      "assert": {
+        "kind": "assert",
+        "source": "live",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $60.00 eligible cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
+          "sha256": "bac28a215bb8227a1548a5f16d56d169c1f382b6bf6647598a0597c69c15cd8d"
+        },
+        "artifacts": {
+          "stdoutPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/eligible-60/assert.ndjson",
+          "stderrPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/eligible-60/assert.stderr.log",
+          "objectivePath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/eligible-60/assert.objective.txt",
+          "exitCode": 0,
+          "exitCodeSource": "process",
+          "timedOut": false,
+          "durationMs": 104829,
+          "argv": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Users\\emman\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
+            "run",
+            "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $60.00 eligible cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
+            "--url",
+            "http://127.0.0.1:4173/",
+            "--agent",
+            "--headless",
+            "--max-steps",
+            "40",
+            "--timeout",
+            "240"
+          ]
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "passed",
+          "resultCode": 100,
+          "reasonCode": "success.complete",
+          "finalState": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$60.00",
+            "observed_shipping": "$0.00"
+          },
+          "finalStateStrings": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$60.00",
+            "observed_shipping": "$0.00"
+          },
+          "memory": {
+            "observed_shipping_amount_check": {
+              "extractedValue": "$0.00",
+              "expectedValue": "$0.00",
+              "reasoning": "value: '$0.00' -> '$0.00' after ['strip']; equals '$0.00' -> PASS"
+            },
+            "observed_shipping": {
+              "extractedValue": "$0.00",
+              "expectedValue": "",
+              "reasoning": "value: '$0.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$60.00",
+              "expectedValue": "",
+              "reasoning": "value: '$60.00' (stored, no comparison)"
+            }
+          },
+          "verdict": null,
+          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\0c633a16-2427-46de-9bfd-b2be5064e58b",
+          "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846J5SGZ1QR8GQ4FBH30S66/dashboard/share/US_JW5P7GC1ZH6K4H1MOI4DS5JR9HFJJEIXBCSNFYY1TZI7JATBJBAXSJ9CM7OORD1O?type=summary&agentView=true&fqdn=summary-page",
+          "duration": 68.6,
+          "credits": 8.717519999999997,
+          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\0c633a16-2427-46de-9bfd-b2be5064e58b\\evidence\\ad2e51a4-7f09-44e2-89ce-67f37e0ab208.evidence",
+          "runId": "run-0",
+          "observedShippingCents": 0,
+          "observedSubtotalCents": 6000,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "rawRunEnd": {
+            "type": "run_end",
+            "status": "passed",
+            "summary": "Opened the Kern demo store and selected “Load $60.00 eligible cart.”\nThe checkout showed a merchandise subtotal of $60.00 and shipping of $0.00.\nThe eligible cart was loaded successfully.",
+            "one_liner": "loaded a $60.00 eligible cart on the Kern demo store",
+            "final_state": {
+              "url": "http://127.0.0.1:4173/checkout",
+              "observed_subtotal": "$60.00",
+              "observed_shipping": "$0.00"
+            },
+            "reason": "Objective completed",
+            "duration": 68.6,
+            "bifurcated": false,
+            "total_runs": 1,
+            "context": {
+              "memory": {
+                "observed_shipping_amount_check": {
+                  "extracted_value": "$0.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$0.00' -> '$0.00' after ['strip']; equals '$0.00' -> PASS",
+                  "analyzer_type": "textual_visual",
+                  "step": 4,
+                  "query": "the amount on the Shipping line in the shipping quote summary",
+                  "condition": " is $0.00.",
+                  "human_description": "Reading the shipping amount from the quote summary",
+                  "expected_value": "$0.00",
+                  "code_js": "el(7).nextElementSibling.nextElementSibling.querySelector('[data-testid=\"shipping-quote\"]').innerText.trim()",
+                  "wrapped_js": "(els) => {\n  const __m = {7: 0};\n  const el = (i) => els[__m[i]];\n  const __v = (el(7).nextElementSibling.nextElementSibling.querySelector('[data-testid=\"shipping-quote\"]').innerText.trim());\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:role=heading[name=\"Shipping quote\"i]"
+                  ],
+                  "needs_unit_conversion": false
+                },
+                "observed_shipping": {
+                  "extracted_value": "$0.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$0.00' (stored, no comparison)",
+                  "analyzer_type": "textual_visual",
+                  "step": 4,
+                  "query": "the amount on the Shipping line in the shipping quote summary",
+                  "condition": "The amount shown on the line starting with 'Shipping' is stored as {{observed_shipping}}.",
+                  "human_description": "Reading the shipping amount from the quote summary",
+                  "expected_value": "",
+                  "code_js": "el(7).nextElementSibling.nextElementSibling.querySelector('[data-testid=\"shipping-quote\"]').innerText.trim()",
+                  "wrapped_js": "(els) => {\n  const __m = {7: 0};\n  const el = (i) => els[__m[i]];\n  const __v = (el(7).nextElementSibling.nextElementSibling.querySelector('[data-testid=\"shipping-quote\"]').innerText.trim());\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:role=heading[name=\"Shipping quote\"i]"
+                  ],
+                  "needs_unit_conversion": false
+                },
+                "observed_subtotal": {
+                  "extracted_value": "$60.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$60.00' (stored, no comparison)",
+                  "analyzer_type": "textual_visual",
+                  "step": 4,
+                  "query": "the amount on the Merchandise subtotal line in the shipping quote summary",
+                  "condition": "The amount shown on the line starting with 'Merchandise subtotal' is stored as {{observed_subtotal}}.",
+                  "human_description": "Reading the merchandise subtotal from the quote summary",
+                  "expected_value": "",
+                  "code_js": "el(7).nextElementSibling.nextElementSibling.querySelector('[data-testid=\"subtotal\"]').innerText.trim()",
+                  "wrapped_js": "(els) => {\n  const __m = {7: 0};\n  const el = (i) => els[__m[i]];\n  const __v = (el(7).nextElementSibling.nextElementSibling.querySelector('[data-testid=\"subtotal\"]').innerText.trim());\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:role=heading[name=\"Shipping quote\"i]"
+                  ],
+                  "needs_unit_conversion": false
+                }
+              },
+              "variables": {
+                "observed_shipping": {
+                  "syntax": "{{observed_shipping}}",
+                  "value": "$0.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                },
+                "observed_subtotal": {
+                  "syntax": "{{observed_subtotal}}",
+                  "value": "$60.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                },
+                "observed_shipping_amount_check": {
+                  "syntax": "{{observed_shipping_amount_check}}",
+                  "value": "$0.00",
+                  "type": "memory",
+                  "secret": false
+                }
+              },
+              "pointer": "(passed) loaded a $60.00 eligible cart on the Kern demo store"
+            },
+            "credits_consumed": 8.717519999999997,
+            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\0c633a16-2427-46de-9bfd-b2be5064e58b",
+            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\0c633a16-2427-46de-9bfd-b2be5064e58b\\runs\\0",
+            "result_code": 100,
+            "reason_code": "success.complete",
+            "per_flow_metadata": [
+              {
+                "result_code": "100",
+                "reason_code": "success.complete",
+                "error_message": null,
+                "summary": "Opened the Kern demo store and selected “Load $60.00 eligible cart.”\nThe checkout showed a merchandise subtotal of $60.00 and shipping of $0.00.\nThe eligible cart was loaded successfully.",
+                "one_liner": "loaded a $60.00 eligible cart on the Kern demo store",
+                "credits_consumed": 8.717519999999997
+              }
+            ],
+            "run_id": "run-0",
+            "test_url": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846J5SGZ1QR8GQ4FBH30S66/dashboard/share/US_JW5P7GC1ZH6K4H1MOI4DS5JR9HFJJEIXBCSNFYY1TZI7JATBJBAXSJ9CM7OORD1O?type=summary&agentView=true&fqdn=summary-page",
+            "coverage": {
+              "status": "skipped"
+            },
+            "v": 1,
+            "ts": "2026-11-23T12:38:48.045Z"
+          }
+        },
+        "evidence": {
+          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\0c633a16-2427-46de-9bfd-b2be5064e58b\\evidence\\ad2e51a4-7f09-44e2-89ce-67f37e0ab208.evidence",
+          "copiedPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/eligible-60/assert.evidence",
+          "sha256": "f8baf0603adaaf2596815e49469b07f61a815982a1ac1b516fbd3f7d4fa81208",
+          "bytes": 622802
+        }
+      },
+      "oracle": {
+        "expectedShippingCents": 0,
+        "observedShippingCents": 0,
+        "observedSubtotalCents": 6000
+      },
+      "assertVerdict": null,
+      "status": "HONORED",
+      "reasons": [
+        "oracle and observation agree at 0 cents; assert passed"
+      ],
+      "notes": []
+    },
+    {
+      "scenarioId": "boundary-50",
+      "presetLabel": "$50.00 boundary",
+      "expectedSubtotalCents": 5000,
+      "thresholdCents": 5000,
+      "objectives": {
+        "observe": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "943d13847c0f4a99968878343425e5852a45869a947c305514213d03ff5d8b8a"
+        },
+        "assert": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
+          "sha256": "d6fd99ab4c6fc021b68fe9a1ff21b9898df2a39e5bb78a9e043dd700751fe57e"
+        },
+        "oracleExpectedCents": 0
+      },
+      "observe": {
+        "kind": "observe",
+        "source": "live",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "943d13847c0f4a99968878343425e5852a45869a947c305514213d03ff5d8b8a"
+        },
+        "artifacts": {
+          "stdoutPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/boundary-50/observe.ndjson",
+          "stderrPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/boundary-50/observe.stderr.log",
+          "objectivePath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/boundary-50/observe.objective.txt",
+          "exitCode": 0,
+          "exitCodeSource": "process",
+          "timedOut": false,
+          "durationMs": 108529,
+          "argv": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Users\\emman\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
+            "run",
+            "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+            "--url",
+            "http://127.0.0.1:4173/",
+            "--agent",
+            "--headless",
+            "--max-steps",
+            "40",
+            "--timeout",
+            "240"
+          ]
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "passed",
+          "resultCode": 100,
+          "reasonCode": "success.complete",
+          "finalState": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$50.00",
+            "observed_shipping": "$0.00"
+          },
+          "finalStateStrings": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$50.00",
+            "observed_shipping": "$0.00"
+          },
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$0.00",
+              "expectedValue": "",
+              "reasoning": "value: '$0.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$50.00",
+              "expectedValue": "",
+              "reasoning": "value: '$50.00' (stored, no comparison)"
+            }
+          },
+          "verdict": null,
+          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\2909272c-7928-4d51-91cb-1d447165165c",
+          "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846NDMK4JYZ2FJ1FBHK26A8/dashboard/share/US_2MDU2HB1O3VIVZGWM79CEQL8Y7611KEKSJUAK66E4DFQJ2QAQ1H69I6DNFF96SRG?type=summary&agentView=true&fqdn=summary-page",
+          "duration": 75,
+          "credits": 21.531042499999998,
+          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\2909272c-7928-4d51-91cb-1d447165165c\\evidence\\538b6c34-098d-4fe5-9211-a5a0345c8710.evidence",
+          "runId": "run-0",
+          "observedShippingCents": 0,
+          "observedSubtotalCents": 5000,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "rawRunEnd": {
+            "type": "run_end",
+            "status": "passed",
+            "summary": "Opened the Kern demo store and loaded the $50.00 boundary cart.\nViewed the checkout summary without placing an order or entering payment details.\nThe merchandise subtotal was $50.00 and shipping was $0.00.",
+            "one_liner": "loaded the $50.00 boundary cart on the Kern demo store",
+            "final_state": {
+              "url": "http://127.0.0.1:4173/checkout",
+              "observed_subtotal": "$50.00",
+              "observed_shipping": "$0.00"
+            },
+            "reason": "Objective completed",
+            "duration": 75,
+            "bifurcated": false,
+            "total_runs": 1,
+            "context": {
+              "memory": {
+                "observed_shipping": {
+                  "extracted_value": "$0.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$0.00' (stored, no comparison)",
+                  "analyzer_type": "textual_visual",
+                  "step": 4,
+                  "query": "the amount shown on the Shipping line in the checkout summary",
+                  "condition": "the amount shown on the line starting with 'Shipping' is stored as {{observed_shipping}}",
+                  "human_description": "Reading the shipping amount from the checkout summary",
+                  "expected_value": "",
+                  "code_js": "el(6).querySelector('[data-testid=\"shipping-quote\"]')?.innerText.trim() ?? null",
+                  "wrapped_js": "(els) => {\n  const __m = {6: 0};\n  const el = (i) => els[__m[i]];\n  const __v = (el(6).querySelector('[data-testid=\"shipping-quote\"]')?.innerText.trim() ?? null);\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:text=\"Shipping quote US destination\"i"
+                  ],
+                  "needs_unit_conversion": false
+                },
+                "observed_subtotal": {
+                  "extracted_value": "$50.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$50.00' (stored, no comparison)",
+                  "analyzer_type": "textual_visual",
+                  "step": 4,
+                  "query": "the amount shown on the Merchandise subtotal line in the checkout summary",
+                  "condition": "the amount shown on the line starting with 'Merchandise subtotal' is stored as {{observed_subtotal}}",
+                  "human_description": "Reading the merchandise subtotal from the checkout summary",
+                  "expected_value": "",
+                  "code_js": "el(6).querySelector('[data-testid=\"subtotal\"]')?.innerText.trim() ?? null",
+                  "wrapped_js": "(els) => {\n  const __m = {6: 0};\n  const el = (i) => els[__m[i]];\n  const __v = (el(6).querySelector('[data-testid=\"subtotal\"]')?.innerText.trim() ?? null);\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:text=\"Shipping quote US destination\"i"
+                  ],
+                  "needs_unit_conversion": false
+                }
+              },
+              "variables": {
+                "observed_shipping": {
+                  "syntax": "{{observed_shipping}}",
+                  "value": "$0.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                },
+                "observed_subtotal": {
+                  "syntax": "{{observed_subtotal}}",
+                  "value": "$50.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                }
+              },
+              "pointer": "(passed) loaded the $50.00 boundary cart on the Kern demo store"
+            },
+            "credits_consumed": 21.531042499999998,
+            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\2909272c-7928-4d51-91cb-1d447165165c",
+            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\2909272c-7928-4d51-91cb-1d447165165c\\runs\\0",
+            "result_code": 100,
+            "reason_code": "success.complete",
+            "per_flow_metadata": [
+              {
+                "result_code": "100",
+                "reason_code": "success.complete",
+                "error_message": null,
+                "summary": "Opened the Kern demo store and loaded the $50.00 boundary cart.\nViewed the checkout summary without placing an order or entering payment details.\nThe merchandise subtotal was $50.00 and shipping was $0.00.",
+                "one_liner": "loaded the $50.00 boundary cart on the Kern demo store",
+                "credits_consumed": 21.531042499999998
+              }
+            ],
+            "run_id": "run-0",
+            "test_url": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846NDMK4JYZ2FJ1FBHK26A8/dashboard/share/US_2MDU2HB1O3VIVZGWM79CEQL8Y7611KEKSJUAK66E4DFQJ2QAQ1H69I6DNFF96SRG?type=summary&agentView=true&fqdn=summary-page",
+            "coverage": {
+              "status": "skipped"
+            },
+            "v": 1,
+            "ts": "2026-11-23T12:40:37.417Z"
+          }
+        },
+        "evidence": {
+          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\2909272c-7928-4d51-91cb-1d447165165c\\evidence\\538b6c34-098d-4fe5-9211-a5a0345c8710.evidence",
+          "copiedPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/boundary-50/observe.evidence",
+          "sha256": "a5a2bd1251b9f7bffa4bab035416f42b606178fd730cb826fb095e2c37e97f85",
+          "bytes": 613734
+        }
+      },
+      "assert": {
+        "kind": "assert",
+        "source": "live",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
+          "sha256": "d6fd99ab4c6fc021b68fe9a1ff21b9898df2a39e5bb78a9e043dd700751fe57e"
+        },
+        "artifacts": {
+          "stdoutPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/boundary-50/assert.ndjson",
+          "stderrPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/boundary-50/assert.stderr.log",
+          "objectivePath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/boundary-50/assert.objective.txt",
+          "exitCode": 0,
+          "exitCodeSource": "process",
+          "timedOut": false,
+          "durationMs": 109103,
+          "argv": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Users\\emman\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
+            "run",
+            "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $50.00 boundary cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $0.00.",
+            "--url",
+            "http://127.0.0.1:4173/",
+            "--agent",
+            "--headless",
+            "--max-steps",
+            "40",
+            "--timeout",
+            "240"
+          ]
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "passed",
+          "resultCode": 100,
+          "reasonCode": "success.complete",
+          "finalState": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$50.00",
+            "observed_shipping": "$0.00"
+          },
+          "finalStateStrings": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$50.00",
+            "observed_shipping": "$0.00"
+          },
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$0.00",
+              "expectedValue": "",
+              "reasoning": "value: '$0.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$50.00",
+              "expectedValue": "",
+              "reasoning": "value: '$50.00' (stored, no comparison)"
+            },
+            "observed_shipping_amount_check": {
+              "extractedValue": "$0.00",
+              "expectedValue": "$0.00",
+              "reasoning": "value: '$0.00' -> '$0.00' after ['strip']; equals '$0.00' -> PASS"
+            }
+          },
+          "verdict": null,
+          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\78ef2183-27a1-4507-a978-f253bd1982be",
+          "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846RNNX25915QW4GZZN59F0/dashboard/share/US_JWUWABNE0OHN8NKIX60HFU3P0I27NLYZXE6JTYPCYI1OYYV41BHDTTZREZXJHK16?type=summary&agentView=true&fqdn=summary-page",
+          "duration": 72.3,
+          "credits": 26.09917,
+          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\78ef2183-27a1-4507-a978-f253bd1982be\\evidence\\40806a6e-5f66-43e1-8c03-35aef9572467.evidence",
+          "runId": "run-0",
+          "observedShippingCents": 0,
+          "observedSubtotalCents": 5000,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "rawRunEnd": {
+            "type": "run_end",
+            "status": "passed",
+            "summary": "Opened the Kern demo store and loaded the $50.00 boundary cart.\nThe cart proceeded to the checkout page with a merchandise subtotal of $50.00.\nShipping was shown as $0.00, confirming the boundary cart received free shipping.",
+            "one_liner": "loaded the $50.00 boundary cart on the Kern demo store",
+            "final_state": {
+              "url": "http://127.0.0.1:4173/checkout",
+              "observed_subtotal": "$50.00",
+              "observed_shipping": "$0.00"
+            },
+            "reason": "Objective completed",
+            "duration": 72.3,
+            "bifurcated": false,
+            "total_runs": 1,
+            "context": {
+              "memory": {
+                "observed_shipping": {
+                  "extracted_value": "$0.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$0.00' (stored, no comparison)",
+                  "analyzer_type": "textual_visual",
+                  "step": 4,
+                  "query": "the amount on the Shipping line in the checkout summary",
+                  "condition": "The amount shown on the line starting with 'Shipping' is stored as {{observed_shipping}}.",
+                  "human_description": "Reading the shipping amount from the checkout summary",
+                  "expected_value": "",
+                  "code_js": "(()=>{const label=Array.from(el(6).querySelectorAll('span')).find(s=>s.innerText.trim().startsWith('Shipping')); return label?.nextElementSibling?.innerText.trim() ?? null})()",
+                  "wrapped_js": "(els) => {\n  const __m = {6: 0};\n  const el = (i) => els[__m[i]];\n  const __v = ((()=>{const label=Array.from(el(6).querySelectorAll('span')).find(s=>s.innerText.trim().startsWith('Shipping')); return label?.nextElementSibling?.innerText.trim() ?? null})());\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:text=\"Shipping quote US destination\"i"
+                  ],
+                  "needs_unit_conversion": false
+                },
+                "observed_subtotal": {
+                  "extracted_value": "$50.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$50.00' (stored, no comparison)",
+                  "analyzer_type": "textual_visual",
+                  "step": 4,
+                  "query": "the amount on the Merchandise subtotal line in the checkout summary",
+                  "condition": "The amount shown on the line starting with 'Merchandise subtotal' is stored as {{observed_subtotal}}.",
+                  "human_description": "Reading the merchandise subtotal from the checkout summary",
+                  "expected_value": "",
+                  "code_js": "(()=>{const label=Array.from(el(6).querySelectorAll('span')).find(s=>s.innerText.trim().startsWith('Merchandise subtotal')); return label?.nextElementSibling?.innerText.trim() ?? null})()",
+                  "wrapped_js": "(els) => {\n  const __m = {6: 0};\n  const el = (i) => els[__m[i]];\n  const __v = ((()=>{const label=Array.from(el(6).querySelectorAll('span')).find(s=>s.innerText.trim().startsWith('Merchandise subtotal')); return label?.nextElementSibling?.innerText.trim() ?? null})());\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:text=\"Shipping quote US destination\"i"
+                  ],
+                  "needs_unit_conversion": false
+                },
+                "observed_shipping_amount_check": {
+                  "extracted_value": "$0.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$0.00' -> '$0.00' after ['strip']; equals '$0.00' -> PASS",
+                  "analyzer_type": "textual_visual",
+                  "step": 5,
+                  "query": "the shipping amount in the checkout order summary",
+                  "condition": "$0.00 is $0.00.",
+                  "human_description": "Reading the shipping amount from the checkout order summary",
+                  "expected_value": "$0.00",
+                  "code_js": "Array.from(el(6).querySelectorAll('*')).map(e => e.innerText.trim()).find(t => t === '$0.00') ?? null",
+                  "wrapped_js": "(els) => {\n  const __m = {6: 0};\n  const el = (i) => els[__m[i]];\n  const __v = (Array.from(el(6).querySelectorAll('*')).map(e => e.innerText.trim()).find(t => t === '$0.00') ?? null);\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:text=\"Shipping quote US destination\"i"
+                  ],
+                  "needs_unit_conversion": false
+                }
+              },
+              "variables": {
+                "observed_shipping": {
+                  "syntax": "{{observed_shipping}}",
+                  "value": "$0.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                },
+                "observed_subtotal": {
+                  "syntax": "{{observed_subtotal}}",
+                  "value": "$50.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                },
+                "observed_shipping_amount_check": {
+                  "syntax": "{{observed_shipping_amount_check}}",
+                  "value": "$0.00",
+                  "type": "memory",
+                  "secret": false
+                }
+              },
+              "pointer": "(passed) loaded the $50.00 boundary cart on the Kern demo store"
+            },
+            "credits_consumed": 26.09917,
+            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\78ef2183-27a1-4507-a978-f253bd1982be",
+            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\78ef2183-27a1-4507-a978-f253bd1982be\\runs\\0",
+            "result_code": 100,
+            "reason_code": "success.complete",
+            "per_flow_metadata": [
+              {
+                "result_code": "100",
+                "reason_code": "success.complete",
+                "error_message": null,
+                "summary": "Opened the Kern demo store and loaded the $50.00 boundary cart.\nThe cart proceeded to the checkout page with a merchandise subtotal of $50.00.\nShipping was shown as $0.00, confirming the boundary cart received free shipping.",
+                "one_liner": "loaded the $50.00 boundary cart on the Kern demo store",
+                "credits_consumed": 26.09917
+              }
+            ],
+            "run_id": "run-0",
+            "test_url": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846RNNX25915QW4GZZN59F0/dashboard/share/US_JWUWABNE0OHN8NKIX60HFU3P0I27NLYZXE6JTYPCYI1OYYV41BHDTTZREZXJHK16?type=summary&agentView=true&fqdn=summary-page",
+            "coverage": {
+              "status": "skipped"
+            },
+            "v": 1,
+            "ts": "2026-11-23T12:42:26.497Z"
+          }
+        },
+        "evidence": {
+          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\78ef2183-27a1-4507-a978-f253bd1982be\\evidence\\40806a6e-5f66-43e1-8c03-35aef9572467.evidence",
+          "copiedPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/boundary-50/assert.evidence",
+          "sha256": "855ecaa4ef3a222a85a21544226bde94b8abb6c4b0605838f810f509507ca086",
+          "bytes": 651843
+        }
+      },
+      "oracle": {
+        "expectedShippingCents": 0,
+        "observedShippingCents": 0,
+        "observedSubtotalCents": 5000
+      },
+      "assertVerdict": null,
+      "status": "HONORED",
+      "reasons": [
+        "oracle and observation agree at 0 cents; assert passed"
+      ],
+      "notes": []
+    },
+    {
+      "scenarioId": "control-35",
+      "presetLabel": "$35.00 control",
+      "expectedSubtotalCents": 3500,
+      "thresholdCents": 5000,
+      "objectives": {
+        "observe": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "75a02fea8548d919e523f3957e5e3a2f218b6514189f83beb4fcae5333827e75"
+        },
+        "assert": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $9.00.",
+          "sha256": "73cea5ea958c75e2b41fd2904aaec7a50f9d26b6d883a06318d241cd6f5d73e0"
+        },
+        "oracleExpectedCents": 900
+      },
+      "observe": {
+        "kind": "observe",
+        "source": "live",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+          "sha256": "75a02fea8548d919e523f3957e5e3a2f218b6514189f83beb4fcae5333827e75"
+        },
+        "artifacts": {
+          "stdoutPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/control-35/observe.ndjson",
+          "stderrPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/control-35/observe.stderr.log",
+          "objectivePath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/control-35/observe.objective.txt",
+          "exitCode": 0,
+          "exitCodeSource": "process",
+          "timedOut": false,
+          "durationMs": 94843,
+          "argv": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Users\\emman\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
+            "run",
+            "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nOn the shipping quote page, read the amount shown on the line starting with 'Shipping' and store it as observed_shipping.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as observed_subtotal.\nDo not place an order and do not enter any payment details.",
+            "--url",
+            "http://127.0.0.1:4173/",
+            "--agent",
+            "--headless",
+            "--max-steps",
+            "40",
+            "--timeout",
+            "240"
+          ]
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "passed",
+          "resultCode": 100,
+          "reasonCode": "success.complete",
+          "finalState": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "merchandise_subtotal": "$35.00",
+            "shipping": "$9.00"
+          },
+          "finalStateStrings": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "merchandise_subtotal": "$35.00",
+            "shipping": "$9.00"
+          },
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$9.00",
+              "expectedValue": "",
+              "reasoning": "value: '$9.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$35.00",
+              "expectedValue": "",
+              "reasoning": "value: '$35.00' (stored, no comparison)"
+            }
+          },
+          "verdict": null,
+          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\244490ef-7e66-4b45-ad54-b62679e2c7c2",
+          "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846W0M88V4XTR9SAJMPABK1/dashboard/share/US_90J5LQ5D955VRPDRAGXFI84UC48SZAMCNN0AV7EM6P4KDL32ABIRC7F6NHWRVTOQ?type=summary&agentView=true&fqdn=summary-page",
+          "duration": 59.6,
+          "credits": 9.9782025,
+          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\244490ef-7e66-4b45-ad54-b62679e2c7c2\\evidence\\e7e45633-c9b5-40e5-86b5-c66f8aacd8f6.evidence",
+          "runId": "run-0",
+          "observedShippingCents": 900,
+          "observedSubtotalCents": 3500,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "rawRunEnd": {
+            "type": "run_end",
+            "status": "passed",
+            "summary": "Opened the Kern demo store and loaded the $35.00 control cart.\nReached the checkout page without placing an order or entering payment details.\nThe merchandise subtotal shown was $35.00 and shipping shown was $9.00.",
+            "one_liner": "loaded the $35.00 control cart on the Kern demo store",
+            "final_state": {
+              "url": "http://127.0.0.1:4173/checkout",
+              "merchandise_subtotal": "$35.00",
+              "shipping": "$9.00"
+            },
+            "reason": "Objective completed",
+            "duration": 59.6,
+            "bifurcated": false,
+            "total_runs": 1,
+            "context": {
+              "memory": {
+                "observed_shipping": {
+                  "extracted_value": "$9.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$9.00' (stored, no comparison)",
+                  "analyzer_type": "visual",
+                  "step": 4,
+                  "query": "The amount shown on the line starting with 'Shipping' is stored as {{observed_shipping}}.",
+                  "condition": "The amount shown on the line starting with 'Shipping' is stored as {{observed_shipping}}.",
+                  "human_description": "Reading the shipping amount from the shipping quote summary",
+                  "expected_value": ""
+                },
+                "observed_subtotal": {
+                  "extracted_value": "$35.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$35.00' (stored, no comparison)",
+                  "analyzer_type": "visual",
+                  "step": 4,
+                  "query": "The amount shown on the line starting with 'Merchandise subtotal' is stored as {{observed_subtotal}}.",
+                  "condition": "The amount shown on the line starting with 'Merchandise subtotal' is stored as {{observed_subtotal}}.",
+                  "human_description": "Reading the merchandise subtotal from the shipping quote summary",
+                  "expected_value": ""
+                }
+              },
+              "variables": {
+                "observed_shipping": {
+                  "syntax": "{{observed_shipping}}",
+                  "value": "$9.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                },
+                "observed_subtotal": {
+                  "syntax": "{{observed_subtotal}}",
+                  "value": "$35.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                }
+              },
+              "pointer": "(passed) loaded the $35.00 control cart on the Kern demo store"
+            },
+            "credits_consumed": 9.9782025,
+            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\244490ef-7e66-4b45-ad54-b62679e2c7c2",
+            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\244490ef-7e66-4b45-ad54-b62679e2c7c2\\runs\\0",
+            "result_code": 100,
+            "reason_code": "success.complete",
+            "per_flow_metadata": [
+              {
+                "result_code": "100",
+                "reason_code": "success.complete",
+                "error_message": null,
+                "summary": "Opened the Kern demo store and loaded the $35.00 control cart.\nReached the checkout page without placing an order or entering payment details.\nThe merchandise subtotal shown was $35.00 and shipping shown was $9.00.",
+                "one_liner": "loaded the $35.00 control cart on the Kern demo store",
+                "credits_consumed": 9.9782025
+              }
+            ],
+            "run_id": "run-0",
+            "test_url": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846W0M88V4XTR9SAJMPABK1/dashboard/share/US_90J5LQ5D955VRPDRAGXFI84UC48SZAMCNN0AV7EM6P4KDL32ABIRC7F6NHWRVTOQ?type=summary&agentView=true&fqdn=summary-page",
+            "coverage": {
+              "status": "skipped"
+            },
+            "v": 1,
+            "ts": "2026-11-23T12:43:59.874Z"
+          }
+        },
+        "evidence": {
+          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\244490ef-7e66-4b45-ad54-b62679e2c7c2\\evidence\\e7e45633-c9b5-40e5-86b5-c66f8aacd8f6.evidence",
+          "copiedPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/control-35/observe.evidence",
+          "sha256": "705e4eeeb5a87340f0129c7b373a10df2076906f1d3a6ce89c70b608b516d889",
+          "bytes": 617719
+        }
+      },
+      "assert": {
+        "kind": "assert",
+        "source": "live",
+        "objective": {
+          "text": "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $9.00.",
+          "sha256": "73cea5ea958c75e2b41fd2904aaec7a50f9d26b6d883a06318d241cd6f5d73e0"
+        },
+        "artifacts": {
+          "stdoutPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/control-35/assert.ndjson",
+          "stderrPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/control-35/assert.stderr.log",
+          "objectivePath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/control-35/assert.objective.txt",
+          "exitCode": 0,
+          "exitCodeSource": "process",
+          "timedOut": false,
+          "durationMs": 139597,
+          "argv": [
+            "C:\\Program Files\\nodejs\\node.exe",
+            "C:\\Users\\emman\\AppData\\Roaming\\npm\\node_modules\\@testmuai\\kane-cli\\bin\\kane-cli.cjs",
+            "run",
+            "Navigate to http://127.0.0.1:4173/ then Open the Kern demo store.\nClick the button labelled 'Load $35.00 control cart'.\nRead the amount shown on the line starting with 'Shipping' and store it as {{observed_shipping}}.\nRead the amount shown on the line starting with 'Merchandise subtotal' and store it as {{observed_subtotal}}.\nThen verify {{observed_shipping}} is $9.00.",
+            "--url",
+            "http://127.0.0.1:4173/",
+            "--agent",
+            "--headless",
+            "--max-steps",
+            "40",
+            "--timeout",
+            "240"
+          ]
+        },
+        "parsed": {
+          "terminal": true,
+          "error": null,
+          "runEndStatus": "passed",
+          "resultCode": 100,
+          "reasonCode": "success.complete",
+          "finalState": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$35.00",
+            "observed_shipping": "$9.00"
+          },
+          "finalStateStrings": {
+            "url": "http://127.0.0.1:4173/checkout",
+            "observed_subtotal": "$35.00",
+            "observed_shipping": "$9.00"
+          },
+          "memory": {
+            "observed_shipping": {
+              "extractedValue": "$9.00",
+              "expectedValue": "",
+              "reasoning": "value: '$9.00' (stored, no comparison)"
+            },
+            "observed_subtotal": {
+              "extractedValue": "$35.00",
+              "expectedValue": "",
+              "reasoning": "value: '$35.00' (stored, no comparison)"
+            },
+            "observed_shipping_value_check": {
+              "extractedValue": "$9.00",
+              "expectedValue": "$9.00",
+              "reasoning": "value: '$9.00' -> '$9.00' after ['strip']; equals '$9.00' -> PASS"
+            }
+          },
+          "verdict": null,
+          "sessionDir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\dd3a1c81-45a5-4f6c-89e3-a87001ab3215",
+          "testUrl": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846YX1CCAVCMN2GYMN6EKB0/dashboard/share/US_J1DC4UUV1WBJQ5ZXHTTLHMKO3NOM73D5RVR0TR28SWNMO2W4ZG934X2J6P01V4QU?type=summary&agentView=true&fqdn=summary-page",
+          "duration": 104.3,
+          "credits": 34.563742500000004,
+          "evidencePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\dd3a1c81-45a5-4f6c-89e3-a87001ab3215\\evidence\\fc5dacba-a8b5-44eb-8c46-33fe4cbb4a5f.evidence",
+          "runId": "run-0",
+          "observedShippingCents": 900,
+          "observedSubtotalCents": 3500,
+          "moneyErrors": [],
+          "parseWarnings": [],
+          "rawRunEnd": {
+            "type": "run_end",
+            "status": "passed",
+            "summary": "Opened the Kern demo store and loaded the $35.00 control cart.\nThe checkout page showed a merchandise subtotal of $35.00 and standard shipping of $9.00.\nThe requested cart was loaded successfully.",
+            "one_liner": "loaded the $35.00 control cart on the Kern demo store",
+            "final_state": {
+              "url": "http://127.0.0.1:4173/checkout",
+              "observed_subtotal": "$35.00",
+              "observed_shipping": "$9.00"
+            },
+            "reason": "Objective completed",
+            "duration": 104.3,
+            "bifurcated": false,
+            "total_runs": 1,
+            "context": {
+              "memory": {
+                "observed_shipping": {
+                  "extracted_value": "$9.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$9.00' (stored, no comparison)",
+                  "analyzer_type": "textual_visual",
+                  "step": 4,
+                  "query": "the amount shown beside the Shipping line in the checkout summary",
+                  "condition": "The amount shown on the line starting with 'Shipping' is stored as {{observed_shipping}}.",
+                  "human_description": "Reading the shipping amount from the checkout summary",
+                  "expected_value": "",
+                  "code_js": "Array.from(el(6).querySelectorAll('span')).find(e => e.textContent.trim() === 'Shipping — Standard (3–5 business days)')?.nextElementSibling?.textContent.trim() ?? null",
+                  "wrapped_js": "(els) => {\n  const __m = {6: 0};\n  const el = (i) => els[__m[i]];\n  const __v = (Array.from(el(6).querySelectorAll('span')).find(e => e.textContent.trim() === 'Shipping — Standard (3–5 business days)')?.nextElementSibling?.textContent.trim() ?? null);\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:text=\"Shipping quote US destination\"i"
+                  ],
+                  "needs_unit_conversion": false
+                },
+                "observed_subtotal": {
+                  "extracted_value": "$35.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$35.00' (stored, no comparison)",
+                  "analyzer_type": "visual",
+                  "step": 5,
+                  "query": "The amount shown on the line starting with 'Merchandise subtotal' is stored as {{observed_subtotal}}.",
+                  "condition": "The amount shown on the line starting with 'Merchandise subtotal' is stored as {{observed_subtotal}}.",
+                  "human_description": "Reading the merchandise subtotal from the order summary",
+                  "expected_value": ""
+                },
+                "observed_shipping_value_check": {
+                  "extracted_value": "$9.00",
+                  "operator": "equals",
+                  "transforms": [
+                    "strip"
+                  ],
+                  "json_path": null,
+                  "reasoning": "value: '$9.00' -> '$9.00' after ['strip']; equals '$9.00' -> PASS",
+                  "analyzer_type": "textual_visual",
+                  "step": 6,
+                  "query": "the shipping amount in the Standard shipping line of the order summary",
+                  "condition": "$9.00 is $9.00.",
+                  "human_description": "Reading the shipping amount from the order summary",
+                  "expected_value": "$9.00",
+                  "code_js": "el(6).querySelector('[data-testid=\"shipping-quote\"]')?.textContent.trim() ?? null",
+                  "wrapped_js": "(els) => {\n  const __m = {6: 0};\n  const el = (i) => els[__m[i]];\n  const __v = (el(6).querySelector('[data-testid=\"shipping-quote\"]')?.textContent.trim() ?? null);\n  return (typeof __v === 'boolean' ? String(__v) : __v);\n}",
+                  "locators": [
+                    "internal:text=\"Shipping quote US destination\"i"
+                  ],
+                  "needs_unit_conversion": false
+                }
+              },
+              "variables": {
+                "observed_shipping": {
+                  "syntax": "{{observed_shipping}}",
+                  "value": "$9.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                },
+                "observed_subtotal": {
+                  "syntax": "{{observed_subtotal}}",
+                  "value": "$35.00",
+                  "type": "memory",
+                  "secret": false,
+                  "source": "runtime"
+                },
+                "observed_shipping_value_check": {
+                  "syntax": "{{observed_shipping_value_check}}",
+                  "value": "$9.00",
+                  "type": "memory",
+                  "secret": false
+                }
+              },
+              "pointer": "(passed) loaded the $35.00 control cart on the Kern demo store"
+            },
+            "credits_consumed": 34.563742500000004,
+            "session_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\dd3a1c81-45a5-4f6c-89e3-a87001ab3215",
+            "run_dir": "C:\\Users\\emman/.testmuai/kaneai/sessions\\dd3a1c81-45a5-4f6c-89e3-a87001ab3215\\runs\\0",
+            "result_code": 100,
+            "reason_code": "success.complete",
+            "per_flow_metadata": [
+              {
+                "result_code": "100",
+                "reason_code": "success.complete",
+                "error_message": null,
+                "summary": "Opened the Kern demo store and loaded the $35.00 control cart.\nThe checkout page showed a merchandise subtotal of $35.00 and standard shipping of $9.00.\nThe requested cart was loaded successfully.",
+                "one_liner": "loaded the $35.00 control cart on the Kern demo store",
+                "credits_consumed": 34.563742500000004
+              }
+            ],
+            "run_id": "run-0",
+            "test_url": "https://test-manager.lambdatest.com/projects/01M809Q6DP2RB34MAQGT47KQQP/test-cases/01M846YX1CCAVCMN2GYMN6EKB0/dashboard/share/US_J1DC4UUV1WBJQ5ZXHTTLHMKO3NOM73D5RVR0TR28SWNMO2W4ZG934X2J6P01V4QU?type=summary&agentView=true&fqdn=summary-page",
+            "coverage": {
+              "status": "skipped"
+            },
+            "v": 1,
+            "ts": "2026-11-23T12:46:19.989Z"
+          }
+        },
+        "evidence": {
+          "sourcePath": "C:\\Users\\emman\\.testmuai\\kaneai\\sessions\\dd3a1c81-45a5-4f6c-89e3-a87001ab3215\\evidence\\fc5dacba-a8b5-44eb-8c46-33fe4cbb4a5f.evidence",
+          "copiedPath": ".data/audits/2026-11-23T12-35-29-692Z-48b993/control-35/assert.evidence",
+          "sha256": "cce42f1ad08af2f5256a2e84e5b988d764004e98c0f7df53d37b38bb4ace42aa",
+          "bytes": 696272
+        }
+      },
+      "oracle": {
+        "expectedShippingCents": 900,
+        "observedShippingCents": 900,
+        "observedSubtotalCents": 3500
+      },
+      "assertVerdict": null,
+      "status": "HONORED",
+      "reasons": [
+        "oracle and observation agree at 900 cents; assert passed"
+      ],
+      "notes": []
+    }
+  ],
+  "overallStatus": "HONORED",
+  "totals": {
+    "runs": 6,
+    "credits": 117.137467,
+    "liveRuns": 6,
+    "liveCredits": 117.137467,
+    "providedCaptureRuns": 0,
+    "providedCaptureCredits": 0
+  }
+}
