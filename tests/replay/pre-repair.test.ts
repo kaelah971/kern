@@ -1,26 +1,28 @@
 /**
  * Pre-repair acceptance characterization.
  *
- * This file records what the real store currently charges, as observed from
- * the server-rendered checkout page. The seeded defect is deliberate, so the
- * tests assert the defective $9.00 quote AND the independent oracle's $0.00
- * expectation. They are meant to pass before the repair and to prove the
- * mismatch exists. The post-repair challenge is a different test: same carts,
- * same contract, quote must equal the oracle.
+ * This file records what the pre-repair store charged, as observed from the
+ * server-rendered checkout page. The seeded defect is deliberate, so the tests
+ * assert the defective $9.00 quote AND the independent oracle's $0.00
+ * expectation. They are meant to pass only when the buggy revision is in place.
  *
- * Do not edit the contract or these expectations to make the defect disappear.
+ * This path is intentionally outside the default `npm test` glob. Run it with
+ * `npm run demo:replay-pre-repair`, which temporarily restores the pre-fix
+ * shipping file, runs only this file, restores the current file, and verifies
+ * the hash. Do not edit the contract or these expectations to make the defect
+ * disappear.
  */
 import test, { after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { createStoreServer } from '../src/server.ts';
-import { PRESET_CARTS } from '../src/lib/catalog.ts';
+import { createStoreServer } from '../../src/server.ts';
+import { PRESET_CARTS } from '../../src/lib/catalog.ts';
 import {
   evaluateShippingPromise,
   expectedShippingCents,
   loadContract,
-} from '../src/lib/contract.ts';
+} from '../../src/lib/contract.ts';
 
 const contract = loadContract();
 let server: Server;
