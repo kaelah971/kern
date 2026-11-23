@@ -622,26 +622,29 @@ function hashComparisonTable(post: AuditSummary): string {
   if (!comparisons || comparisons.length === 0) {
     return `<p class="meta">No objective-hash comparison table was recorded in this audit.</p>`;
   }
+  const shortHash = (hash: string): string =>
+    `<code class="hash" title="${escapeHtml(hash)}">${escapeHtml(hash.slice(0, 12))}</code>`;
   const rows = comparisons
     .map(
       (comparison) => `<tr>
-  <td>${escapeHtml(comparison.scenarioId)}</td>
-  <td>${escapeHtml(comparison.kind)}</td>
-  <td><code class="hash">${escapeHtml(comparison.preRepairSha256)}</code></td>
-  <td><code class="hash">${escapeHtml(comparison.postRepairSha256)}</code></td>
-  <td>${comparison.match ? 'MATCH' : 'MISMATCH'}</td>
+  <td>${escapeHtml(comparison.scenarioId)}<br><span class="meta">${escapeHtml(
+    comparison.kind,
+  )} · ${comparison.match ? 'MATCH' : 'MISMATCH'}</span></td>
+  <td>${shortHash(comparison.preRepairSha256)}</td>
+  <td>${shortHash(comparison.postRepairSha256)}</td>
 </tr>`,
     )
     .join('\n');
   const matches = comparisons.filter((comparison) => comparison.match).length;
   return `<p><strong>${matches}/${comparisons.length}</strong> objective hashes match.</p>
 <div class="table-wrap">
-<table>
+<table class="hash-compare">
   <caption class="sr-only">Pre-repair and post-repair objective hashes</caption>
-  <thead><tr><th scope="col">Scenario</th><th scope="col">Run</th><th scope="col">Pre-repair SHA-256</th><th scope="col">Post-repair SHA-256</th><th scope="col">Comparison</th></tr></thead>
+  <thead><tr><th scope="col">Scenario / run</th><th scope="col">Pre-repair SHA-256</th><th scope="col">Post-repair SHA-256</th></tr></thead>
   <tbody>${rows}</tbody>
 </table>
-</div>`;
+</div>
+<p class="meta">First 12 hex characters shown; the complete 64-character values are in the audit artifact (<code>audit.json</code>). Hover a hash for its full value.</p>`;
 }
 
 export function renderRepair(input: {

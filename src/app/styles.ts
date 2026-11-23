@@ -224,6 +224,11 @@ p { margin: 0 0 1rem; }
 .status--inconclusive { color: var(--warning); background: var(--warning-surface); }
 .status--infra-error { color: var(--slate); background: var(--slate-surface); }
 .table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; }
+.hash-compare { table-layout: fixed; }
+.hash-compare th { white-space: normal; vertical-align: bottom; }
+.hash-compare th, .hash-compare td { padding: .5rem .4rem; }
+.hash-compare td:first-child { overflow-wrap: anywhere; }
+.hash-compare .hash { font-size: .7rem; }
 table { width: 100%; border-collapse: collapse; }
 th, td {
   text-align: left;
@@ -361,8 +366,9 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   font-size: .76rem;
   line-height: 1.45;
   padding: .65rem .75rem;
-  overflow-x: auto;
-  white-space: nowrap;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .diff {
   max-width: 100%;
@@ -373,8 +379,9 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   line-height: 1.5;
   margin: 0;
   padding: 1rem;
-  overflow-x: auto;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .diff-line { display: block; }
 .diff-add { color: #a7d8b3; }

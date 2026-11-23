@@ -45,12 +45,19 @@ node scripts/capture-mobile-screenshot.ts
 | File | Dimensions | Bytes | Page |
 |---|---|---:|---|
 | `01-campaign.png` | 1440×1600 | 244,960 | `/` |
-| `02-journey-x-ray.png` | 1440×2200 | 320,519 | `/audits/2026-11-22T00-53-05-669Z-f5230a` |
-| `03-closed-loop.png` | 1440×1800 | 336,959 | `/repair/2026-11-22T00-53-05-669Z-f5230a` |
+| `02-journey-x-ray.png` | 1440×2200 | 322,006 | `/audits/2026-11-22T00-53-05-669Z-f5230a` |
+| `03-closed-loop.png` | 1440×1800 | 312,061 | `/repair/2026-11-22T00-53-05-669Z-f5230a` |
 | `04-receipt.png` | 1440×2000 | 224,375 | `/audits/2026-11-23T12-35-29-692Z-48b993/receipt` |
 | `05-mobile.png` | 390×1400 | 140,427 | `/` |
 
 All five are under 400 KB. No image was upscaled or edited.
+
+`02-journey-x-ray.png` and `03-closed-loop.png` were recaptured after the
+presentation fix: command blocks and the diff now wrap, and the objective-hash
+table shows the first 12 hex characters with the full value in a `title`
+attribute and the complete hashes in `audit.json`. `04-receipt.png` was not
+recaptured because the receipt has no `kane-cli evidence serve` command block;
+its evidence hashes already wrap inside the table.
 
 These shots show the recording machine's **live** `.data` records, so the
 recorded-audit banner is absent. A public clone has no `.data` and reads
