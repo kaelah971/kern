@@ -5,6 +5,7 @@ import { PRESET_CARTS } from '../lib/catalog.ts';
 import type { AuditIndex, AuditSummary } from './audits.ts';
 import { latestAudit } from './audits.ts';
 import type { DiffResult } from './git.ts';
+import type { EngineStatus, Job } from './jobs.ts';
 import type { PolicyInfo } from './data.ts';
 import {
   formatCents,
@@ -27,6 +28,12 @@ export function escapeHtml(value: string): string {
 
 export function statusChip(status: AuditStatus): string {
   return `<span class="status ${statusClass(status)}"><span class="status-mark" aria-hidden="true"></span>${escapeHtml(status)}</span>`;
+}
+
+export function jobStatusChip(status: Job['status']): string {
+  return `<span class="status status--${status}"><span class="status-mark" aria-hidden="true"></span>${escapeHtml(
+    status.toUpperCase(),
+  )}</span>`;
 }
 
 export function recordedBanner(summary: AuditSummary | null): string {
@@ -81,6 +88,7 @@ export function layout(
   title: string,
   body: string,
   current: 'campaign' | 'audits' | 'audit' | 'repair' = 'campaign',
+  publicMode = false,
 ): string {
   const navCurrent = current === 'campaign' ? 'campaign' : 'audits';
   return `<!doctype html>
@@ -98,15 +106,16 @@ export function layout(
   <nav aria-label="Main">
     <a href="/"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
     <a href="/audits"${navCurrent === 'audits' ? ' aria-current="page"' : ''}>Audits</a>
-    <a href="${STOREFRONT_URL}">Storefront</a>
+    ${publicMode ? '' : `<a href="${STOREFRONT_URL}">Storefront</a>`}
   </nav>
 </header>
 <main id="main">
 ${body}
 </main>
 <footer class="footer">
-  <span>Kern · local demo · reads <code>.data/audits</code></span>
+  <span>${publicMode ? "Kern · live jobs run on the owner's machine" : "Kern · local demo · reads <code>.data/audits</code>"}</span>
   <span>Evidence is hash-linked. No screenshots are fabricated.</span>
+  <div class="footer-note">Live runs execute on the owner's machine. One demo store, one promise type.</div>
 </footer>
 </body>
 </html>`;
@@ -160,12 +169,68 @@ function scenarioCards(
     .join('\n');
 }
 
+function checkPanel(contract: PromiseContract, engine: EngineStatus | null): string {
+  const online = engine?.online ?? false;
+  const lastSeen = engine?.lastHeartbeat
+    ? formatTimestamp(engine.lastHeartbeat)
+    : 'no heartbeat recorded';
+  const statusText = online
+    ? `Engine online · last heartbeat ${lastSeen}`
+    : `Engine offline · last heartbeat ${lastSeen} · runs disabled`;
+  const maxPerHour = engine?.limits.maxPerHour ?? 3;
+  const maxPerDay = engine?.limits.maxPerDay ?? 20;
+  const perIpMinutes = Math.round((engine?.limits.perIpWindowMs ?? 600_000) / 60_000);
+
+  const cards = Object.values(PRESET_CARTS)
+    .map((preset) => {
+      const expected = expectedShippingCents(contract, preset.expectedSubtotalCents);
+      return `<article class="check-card" data-check-card data-card-scenario="${escapeHtml(
+        preset.id,
+      )}">
+  <p class="eyebrow">${escapeHtml(preset.id)}</p>
+  <h3>${escapeHtml(preset.label)}</h3>
+  <p class="card-meta">Subtotal ${formatCents(
+    preset.expectedSubtotalCents,
+  )} · promised ${formatCents(expected)}</p>
+  <button class="button" type="button" data-run data-scenario="${escapeHtml(
+    preset.id,
+  )}"${online ? '' : ' disabled'}>Run this cart</button>
+  <p class="job-status" data-job-status aria-live="polite">idle</p>
+</article>`;
+    })
+    .join('\n');
+
+  return `<section class="check-panel" data-check-panel data-engine-online="${
+    online ? 'true' : 'false'
+  }" aria-labelledby="check-heading">
+  <div class="check-head">
+    <div>
+      <p class="eyebrow">Check this store</p>
+      <h2 id="check-heading">Run one real audit</h2>
+      <p class="lede">Pick one of the three fixed carts. The worker runs the same Kane audit on the owner's machine and posts the result here.</p>
+    </div>
+    <p class="engine-status ${online ? 'engine-status--online' : 'engine-status--offline'}" data-engine-status aria-live="polite">${escapeHtml(
+      statusText,
+    )}</p>
+  </div>
+  <div class="check-cards">
+${cards}
+  </div>
+  <p class="meta">Only these three carts; no free text. Rate-limited to ${maxPerHour}/hour and ${maxPerDay}/day globally, ${perIpMinutes} minute${
+    perIpMinutes === 1 ? '' : 's'
+  } per visitor, and one run at a time.</p>
+  <script src="/assets/public.js" defer></script>
+</section>`;
+}
+
 export function renderCampaign(input: {
   contract: PromiseContract;
   policy: PolicyInfo | null;
   index: AuditIndex;
+  publicMode?: boolean;
+  engine?: EngineStatus | null;
 }): string {
-  const { contract, policy, index } = input;
+  const { contract, policy, index, publicMode = false } = input;
   const latest = latestAudit(index);
 
   const latestBlock = latest
@@ -233,6 +298,8 @@ ${auditContractWarning(latest, contract)}`
   </aside>
 </div>
 
+${publicMode ? checkPanel(contract, input.engine ?? null) : ''}
+
 <div class="grid-two">
   <section class="panel panel--ad" aria-labelledby="ad-heading">
     <p class="panel-label" id="ad-heading">Ad snapshot</p>
@@ -280,10 +347,11 @@ ${scenarioCards(contract, latest)}
   ${incompleteWarnings(index)}
 </section>`,
     'campaign',
+    publicMode,
   );
 }
 
-export function renderAuditList(index: AuditIndex): string {
+export function renderAuditList(index: AuditIndex, publicMode = false): string {
   const rows = index.audits
     .map((summary) => {
       const audit = summary.audit;
@@ -340,6 +408,7 @@ ${incompleteWarnings(index)}
 ${recordedNotice}
 ${content}`,
     'audits',
+    publicMode,
   );
 }
 
@@ -510,9 +579,26 @@ function scenarioBlock(scenario: ScenarioAudit, contract: PromiseContract): stri
 </article>`;
 }
 
-export function renderAuditDetail(summary: AuditSummary, contract: PromiseContract): string {
+export function renderAuditDetail(
+  summary: AuditSummary,
+  contract: PromiseContract,
+  options: {
+    publicMode?: boolean;
+    receiptHref?: string;
+    repairHref?: string | null;
+    notice?: string;
+  } = {},
+): string {
   const audit = summary.audit;
   const banner = recordedBanner(summary);
+  const publicMode = options.publicMode ?? false;
+  const notice = options.notice ?? '';
+  const receiptHref =
+    options.receiptHref ?? `/audits/${encodeURIComponent(audit.auditId)}/receipt`;
+  const repairHref =
+    options.repairHref === undefined
+      ? `/repair/${encodeURIComponent(audit.auditId)}`
+      : options.repairHref;
   const postRepair = audit.postRepair
     ? audit.answersAuditId
       ? `<div class="warning" role="status">Post-repair audit. It answers <a href="/repair/${encodeURIComponent(
@@ -538,6 +624,7 @@ export function renderAuditDetail(summary: AuditSummary, contract: PromiseContra
   <div>${statusChip(audit.overallStatus)}</div>
 </div>
 
+${notice}
 ${banner}
 <div class="audit-banner">
   <div>
@@ -549,13 +636,13 @@ ${banner}
   </div>
   <div class="meta">
     <p>${audit.totals.runs} runs · ${credits(audit.totals.credits)} credits</p>
-    <p><a class="button button--secondary" href="/audits/${encodeURIComponent(
-      audit.auditId,
-    )}/receipt">Promise Receipt</a></p>
+    <p><a class="button button--secondary" href="${escapeHtml(
+      receiptHref,
+    )}">Promise Receipt</a></p>
     ${
-      !audit.postRepair
-        ? `<p><a class="button button--secondary" href="/repair/${encodeURIComponent(
-            audit.auditId,
+      !audit.postRepair && repairHref
+        ? `<p><a class="button button--secondary" href="${escapeHtml(
+            repairHref,
           )}">Closed loop</a></p>`
         : ''
     }
@@ -651,8 +738,9 @@ export function renderRepair(input: {
   pre: AuditSummary;
   post: AuditSummary | null;
   diff: DiffResult;
+  publicMode?: boolean;
 }): string {
-  const { pre, post, diff } = input;
+  const { pre, post, diff, publicMode = false } = input;
   const banners = `${recordedBanner(pre)}${post ? recordedBanner(post) : ''}`;
   const diffBlock = diff.ok
     ? diff.diff.trim().length > 0
@@ -715,10 +803,58 @@ ${banners}
   ${postBlock}
 </div>`,
     'repair',
+    publicMode,
   );
 }
 
-export function renderNotFound(title: string, message: string): string {
+export function renderJobStatus(job: Job, publicMode = false): string {
+  const preset = PRESET_CARTS[job.scenario];
+  const statusText =
+    job.status === 'queued'
+      ? 'Queued. The worker on the owner\'s machine will pick this up.'
+      : job.status === 'running'
+        ? 'Running. The worker is shopping the store now.'
+        : job.status === 'failed'
+          ? 'The worker could not complete this run.'
+          : job.status === 'expired'
+            ? 'The lease expired before the worker posted a result.'
+            : 'This run is done.';
+
+  return layout(
+    'Live run',
+    `<p class="eyebrow">Live run</p>
+<div class="hero">
+  <div>
+    <h1>${escapeHtml(statusText)}</h1>
+    <p class="lede">Run <code>${escapeHtml(job.id)}</code> · ${escapeHtml(
+      preset.label,
+    )} · ${escapeHtml(job.scenario)}</p>
+  </div>
+  <div>${jobStatusChip(job.status)}</div>
+</div>
+<div class="audit-banner">
+  <div>
+    <p class="meta"><strong>Created</strong> ${formatTimestamp(job.createdAt)}</p>
+    <p class="meta"><strong>Updated</strong> ${formatTimestamp(job.updatedAt)}</p>
+    ${
+      job.leaseExpiresAt
+        ? `<p class="meta"><strong>Lease expires</strong> ${formatTimestamp(job.leaseExpiresAt)}</p>`
+        : ''
+    }
+  </div>
+  <div class="meta">
+    <p>Only the three fixed scenarios can be run.</p>
+    <p><a class="button button--secondary" href="/">Back to campaign</a></p>
+  </div>
+</div>
+${job.error ? `<div class="warning" role="alert">${escapeHtml(job.error)}</div>` : ''}
+<p class="meta">This page does not auto-refresh; the campaign panel polls the run status. The recorded proof remains available on <a href="/audits">Audits</a>.</p>`,
+    'audit',
+    publicMode,
+  );
+}
+
+export function renderNotFound(title: string, message: string, publicMode = false): string {
   return layout(
     title,
     `<p class="eyebrow">Not found</p>
@@ -726,10 +862,11 @@ export function renderNotFound(title: string, message: string): string {
 <div class="empty"><p>${escapeHtml(message)}</p></div>
 <a class="button" href="/">Back to campaign</a>`,
     'campaign',
+    publicMode,
   );
 }
 
-export function renderServerError(message: string): string {
+export function renderServerError(message: string, publicMode = false): string {
   return layout(
     'Something went wrong',
     `<p class="eyebrow">Server error</p>
@@ -738,5 +875,6 @@ export function renderServerError(message: string): string {
 <p class="meta">The app reads real files under <code>.data/audits</code> and <code>docs/</code>. It does not substitute a mock.</p>
 <a class="button" href="/">Back to campaign</a>`,
     'campaign',
+    publicMode,
   );
 }

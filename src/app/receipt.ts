@@ -217,6 +217,12 @@ export function renderReceiptPage(
   audit: AuditRecord,
   contract: PromiseContract,
   policy: PolicyInfo | null,
+  publicMode = false,
 ): string {
-  return layout('Promise Receipt', renderReceiptBody(audit, contract, policy), 'audit');
+  return layout(
+    'Promise Receipt',
+    renderReceiptBody(audit, contract, policy),
+    'audit',
+    publicMode,
+  );
 }
