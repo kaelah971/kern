@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": [
+        "recorded/**",
+        "contracts/**",
+        "docs/store-policy.md"
+      ]
+    }
+  },
+  "rewrites": [
+    { "source": "/health", "destination": "/api/index.ts" },
+    { "source": "/(.*)", "destination": "/api/index.ts" }
+  ]
+}

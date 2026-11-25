@@ -2,6 +2,8 @@
 
 Kern turns an advertised checkout promise into a frozen, merchant-approved contract, sends Kane CLI through the real storefront in a browser, and compares the rendered charge with a deterministic oracle. When the store is wrong, a bounded source repair is followed by the same challenge rerun unchanged. The demo has one storefront, one `free_shipping_threshold` promise, three carts, and two real audits.
 
+**Live demo:** `<URL>` — read-only proof site. Deployment steps: [`docs/vercel.md`](docs/vercel.md).
+
 ## The proof
 
 **Pre-repair audit** `2026-11-22T00-53-05-669Z-f5230a` — **BROKEN**
@@ -58,9 +60,10 @@ What to click:
 
 1. `/` — the ad snapshot and the merchant's interpretation as separate blocks, the frozen contract, the policy source behind $9.00, the three carts, and the latest audit.
 2. **Audits** — every readable audit, newest first, with status, source, post-repair provenance, runs and credits.
-3. **`2026-11-22T00-53-05-669Z-f5230a`** — Journey X-Ray: $60 Promised $0.00 / Observed $9.00, Kane's confirmed verdict; the $50 boundary and $35 control follow.
-4. **Closed loop** — the actual `git diff ed3dbaf HEAD -- src/lib/shipping.ts`, then the post-repair audit and the 6/6 objective-hash comparison.
-5. **`2026-11-23T12-35-29-692Z-48b993` → Promise Receipt** — the scoped status, contract hash, pre-repair audit id, per-scenario and per-run evidence, and the “what this does not prove” section.
+3. **Runs** — every real Kane run, grouped by audit, with session, exit, result, credits, evidence hash and verdict. On the read-only deployment this page carries the operator-machine note and no run controls.
+4. **`2026-11-22T00-53-05-669Z-f5230a`** — Journey X-Ray: $60 Promised $0.00 / Observed $9.00, Kane's confirmed verdict; the $50 boundary and $35 control follow.
+5. **Closed loop** — the actual `git diff ed3dbaf HEAD -- src/lib/shipping.ts`, then the post-repair audit and the 6/6 objective-hash comparison.
+6. **`2026-11-23T12-35-29-692Z-48b993` → Promise Receipt** — the scoped status, contract hash, pre-repair audit id, per-scenario and per-run evidence, and the “what this does not prove” section.
 
 The store is on `http://127.0.0.1:4173`. A 3:30 recording plan is in [`docs/demo-script.md`](docs/demo-script.md).
 
@@ -87,6 +90,7 @@ A cheap smoke run is `node scripts/kane-audit.ts --scenario control-35 --kind ob
 - A two-run Kane audit engine (observe + assert), strict NDJSON/USD parsing, fail-closed statuses, evidence copy and hash.
 - A bounded repair and an unchanged post-repair audit gated by all six objective hashes.
 - A read-only server-rendered app on 3000: campaign, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff.
+- `/runs` — every real Kane run in the audit JSON, newest first, grouped by audit; 15 locally with `.data`, 12 in the two-audit `recorded/` bundle.
 - Public `recorded/` copies, a restore-safe pre-repair replay, and a pre-repair store runner for filming.
 
 ## What is not built
@@ -126,6 +130,7 @@ The pre-repair characterization lives at `tests/replay/pre-repair.test.ts` and i
 - [`docs/proof-ledger.md`](docs/proof-ledger.md) — real runs, sessions, exits, reasons, evidence hashes, spend.
 - [`docs/decisions.md`](docs/decisions.md) — scope, boundary, claim rules.
 - [`docs/demo-script.md`](docs/demo-script.md) — 3:30 shot list.
+- [`docs/vercel.md`](docs/vercel.md) — read-only Vercel deployment, audit-root resolution, simulation result.
 - [`docs/publish.md`](docs/publish.md) — publication commands, scan findings, post drafts.
 - [`recorded/README.md`](recorded/README.md) — what was stripped, how to verify the originals.
 - [`LICENSE`](LICENSE) — MIT.

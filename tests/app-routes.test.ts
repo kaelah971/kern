@@ -55,6 +55,18 @@ test('campaign page shows the ad, the interpretation, the contract and the lates
   assert.match(text, /Latest audit/);
 });
 
+test('runs page lists every real run from the two fixture audits', async () => {
+  const { status, text } = await get(baseUrl, '/runs');
+  assert.equal(status, 200);
+  assert.match(text, /<strong>12<\/strong> runs/);
+  assert.match(text, /<strong>259\.14<\/strong> credits/);
+  assert.match(text, /<strong>2 broken<\/strong> \/ <strong>4 honored<\/strong>/);
+  assert.match(text, new RegExp(BROKEN.auditId));
+  assert.match(text, new RegExp(HONORED.auditId));
+  assert.doesNotMatch(text, /Recorded audit: replay of real runs, not a live session\./);
+  assert.match(text, /href="\/runs"/);
+});
+
 test('audit list shows both real records, status and post-repair provenance', async () => {
   const { status, text } = await get(baseUrl, '/audits');
   assert.equal(status, 200);

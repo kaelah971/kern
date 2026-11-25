@@ -97,8 +97,10 @@ test('the recorded banner appears for source: recorded and never for source: liv
 
 test('resolveAuditRoot prefers live .data and falls back to recorded', () => {
   const repo = mkdtempSync(join(tmpdir(), 'kern-resolve-recorded-'));
+  const previous = process.env.KERN_RECORDED_ROOT;
   try {
     cpSync(recordedRoot, join(repo, 'recorded'), { recursive: true });
+    process.env.KERN_RECORDED_ROOT = join(repo, 'recorded');
     const recorded = resolveAuditRoot(repo);
     assert.equal(recorded.source, 'recorded');
     assert.equal(recorded.root, join(repo, 'recorded'));
@@ -114,14 +116,18 @@ test('resolveAuditRoot prefers live .data and falls back to recorded', () => {
       rmSync(liveSource, { recursive: true, force: true });
     }
   } finally {
+    if (previous === undefined) delete process.env.KERN_RECORDED_ROOT;
+    else process.env.KERN_RECORDED_ROOT = previous;
     rmSync(repo, { recursive: true, force: true });
   }
 });
 
 test('a clone with no .data serves the recorded audits with the banner', async () => {
   const repo = mkdtempSync(join(tmpdir(), 'kern-recorded-clone-'));
+  const previous = process.env.KERN_RECORDED_ROOT;
   try {
     cpSync(recordedRoot, join(repo, 'recorded'), { recursive: true });
+    process.env.KERN_RECORDED_ROOT = join(repo, 'recorded');
     const server = createAppServer({ repoRoot: repo });
     const base = await listen(server);
     try {
@@ -147,6 +153,8 @@ test('a clone with no .data serves the recorded audits with the banner', async (
       await close(server);
     }
   } finally {
+    if (previous === undefined) delete process.env.KERN_RECORDED_ROOT;
+    else process.env.KERN_RECORDED_ROOT = previous;
     rmSync(repo, { recursive: true, force: true });
   }
 });

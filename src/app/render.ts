@@ -5,7 +5,6 @@ import { PRESET_CARTS } from '../lib/catalog.ts';
 import type { AuditIndex, AuditSummary } from './audits.ts';
 import { latestAudit } from './audits.ts';
 import type { DiffResult } from './git.ts';
-import type { EngineStatus, Job } from './jobs.ts';
 import type { PolicyInfo } from './data.ts';
 import {
   formatCents,
@@ -28,12 +27,6 @@ export function escapeHtml(value: string): string {
 
 export function statusChip(status: AuditStatus): string {
   return `<span class="status ${statusClass(status)}"><span class="status-mark" aria-hidden="true"></span>${escapeHtml(status)}</span>`;
-}
-
-export function jobStatusChip(status: Job['status']): string {
-  return `<span class="status status--${status}"><span class="status-mark" aria-hidden="true"></span>${escapeHtml(
-    status.toUpperCase(),
-  )}</span>`;
 }
 
 export function recordedBanner(summary: AuditSummary | null): string {
@@ -87,10 +80,10 @@ function auditContractWarning(audit: AuditSummary, contract: PromiseContract): s
 export function layout(
   title: string,
   body: string,
-  current: 'campaign' | 'audits' | 'audit' | 'repair' = 'campaign',
+  current: 'campaign' | 'audits' | 'runs' | 'audit' | 'repair' = 'campaign',
   publicMode = false,
 ): string {
-  const navCurrent = current === 'campaign' ? 'campaign' : 'audits';
+  const navCurrent = current === 'campaign' ? 'campaign' : current === 'runs' ? 'runs' : 'audits';
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -106,6 +99,7 @@ export function layout(
   <nav aria-label="Main">
     <a href="/"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
     <a href="/audits"${navCurrent === 'audits' ? ' aria-current="page"' : ''}>Audits</a>
+    <a href="/runs"${navCurrent === 'runs' ? ' aria-current="page"' : ''}>Runs</a>
     ${publicMode ? '' : `<a href="${STOREFRONT_URL}">Storefront</a>`}
   </nav>
 </header>
@@ -113,9 +107,8 @@ export function layout(
 ${body}
 </main>
 <footer class="footer">
-  <span>${publicMode ? "Kern · live jobs run on the owner's machine" : "Kern · local demo · reads <code>.data/audits</code>"}</span>
+  <span>${publicMode ? 'Kern · read-only proof site' : 'Kern · local demo · reads <code>.data/audits</code>'}</span>
   <span>Evidence is hash-linked. No screenshots are fabricated.</span>
-  <div class="footer-note">Live runs execute on the owner's machine. One demo store, one promise type.</div>
 </footer>
 </body>
 </html>`;
@@ -169,58 +162,26 @@ function scenarioCards(
     .join('\n');
 }
 
-function checkPanel(contract: PromiseContract, engine: EngineStatus | null): string {
-  const online = engine?.online ?? false;
-  const lastSeen = engine?.lastHeartbeat
-    ? formatTimestamp(engine.lastHeartbeat)
-    : 'no heartbeat recorded';
-  const statusText = online
-    ? `Engine online · last heartbeat ${lastSeen}`
-    : `Engine offline · last heartbeat ${lastSeen} · runs disabled`;
-  const maxPerHour = engine?.limits.maxPerHour ?? 3;
-  const maxPerDay = engine?.limits.maxPerDay ?? 20;
-  const perIpMinutes = Math.round((engine?.limits.perIpWindowMs ?? 600_000) / 60_000);
+function hasLiveRun(summary: AuditSummary): boolean {
+  return summary.audit.scenarios.some(
+    (scenario) => scenario.observe?.source === 'live' || scenario.assert?.source === 'live',
+  );
+}
 
-  const cards = Object.values(PRESET_CARTS)
-    .map((preset) => {
-      const expected = expectedShippingCents(contract, preset.expectedSubtotalCents);
-      return `<article class="check-card" data-check-card data-card-scenario="${escapeHtml(
-        preset.id,
-      )}">
-  <p class="eyebrow">${escapeHtml(preset.id)}</p>
-  <h3>${escapeHtml(preset.label)}</h3>
-  <p class="card-meta">Subtotal ${formatCents(
-    preset.expectedSubtotalCents,
-  )} · promised ${formatCents(expected)}</p>
-  <button class="button" type="button" data-run data-scenario="${escapeHtml(
-    preset.id,
-  )}"${online ? '' : ' disabled'}>Run this cart</button>
-  <p class="job-status" data-job-status aria-live="polite">idle</p>
-</article>`;
-    })
-    .join('\n');
+function realAudits(index: AuditIndex): AuditSummary[] {
+  return index.audits.filter(hasLiveRun);
+}
 
-  return `<section class="check-panel" data-check-panel data-engine-online="${
-    online ? 'true' : 'false'
-  }" aria-labelledby="check-heading">
-  <div class="check-head">
-    <div>
-      <p class="eyebrow">Check this store</p>
-      <h2 id="check-heading">Run one real audit</h2>
-      <p class="lede">Pick one of the three fixed carts. The worker runs the same Kane audit on the owner's machine and posts the result here.</p>
-    </div>
-    <p class="engine-status ${online ? 'engine-status--online' : 'engine-status--offline'}" data-engine-status aria-live="polite">${escapeHtml(
-      statusText,
-    )}</p>
-  </div>
-  <div class="check-cards">
-${cards}
-  </div>
-  <p class="meta">Only these three carts; no free text. Rate-limited to ${maxPerHour}/hour and ${maxPerDay}/day globally, ${perIpMinutes} minute${
-    perIpMinutes === 1 ? '' : 's'
-  } per visitor, and one run at a time.</p>
-  <script src="/assets/public.js" defer></script>
-</section>`;
+function realRunCount(index: AuditIndex): number {
+  return realAudits(index).reduce(
+    (total, summary) =>
+      total +
+      summary.audit.scenarios.reduce(
+        (count, scenario) => count + (scenario.observe ? 1 : 0) + (scenario.assert ? 1 : 0),
+        0,
+      ),
+    0,
+  );
 }
 
 export function renderCampaign(input: {
@@ -228,10 +189,10 @@ export function renderCampaign(input: {
   policy: PolicyInfo | null;
   index: AuditIndex;
   publicMode?: boolean;
-  engine?: EngineStatus | null;
 }): string {
   const { contract, policy, index, publicMode = false } = input;
   const latest = latestAudit(index);
+  const runCount = realRunCount(index);
 
   const latestBlock = latest
     ? `${recordedBanner(latest)}<div class="audit-banner">
@@ -287,6 +248,9 @@ ${auditContractWarning(latest, contract)}`
 <div class="hero">
   <div>
     <h1>Every ad makes a promise. The checkout has to keep it.</h1>
+    <p class="front-line">“Other tools ask for your website URL. Kern asks for your ad.”</p>
+    <p class="front-line">“$60 cart: promised $0.00, charged $9.00.  $35 cart: promised $9.00, charged $9.00.”</p>
+    <p class="hero-runs"><a href="/runs">See all ${runCount} real runs</a></p>
     <p class="lede">The campaign freezes the advertised offer as a contract, then checks the rendered shipping quote on three deterministic carts. The ad wording and the merchant's interpretation are kept separate.</p>
   </div>
   <aside class="meta">
@@ -297,8 +261,6 @@ ${auditContractWarning(latest, contract)}`
     )}</span></p>
   </aside>
 </div>
-
-${publicMode ? checkPanel(contract, input.engine ?? null) : ''}
 
 <div class="grid-two">
   <section class="panel panel--ad" aria-labelledby="ad-heading">
@@ -408,6 +370,125 @@ ${incompleteWarnings(index)}
 ${recordedNotice}
 ${content}`,
     'audits',
+    publicMode,
+  );
+}
+
+function runVerdict(run: RunAudit): string {
+  if (run.kind !== 'assert') return '—';
+  const verdict = run.parsed.verdict;
+  if (verdict) {
+    return `${verdict.confirmed ? 'confirmed' : 'unconfirmed'}: ${verdict.bugTitle ?? 'bug'}`;
+  }
+  if (run.parsed.runEndStatus === 'passed') return 'passed';
+  return '—';
+}
+
+export function renderRunsList(index: AuditIndex, publicMode = false): string {
+  const groups = realAudits(index).map((summary) => {
+    const runs: Array<{ scenario: ScenarioAudit; run: RunAudit }> = [];
+    for (const scenario of summary.audit.scenarios) {
+      if (scenario.observe) runs.push({ scenario, run: scenario.observe });
+      if (scenario.assert) runs.push({ scenario, run: scenario.assert });
+    }
+    return { summary, runs };
+  });
+
+  const totalRuns = groups.reduce((total, group) => total + group.runs.length, 0);
+  const totalCredits = groups.reduce(
+    (total, group) =>
+      total +
+      group.runs.reduce((sum, row) => sum + (row.run.parsed.credits ?? 0), 0),
+    0,
+  );
+  let broken = 0;
+  let honored = 0;
+  for (const group of groups) {
+    for (const scenario of group.summary.audit.scenarios) {
+      if (!scenario.assert) continue;
+      if (scenario.status === 'BROKEN') broken += 1;
+      else if (scenario.status === 'HONORED') honored += 1;
+    }
+  }
+
+  const recordedCount = groups.filter((group) => group.summary.recorded).length;
+  const recordedNotice =
+    recordedCount > 0
+      ? `<div class="recorded-banner" role="status"><strong>Recorded audit: replay of real runs, not a live session.</strong> ${recordedCount} of ${groups.length} audits are recorded copies.</div>`
+      : '';
+  const readOnly = publicMode
+    ? `<div class="read-only-note" role="status">Live checks run on the operator's machine. The runs below are real executions; this deployment only reads them.</div>`
+    : '';
+  const excluded = index.audits.filter(
+    (summary) =>
+      !hasLiveRun(summary) &&
+      summary.audit.scenarios.some((scenario) => scenario.observe || scenario.assert),
+  );
+  const exclusionNote =
+    excluded.length > 0
+      ? `<p class="meta">A provided-capture import validation (${excluded
+          .map((summary) => `<code>${escapeHtml(summary.audit.auditId)}</code>`)
+          .join(', ')}) is excluded: it duplicates the eligible-60 capture and contains no independent Kane execution.</p>`
+      : '';
+
+  const tableRows = groups
+    .map((group) => {
+      const rows = group.runs.map((row, index) => {
+        const audit = group.summary.audit;
+        const run = row.run;
+        const first = index === 0;
+        const star =
+          run.artifacts.exitCodeSource === 'provided_capture_user_reported' ? '*' : '';
+        return `<tr>
+  ${
+    first
+      ? `<td rowspan="${group.runs.length}"><a href="/audits/${encodeURIComponent(
+          audit.auditId,
+        )}">${escapeHtml(audit.auditId)}</a><br><span class="meta">${escapeHtml(
+          audit.overallStatus,
+        )} · ${formatTimestamp(audit.startedAt)}</span></td>
+  <td rowspan="${group.runs.length}">${audit.postRepair ? 'Yes' : 'No'}</td>`
+      : ''
+  }
+  <td>${escapeHtml(row.scenario.presetLabel)}<br><span class="meta">${escapeHtml(
+    row.scenario.scenarioId,
+  )}</span></td>
+  <td>${escapeHtml(run.kind)}</td>
+  <td><code class="hash">${escapeHtml(sessionId(run))}</code></td>
+  <td>${run.artifacts.exitCode ?? '—'}${star}</td>
+  <td>${escapeHtml(String(run.parsed.resultCode ?? '—'))} / ${escapeHtml(
+    run.parsed.reasonCode ?? '—',
+  )}</td>
+  <td>${typeof run.parsed.duration === 'number' ? `${run.parsed.duration}s` : '—'}</td>
+  <td>${credits(run.parsed.credits)}</td>
+  <td><code class="hash">${escapeHtml(run.evidence?.sha256 ?? '—')}</code></td>
+  <td>${escapeHtml(runVerdict(run))}</td>
+</tr>`;
+      });
+      return `<tbody class="audit-group">${rows.join('\n')}</tbody>`;
+    })
+    .join('\n');
+
+  return layout(
+    'Runs',
+    `<p class="eyebrow">Every Kane run</p>
+<h1>Runs</h1>
+<p class="lede">Every real Kane run in the audit JSON on disk, newest first, grouped by audit. No rows are invented.</p>
+${readOnly}
+${recordedNotice}
+<p class="run-totals"><strong>${totalRuns}</strong> runs · <strong>${totalCredits.toFixed(
+      2,
+    )}</strong> credits · <strong>${broken} broken</strong> / <strong>${honored} honored</strong></p>
+${exclusionNote}
+<div class="table-wrap">
+<table class="runs-table">
+  <caption class="sr-only">Every real Kane run, grouped by audit</caption>
+  <thead><tr><th scope="col">Audit</th><th scope="col">Post-repair</th><th scope="col">Scenario</th><th scope="col">Kind</th><th scope="col">Session</th><th scope="col">Exit</th><th scope="col">Result / reason</th><th scope="col">Duration</th><th scope="col">Credits</th><th scope="col">Evidence SHA-256</th><th scope="col">Verdict</th></tr></thead>
+  ${tableRows}
+</table>
+</div>
+<p class="meta">Runs marked <strong>*</strong> are provided real captures; their exit codes are user-reported.</p>`,
+    'runs',
     publicMode,
   );
 }
@@ -582,23 +663,10 @@ function scenarioBlock(scenario: ScenarioAudit, contract: PromiseContract): stri
 export function renderAuditDetail(
   summary: AuditSummary,
   contract: PromiseContract,
-  options: {
-    publicMode?: boolean;
-    receiptHref?: string;
-    repairHref?: string | null;
-    notice?: string;
-  } = {},
+  publicMode = false,
 ): string {
   const audit = summary.audit;
   const banner = recordedBanner(summary);
-  const publicMode = options.publicMode ?? false;
-  const notice = options.notice ?? '';
-  const receiptHref =
-    options.receiptHref ?? `/audits/${encodeURIComponent(audit.auditId)}/receipt`;
-  const repairHref =
-    options.repairHref === undefined
-      ? `/repair/${encodeURIComponent(audit.auditId)}`
-      : options.repairHref;
   const postRepair = audit.postRepair
     ? audit.answersAuditId
       ? `<div class="warning" role="status">Post-repair audit. It answers <a href="/repair/${encodeURIComponent(
@@ -624,7 +692,6 @@ export function renderAuditDetail(
   <div>${statusChip(audit.overallStatus)}</div>
 </div>
 
-${notice}
 ${banner}
 <div class="audit-banner">
   <div>
@@ -636,13 +703,13 @@ ${banner}
   </div>
   <div class="meta">
     <p>${audit.totals.runs} runs · ${credits(audit.totals.credits)} credits</p>
-    <p><a class="button button--secondary" href="${escapeHtml(
-      receiptHref,
-    )}">Promise Receipt</a></p>
+    <p><a class="button button--secondary" href="/audits/${encodeURIComponent(
+      audit.auditId,
+    )}/receipt">Promise Receipt</a></p>
     ${
-      !audit.postRepair && repairHref
-        ? `<p><a class="button button--secondary" href="${escapeHtml(
-            repairHref,
+      !audit.postRepair
+        ? `<p><a class="button button--secondary" href="/repair/${encodeURIComponent(
+            audit.auditId,
           )}">Closed loop</a></p>`
         : ''
     }
@@ -807,53 +874,6 @@ ${banners}
   );
 }
 
-export function renderJobStatus(job: Job, publicMode = false): string {
-  const preset = PRESET_CARTS[job.scenario];
-  const statusText =
-    job.status === 'queued'
-      ? 'Queued. The worker on the owner\'s machine will pick this up.'
-      : job.status === 'running'
-        ? 'Running. The worker is shopping the store now.'
-        : job.status === 'failed'
-          ? 'The worker could not complete this run.'
-          : job.status === 'expired'
-            ? 'The lease expired before the worker posted a result.'
-            : 'This run is done.';
-
-  return layout(
-    'Live run',
-    `<p class="eyebrow">Live run</p>
-<div class="hero">
-  <div>
-    <h1>${escapeHtml(statusText)}</h1>
-    <p class="lede">Run <code>${escapeHtml(job.id)}</code> · ${escapeHtml(
-      preset.label,
-    )} · ${escapeHtml(job.scenario)}</p>
-  </div>
-  <div>${jobStatusChip(job.status)}</div>
-</div>
-<div class="audit-banner">
-  <div>
-    <p class="meta"><strong>Created</strong> ${formatTimestamp(job.createdAt)}</p>
-    <p class="meta"><strong>Updated</strong> ${formatTimestamp(job.updatedAt)}</p>
-    ${
-      job.leaseExpiresAt
-        ? `<p class="meta"><strong>Lease expires</strong> ${formatTimestamp(job.leaseExpiresAt)}</p>`
-        : ''
-    }
-  </div>
-  <div class="meta">
-    <p>Only the three fixed scenarios can be run.</p>
-    <p><a class="button button--secondary" href="/">Back to campaign</a></p>
-  </div>
-</div>
-${job.error ? `<div class="warning" role="alert">${escapeHtml(job.error)}</div>` : ''}
-<p class="meta">This page does not auto-refresh; the campaign panel polls the run status. The recorded proof remains available on <a href="/audits">Audits</a>.</p>`,
-    'audit',
-    publicMode,
-  );
-}
-
 export function renderNotFound(title: string, message: string, publicMode = false): string {
   return layout(
     title,
@@ -875,6 +895,5 @@ export function renderServerError(message: string, publicMode = false): string {
 <p class="meta">The app reads real files under <code>.data/audits</code> and <code>docs/</code>. It does not substitute a mock.</p>
 <a class="button" href="/">Back to campaign</a>`,
     'campaign',
-    publicMode,
   );
 }

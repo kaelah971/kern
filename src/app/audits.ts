@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { AuditRecord, AuditStatus } from '../lib/audit.ts';
 
 const STATUSES = new Set<AuditStatus>(['HONORED', 'BROKEN', 'INCONCLUSIVE', 'INFRA_ERROR']);
@@ -38,6 +39,14 @@ export function defaultAuditRoot(repoRoot = process.cwd()): string {
 }
 
 export function recordedAuditRoot(repoRoot = process.cwd()): string {
+  const fromEnv = process.env.KERN_RECORDED_ROOT;
+  if (fromEnv && existsSync(fromEnv)) return fromEnv;
+
+  // src/app/audits.ts -> repository root -> recorded/. Vercel's cwd is
+  // /var/task, but the function bundle keeps this module-relative path.
+  const moduleRelative = fileURLToPath(new URL('../../recorded', import.meta.url));
+  if (existsSync(moduleRelative)) return moduleRelative;
+
   return join(repoRoot, 'recorded');
 }
 
