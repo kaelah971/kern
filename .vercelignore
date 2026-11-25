@@ -1,0 +1,6 @@
+.data
+node_modules
+.git
+tests
+docs/screenshots
+api

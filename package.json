@@ -17,10 +17,12 @@
     "demo:store-pre-repair": "node scripts/demo-store-pre-repair.ts",
     "contract:freeze": "node scripts/freeze-contract.ts",
     "typecheck": "tsc --noEmit",
-    "verify:vercel": "node scripts/vercel-simulate.ts"
+    "verify:vercel": "node scripts/vercel-simulate.ts",
+    "app:recorded": "KERN_PUBLIC=1 KERN_AUDIT_SOURCE=recorded PORT=3300 node src/app/server.ts",
+    "export:static": "node scripts/export-static.ts http://127.0.0.1:3300"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
-    "typescript": "^7.0.2"
+    "typescript": "^5.9.3"
   }
 }

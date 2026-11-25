@@ -67,6 +67,14 @@ function hasAuditJson(root: string): boolean {
 export function resolveAuditRoot(
   repoRoot = process.cwd(),
 ): { root: string; source: 'live' | 'recorded' } {
+  // An explicit source wins. `KERN_AUDIT_SOURCE=recorded` is how the static
+  // export builds the public site from the committed copies even when local
+  // .data/ evidence exists on the build machine.
+  if (process.env.KERN_AUDIT_SOURCE === 'recorded') {
+    const recordedOnly = recordedAuditRoot(repoRoot);
+    if (hasAuditJson(recordedOnly)) return { root: recordedOnly, source: 'recorded' };
+  }
+
   const live = defaultAuditRoot(repoRoot);
   if (hasAuditJson(live)) return { root: live, source: 'live' };
 

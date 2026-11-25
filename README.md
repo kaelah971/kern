@@ -2,7 +2,7 @@
 
 Kern turns an advertised checkout promise into a frozen, merchant-approved contract, sends Kane CLI through the real storefront in a browser, and compares the rendered charge with a deterministic oracle. When the store is wrong, a bounded source repair is followed by the same challenge rerun unchanged. The demo has one storefront, one `free_shipping_threshold` promise, three carts, and two real audits.
 
-**Live demo:** `<URL>` — read-only proof site. Deployment steps: [`docs/vercel.md`](docs/vercel.md).
+**Live demo:** https://kern-site-mocha.vercel.app — read-only proof site. Every page is a real audit; no account needed. Deployment steps: [`docs/vercel.md`](docs/vercel.md).
 
 ## The proof
 
