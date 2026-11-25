@@ -36,7 +36,7 @@ await new Promise((resolve, reject) => {
 const address = server.address();
 const base = 'http://127.0.0.1:' + address.port;
 const checks = [
-  ['/', [/See all 12 real runs/, /Recorded audit: replay of real runs/]],
+  ['/', [/See all 12 real runs/, /Recorded audit: replay of real runs/, /Live checks run on the operator's machine/]],
   ['/runs', [/<strong>12<\/strong> runs/, /Live checks run on the operator's machine/]],
   ['/audits/2026-11-22T00-53-05-669Z-f5230a', [/Journey X-Ray/, /Recorded audit: replay of real runs/]],
   ['/audits/2026-11-22T00-53-05-669Z-f5230a/receipt', [/Promise Receipt/, /Recorded audit: replay of real runs/]],

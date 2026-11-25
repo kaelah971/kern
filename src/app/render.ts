@@ -6,6 +6,7 @@ import type { AuditIndex, AuditSummary } from './audits.ts';
 import { latestAudit } from './audits.ts';
 import type { DiffResult } from './git.ts';
 import type { PolicyInfo } from './data.ts';
+import type { LiveSnapshot } from './live.ts';
 import {
   formatCents,
   formatTimestamp,
@@ -80,15 +81,24 @@ function auditContractWarning(audit: AuditSummary, contract: PromiseContract): s
 export function layout(
   title: string,
   body: string,
-  current: 'campaign' | 'audits' | 'runs' | 'audit' | 'repair' = 'campaign',
+  current: 'campaign' | 'audits' | 'runs' | 'audit' | 'repair' | 'check' = 'campaign',
   publicMode = false,
+  headExtra = '',
 ): string {
-  const navCurrent = current === 'campaign' ? 'campaign' : current === 'runs' ? 'runs' : 'audits';
+  const navCurrent =
+    current === 'campaign'
+      ? 'campaign'
+      : current === 'runs'
+        ? 'runs'
+        : current === 'check'
+          ? ''
+          : 'audits';
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+${headExtra}
 <title>${escapeHtml(title)} · Kern</title>
 <style>${APP_STYLES}</style>
 </head>
@@ -189,10 +199,15 @@ export function renderCampaign(input: {
   policy: PolicyInfo | null;
   index: AuditIndex;
   publicMode?: boolean;
+  live?: LiveSnapshot | null;
 }): string {
-  const { contract, policy, index, publicMode = false } = input;
+  const { contract, policy, index, publicMode = false, live = null } = input;
   const latest = latestAudit(index);
   const runCount = realRunCount(index);
+  const operatorNote = publicMode
+    ? `<div class="read-only-note" role="status">Live checks run on the operator's machine. The runs below are real executions; this deployment only reads them.</div>`
+    : '';
+  const livePanel = !publicMode && live ? renderLivePanel(live, contract) : '';
 
   const latestBlock = latest
     ? `${recordedBanner(latest)}<div class="audit-banner">
@@ -261,6 +276,8 @@ ${auditContractWarning(latest, contract)}`
     )}</span></p>
   </aside>
 </div>
+${operatorNote}
+${livePanel}
 
 <div class="grid-two">
   <section class="panel panel--ad" aria-labelledby="ad-heading">
@@ -310,6 +327,144 @@ ${scenarioCards(contract, latest)}
 </section>`,
     'campaign',
     publicMode,
+  );
+}
+
+function liveLimitsLine(live: LiveSnapshot): string {
+  return `${live.limits.perHour} per hour · ${live.limits.perDay} per day · one at a time · ${live.limits.minBalanceCredits} credit floor`;
+}
+
+function liveStateLine(live: LiveSnapshot): string {
+  if (live.state === 'running') {
+    return `Running <code>${escapeHtml(live.scenario ?? 'unknown')}</code> since ${formatTimestamp(
+      live.startedAt ?? '',
+    )} (${live.elapsedSeconds ?? 0}s). <a href="/check/status">Status</a>`;
+  }
+  if (live.state === 'done' && live.auditUrl) {
+    return `Done. <a href="${live.auditUrl}">Open the audit</a>.`;
+  }
+  if (live.state === 'failed') {
+    return `Failed: ${escapeHtml(live.error ?? 'unknown failure')}. <a href="/check/status">Open status and log</a>.`;
+  }
+  return `Idle. ${live.startsLastHour} of ${live.limits.perHour} starts used this hour; ${live.startsLastDay} of ${live.limits.perDay} today.`;
+}
+
+function liveCartCards(contract: PromiseContract, disabled: boolean): string {
+  return Object.values(PRESET_CARTS)
+    .map((preset) => {
+      const expected = expectedShippingCents(contract, preset.expectedSubtotalCents);
+      return `<article class="live-card">
+  <p class="eyebrow">${escapeHtml(preset.id)}</p>
+  <h3>${escapeHtml(preset.label)}</h3>
+  <p class="card-meta">${escapeHtml(preset.description)} · subtotal ${formatCents(
+        preset.expectedSubtotalCents,
+      )}</p>
+  <p class="live-promise">promised ${formatCents(expected)} shipping</p>
+  <form class="live-start" method="post" action="/check/run">
+    <input type="hidden" name="scenario" value="${escapeHtml(preset.id)}">
+    <button class="button" type="submit" aria-label="Start check for ${escapeHtml(
+      preset.label,
+    )}"${disabled ? ' disabled' : ''}>Start check</button>
+  </form>
+</article>`;
+    })
+    .join('\n');
+}
+
+function renderLivePanel(live: LiveSnapshot, contract: PromiseContract): string {
+  const running = live.state === 'running';
+  return `<section class="live-panel" aria-labelledby="live-check-heading">
+  <div class="live-panel-head">
+    <div>
+      <p class="eyebrow">Operator · local only</p>
+      <h2 id="live-check-heading">Check this store</h2>
+    </div>
+    <a href="/check/status">Open check console</a>
+  </div>
+  <p class="live-limits">${liveLimitsLine(live)}</p>
+  <p class="live-state live-state--${live.state}">${liveStateLine(live)}</p>
+  <div class="live-cards">
+${liveCartCards(contract, running)}
+  </div>
+</section>`;
+}
+
+function elapsedLabel(seconds: number): string {
+  return seconds === 1 ? '1 second' : `${seconds} seconds`;
+}
+
+function renderLiveStatusBody(live: LiveSnapshot, contract: PromiseContract): string {
+  const limits = `<p class="live-limits">${liveLimitsLine(live)}</p>
+<p class="meta">Starts in the last hour: ${live.startsLastHour} of ${live.limits.perHour}. Starts in the last day: ${live.startsLastDay} of ${live.limits.perDay}.</p>`;
+
+  if (live.state === 'running') {
+    return `<p class="eyebrow">Operator · local only</p>
+<h1>Check this store</h1>
+<p class="live-state live-state--running"><strong>Running</strong> <code>${escapeHtml(
+      live.scenario ?? 'unknown',
+    )}</code></p>
+<dl class="live-facts">
+  <div><dt>Started</dt><dd>${formatTimestamp(live.startedAt ?? '')}</dd></div>
+  <div><dt>Elapsed</dt><dd>${elapsedLabel(live.elapsedSeconds ?? 0)}</dd></div>
+</dl>
+<h2>Last line from the check</h2>
+${
+  live.lastLine
+    ? `<pre class="live-last-line">${escapeHtml(live.lastLine)}</pre>`
+    : '<p class="meta">No output yet.</p>'
+}
+<p class="meta">This page refreshes every 3 seconds. It shows only the child's output; elapsed time is not a prediction.</p>`;
+  }
+
+  if (live.state === 'done') {
+    return `<p class="eyebrow">Operator · local only</p>
+<h1>Check this store</h1>
+<div class="live-result live-result--done" role="status">
+  <p><strong>Done.</strong> The check produced an audit.</p>
+  ${
+    live.auditUrl
+      ? `<p><a class="button" href="${live.auditUrl}">Open the audit</a></p>`
+      : '<p class="meta">The child reported success but did not name an audit.</p>'
+  }
+</div>
+<dl class="live-facts">
+  <div><dt>Scenario</dt><dd><code>${escapeHtml(live.scenario ?? 'unknown')}</code></dd></div>
+  <div><dt>Started</dt><dd>${formatTimestamp(live.startedAt ?? '')}</dd></div>
+</dl>
+<p><a href="/">Back to campaign</a> · <a href="/check/status">Refresh status</a></p>`;
+  }
+
+  if (live.state === 'failed') {
+    return `<p class="eyebrow">Operator · local only</p>
+<h1>Check this store</h1>
+<div class="warning" role="status"><strong>This check failed.</strong> It is not a verified result.</div>
+<dl class="live-facts">
+  <div><dt>Scenario</dt><dd><code>${escapeHtml(live.scenario ?? 'unknown')}</code></dd></div>
+  <div><dt>Started</dt><dd>${formatTimestamp(live.startedAt ?? '')}</dd></div>
+  <div><dt>Failure</dt><dd>${escapeHtml(live.error ?? 'unknown failure')}</dd></div>
+  <div><dt>Log</dt><dd><code>${escapeHtml(live.logPath ?? 'log path not recorded')}</code></dd></div>
+</dl>
+<p><a href="/">Back to campaign</a> · <a href="/check/status">Refresh status</a></p>`;
+  }
+
+  return `<p class="eyebrow">Operator · local only</p>
+<h1>Check this store</h1>
+<p>The check runs the real two-run Kane audit for one fixed cart, then records the audit. It does not take free-text objectives.</p>
+<h2>What will be checked</h2>
+<div class="live-cards">
+${liveCartCards(contract, false)}
+</div>
+${limits}
+<p class="meta">The store must answer at http://127.0.0.1:4173/health. The check stops before starting if it does not.</p>`;
+}
+
+export function renderLiveStatus(live: LiveSnapshot, contract: PromiseContract): string {
+  return layout(
+    'Check this store',
+    renderLiveStatusBody(live, contract),
+    'check',
+    false,
+    '<meta http-equiv="refresh" content="3">',
   );
 }
 

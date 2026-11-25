@@ -10,10 +10,13 @@ import {
 } from './audits.ts';
 import { loadAppContract, readPolicy } from './data.ts';
 import { readShippingDiff } from './git.ts';
+import { getPreset } from '../lib/catalog.ts';
+import { LiveController, LIVE_SCENARIOS, type LiveControllerOptions } from './live.ts';
 import {
   renderAuditDetail,
   renderAuditList,
   renderCampaign,
+  renderLiveStatus,
   renderNotFound,
   renderRepair,
   renderRunsList,
@@ -22,6 +25,8 @@ import {
 import { renderReceiptPage } from './receipt.ts';
 
 const MAX_ID_LENGTH = 200;
+const MAX_FORM_BYTES = 8 * 1024;
+const LIVE_ROUTES = new Set(['/check', '/check/status', '/check/run']);
 
 function sendHtml(
   res: ServerResponse,
@@ -41,6 +46,50 @@ function sendHtml(
   });
   if (headOnly) res.end();
   else res.end(body);
+}
+
+function sendText(res: ServerResponse, status: number, text: string): void {
+  const body = Buffer.from(text, 'utf8');
+  res.writeHead(status, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Content-Length': body.length,
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+  });
+  res.end(body);
+}
+
+function sendRedirect(res: ServerResponse, status: number, location: string): void {
+  res.writeHead(status, {
+    Location: location,
+    'Cache-Control': 'no-store',
+    'Content-Length': 0,
+  });
+  res.end();
+}
+
+function isSameOrigin(req: IncomingMessage): boolean {
+  const origin = req.headers.origin;
+  const host = req.headers.host;
+  if (!origin || !host) return false;
+  try {
+    const parsed = new URL(origin);
+    return parsed.host === host && parsed.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+
+async function readForm(req: IncomingMessage): Promise<URLSearchParams> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of req) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    size += buffer.length;
+    if (size > MAX_FORM_BYTES) throw new Error('form body too large');
+    chunks.push(buffer);
+  }
+  return new URLSearchParams(Buffer.concat(chunks).toString('utf8'));
 }
 
 function sendJson(res: ServerResponse, status: number, value: unknown): void {
@@ -80,6 +129,8 @@ export type AppServerOptions = {
   auditRoot?: string;
   repoRoot?: string;
   publicMode?: boolean;
+  liveMode?: boolean;
+  live?: LiveControllerOptions;
 };
 
 export function createAppRequestHandler(
@@ -88,22 +139,43 @@ export function createAppRequestHandler(
   const repoRoot = options.repoRoot ?? process.cwd();
   const auditRoot = options.auditRoot ?? resolveAuditRoot(repoRoot).root;
   const publicMode = options.publicMode ?? process.env.KERN_PUBLIC === '1';
+  const liveMode = (options.liveMode ?? process.env.KERN_LIVE === '1') && !publicMode;
+  const live = liveMode
+    ? new LiveController({ repoRoot, ...options.live })
+    : null;
 
   async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const method = req.method ?? 'GET';
     const headOnly = method === 'HEAD';
-    if (method !== 'GET' && !headOnly) {
+    const url = new URL(req.url ?? '/', 'http://localhost');
+    const path = url.pathname;
+
+    if (LIVE_ROUTES.has(path) && !liveMode) {
       sendHtml(
         res,
-        405,
-        renderNotFound('Method not allowed', 'This app serves read-only pages over GET.'),
-        false,
+        404,
+        renderNotFound('Page not found', `No route exists for ${path}.`, publicMode),
+        headOnly,
       );
       return;
     }
 
-    const url = new URL(req.url ?? '/', 'http://localhost');
-    const path = url.pathname;
+    const isLiveRunPost = liveMode && path === '/check/run' && method === 'POST';
+    if (!isLiveRunPost && method !== 'GET' && !headOnly) {
+      sendHtml(
+        res,
+        405,
+        renderNotFound(
+          'Method not allowed',
+          liveMode
+            ? 'This route does not accept that method.'
+            : 'This app serves read-only pages over GET.',
+          false,
+        ),
+        false,
+      );
+      return;
+    }
 
     const index = loadAudits(auditRoot);
 
@@ -120,8 +192,73 @@ export function createAppRequestHandler(
     const contract = loadAppContract();
     const policy = readPolicy(repoRoot);
 
+    if (liveMode && live) {
+      if (path === '/check') {
+        sendRedirect(res, 303, '/check/status');
+        return;
+      }
+
+      if (path === '/check/status') {
+        sendHtml(res, 200, renderLiveStatus(live.snapshot(), contract), headOnly);
+        return;
+      }
+
+      if (path === '/check/run') {
+        if (method !== 'POST') {
+          sendHtml(
+            res,
+            405,
+            renderNotFound('Method not allowed', 'This route accepts only POST.', publicMode),
+            headOnly,
+          );
+          return;
+        }
+        if (!isSameOrigin(req)) {
+          sendText(res, 403, 'Forbidden: the check request must come from this local app.');
+          return;
+        }
+
+        let form: URLSearchParams;
+        try {
+          form = await readForm(req);
+        } catch {
+          sendText(res, 400, 'Invalid check request.');
+          return;
+        }
+        const scenario = form.get('scenario') ?? '';
+        const preset = getPreset(scenario);
+        if (!preset) {
+          sendText(
+            res,
+            400,
+            `Unknown scenario. Use one of: ${LIVE_SCENARIOS.join(', ')}.`,
+          );
+          return;
+        }
+
+        const result = await live.start(preset.id);
+        if (!result.ok) {
+          sendText(res, result.status, result.reason);
+          return;
+        }
+        sendRedirect(res, 303, '/check/status');
+        return;
+      }
+    }
+
     if (path === '/') {
-      sendHtml(res, 200, renderCampaign({ contract, policy, index, publicMode }), headOnly);
+      sendHtml(
+        res,
+        200,
+        renderCampaign({
+          contract,
+          policy,
+          index,
+          publicMode,
+          live: live ? live.snapshot() : null,
+        }),
+        headOnly,
+      );
       return;
     }
 

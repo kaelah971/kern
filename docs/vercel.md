@@ -11,7 +11,7 @@ call `server.listen()`.
 ## Import and deploy
 
 1. Push this repository to GitHub:
-   `https://github.com/kaelah971/kern`.
+   `https://github.com/<your-username>/kern`.
 2. In Vercel: **Add New… → Project → Import Git Repository**, choose `kern`.
 3. Framework Preset: **Other**.
 4. Root Directory: `./`.
@@ -44,7 +44,7 @@ On the deployed copy those two audits contribute **12 runs · 259.14 credits ·
 
 > Recorded audit: replay of real runs, not a live session.
 
-It also shows the read-only line:
+The same read-only line appears on the campaign page (`/`):
 
 > Live checks run on the operator's machine. The runs below are real
 > executions; this deployment only reads them.
@@ -100,7 +100,7 @@ pages:
 
 The checks assert:
 
-- `/` contains “See all 12 real runs” and the recorded banner.
+- `/` contains “See all 12 real runs”, the recorded banner and the read-only line.
 - `/runs` contains `<strong>12</strong> runs` and the read-only line.
 - the X-Ray and receipt render with the recorded banner.
 
@@ -113,11 +113,16 @@ Vercel. No rows are invented.
 ## Read-only behaviour
 
 - The Vercel function passes `publicMode: true`.
+- The operator-only live check is gated by `KERN_LIVE=1`; it is off here, and
+  `publicMode` disables it even if the variable were present. `/check`,
+  `/check/run` and `/check/status` return 404 on the deployed site.
 - The Storefront nav link is removed.
-- `/runs` shows the operator-machine line above the runs table.
+- `/` and `/runs` show the operator-machine line. `/runs` shows it above the
+  runs table.
 - There are no run controls, no job API, no worker and no live state.
 - The local app (`npm run app`) keeps the existing pages and Storefront link.
   `KERN_PUBLIC=1 npm run app` applies the read-only presentation locally.
+  `KERN_LIVE=1 npm run app` adds the operator-only check panel and console.
 
 ## Rollback
 
