@@ -6,7 +6,7 @@ An ad makes a promise. A coding agent changes the checkout. Kern freezes the pro
 
 Kern is an independent open-source project built on Kane CLI. It is not an official TestMu AI product.
 
-**Live:** [tryoutkern.vercel.app](https://tryoutkern.vercel.app) · [Promise proof](https://tryoutkern.vercel.app/promises) · [Demo app](https://tryoutkern.vercel.app/campaign) · [Why Kane CLI](https://tryoutkern.vercel.app/why-kane) · [Gate](https://tryoutkern.vercel.app/gate) · [Store](https://tryoutkern.vercel.app/store/) · [GitHub](https://github.com/kaelah971/kern)
+**Live:** [tryoutkern.vercel.app](https://tryoutkern.vercel.app) · [Demo video](https://youtu.be/HNdahWD_ehE?si=dqqkRTZ1gteTkAMm) · [Promise proof](https://tryoutkern.vercel.app/promises) · [Live demo](https://tryoutkern.vercel.app/campaign) · [Why Kane CLI](https://tryoutkern.vercel.app/why-kane) · [Gate](https://tryoutkern.vercel.app/gate) · [Store](https://tryoutkern.vercel.app/store/) · [GitHub](https://github.com/kaelah971/kern)
 
 ---
 
@@ -123,7 +123,7 @@ This is not a Kane wrapper. Remove Kane and the loop loses the only independent 
 With no account and no Kane run:
 
 - Open the [live landing](https://tryoutkern.vercel.app).
-- Open the [demo app](https://tryoutkern.vercel.app/campaign).
+- Open the [live demo](https://tryoutkern.vercel.app/campaign).
 - Read [Why Kane CLI](https://tryoutkern.vercel.app/why-kane).
 - Inspect the [gate](https://tryoutkern.vercel.app/gate), the [promise receipt](https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993/receipt) and the [new promise proof](https://tryoutkern.vercel.app/promises).
 
@@ -385,7 +385,8 @@ MIT. See [LICENSE](LICENSE).
 
 - [Live proof](https://tryoutkern.vercel.app)
 - [Promise proof](https://tryoutkern.vercel.app/promises)
-- [Demo app](https://tryoutkern.vercel.app/campaign)
+- [Demo video](https://youtu.be/HNdahWD_ehE?si=dqqkRTZ1gteTkAMm)
+- [Live demo](https://tryoutkern.vercel.app/campaign)
 - [Why Kane CLI brief](WHY_KANE.md)
 - [Why Kane CLI live](https://tryoutkern.vercel.app/why-kane)
 - [Docs index](docs/README.md)

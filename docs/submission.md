@@ -162,7 +162,7 @@ Kern is that record. Kane is the witness. The gate is how the agent earns “don
 **Gate:** https://tryoutkern.vercel.app/gate  
 **Receipt:** https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993/receipt  
 **Repo:** https://github.com/kaelah971/kern  
-**Demo video:** [add the YouTube link] — local master `docs/demo/kern-demo.mp4` (3:30).
+**Demo video:** [https://youtu.be/HNdahWD_ehE](https://youtu.be/HNdahWD_ehE) — local master `docs/demo/kern-demo.mp4` (3:30).
 
 ---
 
@@ -212,6 +212,6 @@ Attach the receipt screenshot (`docs/screenshots/04-receipt.png`) or a short cli
 - **Gate:** https://tryoutkern.vercel.app/gate
 - **Receipt:** https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993/receipt
 - **Repo:** https://github.com/kaelah971/kern
-- **Video:** `docs/demo/kern-demo.mp4` — 3:30 master; upload to YouTube, then replace the placeholder.
+- **Video:** [https://youtu.be/HNdahWD_ehE](https://youtu.be/HNdahWD_ehE) — local master `docs/demo/kern-demo.mp4` (3:30).
 - **Post 1:** `docs/social/kern-post-1.md` + `docs/social/kern-post-1.png`
 - **Post 2:** the draft above; attach the receipt screenshot or a short clip.
