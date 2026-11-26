@@ -114,6 +114,8 @@ Kane has three jobs:
 
 Kern's job is the loop around the witness: freeze the promise, define the boundary and control carts, own the deterministic oracle, block the agent, and scope the receipt.
 
+Read the full [Why Kane CLI brief](WHY_KANE.md).
+
 This is not a Kane wrapper. Remove Kane and the loop loses the only independent view of the customer checkout. That is why Kane is not a logo in the footer.
 
 ## Try it in two minutes
@@ -384,7 +386,9 @@ MIT. See [LICENSE](LICENSE).
 - [Live proof](https://tryoutkern.vercel.app)
 - [Promise proof](https://tryoutkern.vercel.app/promises)
 - [Demo app](https://tryoutkern.vercel.app/campaign)
-- [Why Kane CLI](https://tryoutkern.vercel.app/why-kane)
+- [Why Kane CLI brief](WHY_KANE.md)
+- [Why Kane CLI live](https://tryoutkern.vercel.app/why-kane)
+- [Docs index](docs/README.md)
 - [Gate](https://tryoutkern.vercel.app/gate)
 - [Audits](https://tryoutkern.vercel.app/audits)
 - [Runs](https://tryoutkern.vercel.app/runs)
