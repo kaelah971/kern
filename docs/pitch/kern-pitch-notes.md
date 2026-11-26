@@ -1,103 +1,61 @@
 # Kern pitch deck — speaker notes
 
-Deck: `docs/pitch/kern-pitch.pdf` (12 slides, 16:9)  
+Deck: `docs/pitch/kern-pitch.pdf` (14 slides, 16:9)  
 Source: `docs/pitch/kern-pitch.html`  
-For a 3-minute cut: slides 1, 2, 4, 6, 8, 9, 12.
+For a 3-minute cut: slides 1, 2, 4, 6, 7, 9, 10, 14.
 
 ## 01 — Cover
 
-Every ad makes a promise. Kern is the firewall that makes the checkout prove it.
-
-Start with the concrete case: a $60 cart, a free-shipping promise of $0.00, and a $9.00 charge.
+Every ad makes a promise. Kern is the firewall that makes the checkout prove it. Four promise classes; one independent witness.
 
 ## 02 — The problem
 
-This is not a hypothetical. A merchant in a public Shopify thread described a customer whose discount “showed in her checkout” but who was charged full price. The fallback was constantly refunding people.
-
-The code was green. The page loaded. The customer still paid more. The promise dies at the last screen — where it becomes real.
+A $60 cart, a free-shipping promise of $0.00, and a $9.00 charge. The same gap hides in discounts, bundles and delivery dates. The code can be green; the customer still gets a different answer.
 
 ## 03 — The vendor blind spot
 
-The ad platform sees the click. Analytics sees the order. Unit tests see the code. Support sees the complaint. Each owns a slice.
-
-Nobody owns the rendered checkout for the exact advertised cart. The last mile is unowned.
+The ad platform sees the click. Analytics sees the order. Tests see the code. Support sees the complaint. The rendered promise for the exact cart has no owner.
 
 ## 04 — Why now
 
-AI agents can now change the pricing code, write the test and call the task done. That is useful speed, and a new risk: a pass is a claim, not proof.
-
-The fix can be too broad and make all shipping free. It can be too narrow and miss the exact boundary. Or the agent can weaken the test until it goes green.
-
-The agent can change the code. It cannot be the witness.
+AI agents can change pricing code, write the test and call it done. The fix can be too broad, too narrow, or the test can be weakened. A pass is a claim; the agent cannot be the witness.
 
 ## 05 — The insight
 
-Most tools start at the rule. Kern starts at the ad.
-
-The ad is the spec. The merchant’s interpretation is stored separately — inclusive $50, after-discount merchandise subtotal, US standard, USD. The $9 baseline has its own approved policy source.
-
-The checkout is the truth.
+The ad is the spec. The checkout is the truth. Most tools start at the rule; Kern starts at the ad and keeps the merchant’s interpretation as a separate, frozen record.
 
 ## 06 — The loop
 
-Freeze the promise. Build three fixed carts: $60 eligible, exact $50 boundary, $35 control. Send Kane through the real rendered checkout. A deterministic oracle decides. If it fails, Pi gets a bounded repair brief; a human approves; Kane reruns the same six objectives. The gate opens only when the evidence matches. Then a scoped receipt.
+Freeze the promise. Build an eligible case, the exact boundary and a control. Send Kane through the real rendered checkout. The oracle decides. If the promise fails, Pi gets a bounded repair; a person approves; Kane reruns the same checks; the gate opens only when the evidence matches.
 
-The boundary catches a fix that only frees $60 and up. The control catches a fix that makes all shipping free. The gate catches a “done” with no passing witness.
+## 07 — The promise library
 
-The agent never decides whether the fix worked. The evidence does.
+One promise type was never the product. The same discipline now covers free shipping, 20% off over $50, the tote + notebook bundle, and order-by-2pm delivery. Every class has an eligible case, an exact edge and a control.
 
-## 07 — Why Kane / TestMu AI
+## 08 — Why Kane / TestMu AI
 
-Kane CLI opens the real storefront in a real browser, follows the cart and reads the rendered shipping quote. It returns the observation, the terminal result and the evidence.
+Kane CLI opens the real storefront in a real browser and reads the rendered price, discount, bundle total or delivery date. It is not a logo at the end of the pipeline. Kern owns the contract, boundary, control, oracle, gate and receipt. Kane owns the observation, evidence and unchanged rerun.
 
-Kern owns the contract, boundary, control, oracle, gate and receipt. Kane owns the observation and the unchanged rerun.
+## 09 — The first proof
 
-Kane is not a logo at the end of the pipeline. Remove Kane and the loop loses the only independent view of the customer checkout.
+The pre-repair shipping audit is BROKEN: $60 → $9, $50 → $9, $35 → $9 correctly. One line fixed a cents-versus-dollars mistake. The post-repair audit is HONORED: $60/$50 → $0, $35 → $9, 6/6 objective hashes, gate open. The control is what proves the fix did not just make shipping free.
 
-## 08 — The proof
+## 10 — The proof grows
 
-The pre-repair audit is BROKEN: $60 → $9, $50 → $9, $35 → $9. The $35 control was correct.
+The same witness checked three more promises. 18 real Kane runs, 9 scenarios, 9/9 HONORED. Discount: $12 / $10 / $0. Bundle: $9 / $0 / $0. Delivery: Nov 30 / Dec 1 / Dec 2. These are correct-feature proofs, not defect/repair cases. The public page is tryoutkern.vercel.app/promises.
 
-The repair was one line: remove the `* 100` that compared a cents subtotal with a dollar-denominated threshold. Pi made the bounded change; a human merged it.
+## 11 — The receipt
 
-The post-repair audit is HONORED: $60 → $0, $50 → $0, $35 → $9. All 6/6 objective hashes match. The gate is open.
+When a customer says “your ad promised free shipping,” the vendor needs a receipt, not an argument. The Promise Receipt shows the promise, carts, observed values, run IDs, evidence hashes, code revision, gate status and what it does not prove. It is a reproducible customer-side record for the tested conditions, not a recording of every shopper. Hash-linked, not signed.
 
-The control stayed at $9.00. The fix did not just make shipping free.
+## 12 — The product
 
-Evidence note: the pre-repair $60 row is a provided real Kane capture; the $50 and $35 rows are live. A separate live $60 run repeats it. The post-repair audit is all live.
+A gate, not a dashboard. The gate CLI exits 0 or 1; a closed gate can block a Claude Code Stop hook. `npm run promise:audit` runs the 18-run proof. The test pages are the store’s own HTML; the agent cannot self-certify.
 
-## 09 — The receipt
+## 13 — Where Kern sits
 
-When a customer says “your ad promised free shipping,” the vendor needs a receipt, not an argument.
+Not a price monitor. Not a promotion-config checker. Not generic QA. Kern starts at the ad and ends at the rendered checkout, for four promise classes, then closes the loop. Who feels it: DTC operations, performance marketing, agencies and platform teams. The loop is the wedge; willingness to pay is not yet validated.
 
-The Promise Receipt shows the ad snapshot, the frozen contract hash, the promised vs observed value per cart, the Kane run IDs and evidence hashes, the code revision and human approval, the gate status, and what the test does not prove.
+## 14 — Close
 
-It is a reproducible customer-side record for the tested conditions. Not a recording of every shopper. Hash-linked, not signed. Not a certification.
-
-That is how a support lead gets from “I think it was working” to “here is the cart, the quote, the code and the evidence.”
-
-## 10 — The product
-
-A gate, not a dashboard.
-
-The gate CLI exits 0 or 1. A coding agent can run it before it says done. A closed gate can return a Claude Code block decision through the Stop hook.
-
-There is also the Promise Receipt, the local contract compiler, and the storefront before/after. The command is the product; the receipt is the interface.
-
-## 11 — Where Kern sits
-
-Not a price monitor. Not a promotion-config checker. Not generic QA.
-
-Those tools start at the price, the rule or the flow. Kern starts at the ad and ends at the rendered checkout — then closes the loop with a bounded repair, an unchanged rerun and a receipt.
-
-Who feels it: DTC operations, performance marketing, agencies and platform teams accountable for an offer. The trigger is a launch, a code change or a customer complaint.
-
-The loop is the wedge. Willingness to pay is not yet validated.
-
-## 12 — Close
-
-The checkout is the proof. Kane is the witness. Kern is the gate.
-
-Live proof: tryoutkern.vercel.app. Source: github.com/kaelah971/kern. The 3-minute demo is the same loop.
-
-Built with Kane CLI / TestMu AI. Pi did the terminal-driven bounded repair. Kern is an independent project.
+The checkout is the proof. Kane is the witness. Kern is the gate. Four promise classes, 18 real Kane runs, 9/9 HONORED. Built with Kane CLI / TestMu AI. Pi did the terminal-driven bounded repair; a human approved it. Kern is an independent project.

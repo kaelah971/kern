@@ -21,7 +21,7 @@ Start with the root [README](../README.md) and the [Why Kane CLI brief](../WHY_K
 ## Submission and launch
 
 - [Submission content](submission.md) — About, project story, short version and post 2.
-- [Pitch deck](pitch/kern-pitch.pdf) — 12 slides.
+- [Pitch deck](pitch/kern-pitch.pdf) — 14 slides.
 - [Social post 1](social/kern-post-1.md) + [card](social/kern-post-1.png).
 - [Social post 2](social/kern-post-2.md).
 - [Demo script](demo-script.md).
