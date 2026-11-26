@@ -1,5 +1,7 @@
 # Kern
 
+**For judges — public posts:** **[Post 1](https://x.com/_kaaelaa_/status/2125914951734657399?s=46)** · **[Post 2](https://x.com/_kaaelaa_/status/2125870283605115130?s=46)**
+
 **The promise firewall for checkout.**
 
 An ad makes a promise. A coding agent changes the checkout. Kern freezes the promise, sends **Kane CLI** through the real rendered storefront, and refuses to accept the result until the same evidence passes. It now covers **free shipping, percentage discounts, bundles and delivery estimates**.

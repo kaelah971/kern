@@ -213,5 +213,5 @@ Attach the receipt screenshot (`docs/screenshots/04-receipt.png`) or a short cli
 - **Receipt:** https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993/receipt
 - **Repo:** https://github.com/kaelah971/kern
 - **Video:** [https://youtu.be/HNdahWD_ehE](https://youtu.be/HNdahWD_ehE) — local master `docs/demo/kern-demo.mp4` (3:30).
-- **Post 1:** `docs/social/kern-post-1.md` + `docs/social/kern-post-1.png`
-- **Post 2:** the draft above; attach the receipt screenshot or a short clip.
+- **Post 1:** [https://x.com/_kaaelaa_/status/2125914951734657399](https://x.com/_kaaelaa_/status/2125914951734657399) — local copy: `docs/social/kern-post-1.md` + `docs/social/kern-post-1.png`
+- **Post 2:** [https://x.com/_kaaelaa_/status/2125870283605115130](https://x.com/_kaaelaa_/status/2125870283605115130) — local copy: the draft above; attach the receipt screenshot or a short clip.
