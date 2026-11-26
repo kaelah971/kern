@@ -43,8 +43,27 @@ after(async () => {
   rmSync(root, { recursive: true, force: true });
 });
 
-test('campaign page shows the ad, the interpretation, the contract and the latest audit', async () => {
+test('the landing page is the reference-style front door with the demo and README actions', async () => {
   const { status, text } = await get(baseUrl, '/');
+  assert.equal(status, 200);
+  assert.match(text, /An ad makes a promise/);
+  assert.match(text, /The checkout has to/);
+  assert.match(text, /Open the demo app/);
+  assert.match(text, /Read the README/);
+  assert.match(text, /89\/89 tests pass/);
+  assert.match(text, /Kane finds/);
+  assert.match(text, /Three tests\. One promise\./);
+  assert.match(text, /Everything is open\./);
+  assert.match(text, /href="\/campaign"/);
+  assert.match(text, /href="\/gate"/);
+  assert.match(text, /href="\/repair\/2026-11-22T00-53-05-669Z-f5230a"/);
+  assert.match(text, /href="\/audits\/2026-11-23T12-35-29-692Z-48b993\/receipt"/);
+  assert.match(text, /BROKEN/);
+  assert.match(text, /HONORED/);
+});
+
+test('campaign page shows the ad, the interpretation, the contract and the latest audit', async () => {
+  const { status, text } = await get(baseUrl, '/campaign');
   assert.equal(status, 200);
   assert.match(text, /Every ad makes a promise/);
   assert.match(text, /Ad snapshot/);
@@ -205,7 +224,7 @@ test('an empty audit directory renders explicit empty states', async () => {
   const emptyRoot = mkdtempSync(join(tmpdir(), 'kern-empty-audits-'));
   const local = await startServer(emptyRoot);
   try {
-    const campaign = await get(local.base, '/');
+    const campaign = await get(local.base, '/campaign');
     assert.equal(campaign.status, 200);
     assert.match(campaign.text, /No audit records yet/);
 

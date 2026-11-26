@@ -28,6 +28,7 @@ import {
   renderServerError,
 } from './render.ts';
 import { renderReceiptPage } from './receipt.ts';
+import { renderLanding } from './landing.ts';
 
 const MAX_ID_LENGTH = 200;
 const MAX_FORM_BYTES = 8 * 1024;
@@ -326,6 +327,31 @@ export function createAppRequestHandler(
     }
 
     if (path === '/') {
+      const post =
+        index.audits.find((summary) => summary.audit.postRepair === true) ?? null;
+      const pre =
+        post?.audit.answersAuditId
+          ? index.audits.find(
+              (summary) => summary.audit.auditId === post.audit.answersAuditId,
+            ) ?? null
+          : null;
+      sendHtml(
+        res,
+        200,
+        renderLanding({
+          contract,
+          index,
+          pre,
+          post,
+          gate: post ? evaluateGate(post.audit, contract) : null,
+          publicMode,
+        }),
+        headOnly,
+      );
+      return;
+    }
+
+    if (path === '/campaign') {
       sendHtml(
         res,
         200,

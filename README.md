@@ -58,13 +58,14 @@ npm install && npm test && npm run demo
 
 What to click:
 
-1. `/` — the above-the-fold loop band (**Kane found $9.00 → Pi changed one line → Kane re-ran 6/6, gate open**), then the ad snapshot, the merchant's interpretation, the frozen contract, the policy source behind $9.00, the three carts, and the latest audit.
-2. **Gate** — the evidence gate, the exact promised/observed table, and the six-patch gauntlet: only the correct fix passes all three carts.
-3. **Audits** — every readable audit, newest first, with status, source, post-repair provenance, runs and credits.
-4. **Runs** — every real Kane run, grouped by audit, with session, exit, result, credits, evidence hash and verdict. On the read-only deployment this page carries the operator-machine note and no run controls.
-5. **`2026-11-22T00-53-05-669Z-f5230a`** — Journey X-Ray: $60 Promised $0.00 / Observed $9.00, Kane's confirmed verdict; the $50 boundary and $35 control follow.
-6. **Closed loop** — the actual `git diff ed3dbaf HEAD -- src/lib/shipping.ts`, then the post-repair audit and the 6/6 objective-hash comparison.
-7. **`2026-11-23T12-35-29-692Z-48b993` → Promise Receipt** — the scoped status, contract hash, pre-repair audit id, per-scenario and per-run evidence, and the “what this does not prove” section.
+1. `/` — the reference-style landing page. Use **Open the demo app**, **Read the README**, the three test cards and the **Everything is open** links. The demo app is `/campaign`.
+2. `/campaign` — the above-the-fold loop band (**Kane found $9.00 → Pi changed one line → Kane re-ran 6/6, gate open**), then the ad snapshot, the merchant's interpretation, the frozen contract, the policy source behind $9.00, the three carts, and the latest audit.
+3. **Gate** — the evidence gate, the exact promised/observed table, and the six-patch gauntlet: only the correct fix passes all three carts.
+4. **Audits** — every readable audit, newest first, with status, source, post-repair provenance, runs and credits.
+5. **Runs** — every real Kane run, grouped by audit, with session, exit, result, credits, evidence hash and verdict. On the read-only deployment this page carries the operator-machine note and no run controls.
+6. **`2026-11-22T00-53-05-669Z-f5230a`** — Journey X-Ray: $60 Promised $0.00 / Observed $9.00, Kane's confirmed verdict; the $50 boundary and $35 control follow.
+7. **Closed loop** — the actual `git diff ed3dbaf HEAD -- src/lib/shipping.ts`, then the post-repair audit and the 6/6 objective-hash comparison.
+8. **`2026-11-23T12-35-29-692Z-48b993` → Promise Receipt** — the scoped status, contract hash, pre-repair audit id, per-scenario and per-run evidence, and the “what this does not prove” section.
 
 The public storefront is **https://kern-site-mocha.vercel.app/store/**. A 3:30–4:00 recording plan is in [`docs/demo-script.md`](docs/demo-script.md), including the static before/after toggle and the optional operator panel.
 
@@ -90,7 +91,7 @@ A cheap smoke run is `node scripts/kane-audit.ts --scenario control-35 --kind ob
 - A frozen promise contract with SHA-256, a deterministic oracle, and boundary tests at 4,999 / 5,000 / 5,001 cents.
 - A two-run Kane audit engine (observe + assert), strict NDJSON/USD parsing, fail-closed statuses, evidence copy and hash.
 - A bounded repair and an unchanged post-repair audit gated by all six objective hashes. The `/repair` page shows the mixed evidence chain: exact failure → Pi's bounded scope → actual commit → human merge → unchanged Kane rerun → gate.
-- A public/recorded read-only app on 3000: campaign, gate, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff. **88/88 tests pass.**
+- A public/recorded read-only app on 3000: campaign, gate, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff. **89/89 tests pass.**
 - `npm run demo` — one command starts the recorded app and the repaired store and opens both; no Kane account or credits needed.
 - An operator-only local check panel (`KERN_LIVE=1`): fixed scenarios, one child at a time, balance/store guards, and a real audit link when a check completes. The public deployment returns 404.
 - `/gate` — the evidence gate and a six-patch gauntlet. The correct repair passes all three carts; all-free, $60-only, UI-only, control-regression and the audited pre-repair rule are rejected. The page labels the gauntlet as contract coverage, not a new Kane run.

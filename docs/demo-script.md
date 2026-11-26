@@ -18,7 +18,7 @@ restores the audited revision, serves it on 4173, and restores the fixed file
 when stopped. The public `/store/before/<cart>` pages are the same audited
 revision as static HTML, so the main one-command demo does not need that swap.
 
-Open **http://127.0.0.1:3000** before recording Segment 1. The optional
+Open **http://127.0.0.1:3000** before recording Segment 1. The landing page is the front door; click **Open the demo app** to reach `/campaign`. The optional
 pre-repair store terminal will print:
 
 ```
@@ -33,8 +33,9 @@ banner is absent; on a public clone it shows `recorded/` and the banner.
 
 | Time | On screen / exact click | Say |
 |---|---|---|
-| 0:00–0:15 | App at `/`. Campaign hero and “Latest audit” visible. | “Kern checks whether the promise in an ad survives checkout. One storefront, one promise, three carts.” |
-| 0:15–0:40 | Scroll to **Ad snapshot** and **Merchant's stated interpretation**. Point at each block, then the contract grid. | “The ad says free shipping over $50. The merchant approved an inclusive $50 boundary, US standard, after-discount subtotal. Those are two separate records, so the interpretation cannot hide inside the ad.” |
+| 0:00–0:12 | Landing at `/`. Point at the hero, **Open the demo app**, **Read the README**, and the three test cards. | “Kern checks whether the promise in an ad survives checkout. One storefront, one promise, three carts.” |
+| 0:12–0:20 | Click **Open the demo app** to `/campaign`. | “Every claim here is downstream of a recorded audit; the landing is the front door, the app is the evidence.” |
+| 0:20–0:40 | Scroll to **Ad snapshot** and **Merchant's stated interpretation**. Point at each block, then the contract grid. | “The ad says free shipping over $50. The merchant approved an inclusive $50 boundary, US standard, after-discount subtotal. Those are two separate records, so the interpretation cannot hide inside the ad.” |
 | 0:40–1:00 | Scroll to **Why $9.00 is a sourced expectation** and the three carts. Point at the policy line, then the $60/$50/$35 cards. | “Qualifying carts are promised $0. The $9 baseline comes from a separate approved policy, not from the ad. The $35 control is supposed to keep paying $9.” |
 | 1:00–1:10 | Click **Audits** in the header. Point at the two canonical IDs: `2026-11-22T00-53-05-669Z-f5230a` (BROKEN) and `2026-11-23T12-35-29-692Z-48b993` (HONORED). | “Two real audits: one before the repair, one after. The second answers the first.” |
 | 1:10–1:25 | Click the pre-repair ID `2026-11-22T00-53-05-669Z-f5230a`. The Journey X-Ray opens on eligible-60. | “The X-Ray puts the promise and the rendered checkout side by side.” |

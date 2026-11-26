@@ -117,7 +117,7 @@ ${headExtra}
 <header class="site-header">
   <a class="wordmark" href="/">KERN<span>PROMISE AUDIT</span></a>
   <nav aria-label="Main">
-    <a href="/"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
+    <a href="/campaign"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
     <a href="/gate"${navCurrent === 'gate' ? ' aria-current="page"' : ''}>Gate</a>
     ${publicMode ? '' : `<a href="/compile"${navCurrent === 'compile' ? ' aria-current="page"' : ''}>Compiler</a>`}
     <a href="/audits"${navCurrent === 'audits' ? ' aria-current="page"' : ''}>Audits</a>

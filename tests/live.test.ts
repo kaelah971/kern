@@ -331,7 +331,7 @@ test('the check UI shows idle, running, and done states without invented steps',
     assert.equal((idle.text.match(/>Start check<\/button>/g) ?? []).length, 3);
     assert.doesNotMatch(idle.text, /<progress/);
 
-    const home = await get(harness.base, '/');
+    const home = await get(harness.base, '/campaign');
     assert.match(home.text, /Check this store/);
     assert.match(home.text, /3 per hour/);
     assert.match(home.text, /20 per day/);
@@ -352,7 +352,7 @@ test('the check UI shows idle, running, and done states without invented steps',
     assert.doesNotMatch(running.text, /<progress>/);
     assert.match(running.text, /meta http-equiv="refresh" content="3"/);
 
-    const homeRunning = await get(harness.base, '/');
+    const homeRunning = await get(harness.base, '/campaign');
     assert.match(homeRunning.text, /Running <code>boundary-50<\/code>/);
     assert.match(homeRunning.text, /disabled/);
 

@@ -131,7 +131,7 @@ test('a clone with no .data serves the recorded audits with the banner', async (
     const server = createAppServer({ repoRoot: repo });
     const base = await listen(server);
     try {
-      const campaign = await fetch(`${base}/`);
+      const campaign = await fetch(`${base}/campaign`);
       assert.equal(campaign.status, 200);
       const campaignText = await campaign.text();
       assert.match(campaignText, /Recorded audit: replay of real runs, not a live session/);
