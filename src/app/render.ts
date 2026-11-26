@@ -113,17 +113,21 @@ ${headExtra}
 <style>${APP_STYLES}</style>
 </head>
 <body>
+<div class="app-frame">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
-  <a class="wordmark" href="/">KERN<span>PROMISE AUDIT</span></a>
-  <nav aria-label="Main">
-    <a href="/campaign"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
-    <a href="/gate"${navCurrent === 'gate' ? ' aria-current="page"' : ''}>Gate</a>
-    ${publicMode ? '' : `<a href="/compile"${navCurrent === 'compile' ? ' aria-current="page"' : ''}>Compiler</a>`}
-    <a href="/audits"${navCurrent === 'audits' ? ' aria-current="page"' : ''}>Audits</a>
-    <a href="${publicMode ? '/store/' : STOREFRONT_URL}">Storefront</a>
-    <a href="/runs"${navCurrent === 'runs' ? ' aria-current="page"' : ''}>Runs</a>
-  </nav>
+  <a class="wordmark" href="/"><span class="logo-mark">K</span>KERN</a>
+  <div class="header-right">
+    <nav aria-label="Main">
+      <a href="/campaign"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
+      <a href="/gate"${navCurrent === 'gate' ? ' aria-current="page"' : ''}>Gate</a>
+      ${publicMode ? '' : `<a href="/compile"${navCurrent === 'compile' ? ' aria-current="page"' : ''}>Compiler</a>`}
+      <a href="/audits"${navCurrent === 'audits' ? ' aria-current="page"' : ''}>Audits</a>
+      <a href="${publicMode ? '/store/' : STOREFRONT_URL}">Storefront</a>
+      <a href="/runs"${navCurrent === 'runs' ? ' aria-current="page"' : ''}>Runs</a>
+    </nav>
+    <a class="nav-cta" href="https://github.com/kaelah971/kern#readme" rel="noopener">README</a>
+  </div>
 </header>
 <main id="main">
 ${body}
@@ -132,6 +136,7 @@ ${body}
   <span>${publicMode ? 'Kern · read-only proof site' : 'Kern · local demo · reads <code>.data/audits</code>'}</span>
   <span>Evidence is hash-linked. No screenshots are fabricated.</span>
 </footer>
+</div>
 </body>
 </html>`;
 }
@@ -344,7 +349,7 @@ ${auditContractWarning(latest, contract)}`
 ${campaignLoopBand(index, publicMode)}
 <div class="hero">
   <div>
-    <h1>Every ad makes a promise. The checkout has to keep it.</h1>
+    <h1>Every ad makes a promise.<br>The checkout has to keep it.</h1>
     <p class="front-line">“Other tools ask for your website URL. Kern asks for your ad.”</p>
     <p class="front-line">“$60 cart: promised $0.00, charged $9.00.  $35 cart: promised $9.00, charged $9.00.”</p>
     <p class="hero-runs"><a href="/runs">See all ${runCount} real runs</a></p>

@@ -1,3 +1,5 @@
+import { APP_DESIGN } from './app-design.ts';
+
 export const APP_STYLES = `
 :root {
   --paper: #f5efe4;
@@ -751,4 +753,6 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   main { padding: 0; }
   .receipt { border-color: #000; max-width: none; padding: 0; }
 }
+
+${APP_DESIGN}
 `;

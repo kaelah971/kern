@@ -1,6 +1,7 @@
 import { PRESET_CARTS, PRODUCTS } from './catalog.ts';
 import type { CartLineView } from './cart.ts';
 import { formatUsd } from './money.ts';
+import { STORE_DESIGN } from './store-design.ts';
 
 export type KernSaw = {
   promisedCents: number;
@@ -278,7 +279,7 @@ footer {
   gap: 1rem;
   flex-wrap: wrap;
 }
-`;
+` + STORE_DESIGN;
 
 function layout(
   title: string,
@@ -292,9 +293,7 @@ function layout(
   const nav = staticExport
     ? `<nav><a href="/store/">Shop</a><a href="/">Kern proof site</a></nav>`
     : `<nav><a href="/">Shop</a><a href="/cart">${cartLabel}</a></nav>`;
-  const banner = staticExport
-    ? `<div class="demo-banner" role="note">Demo storefront. Not a real shop. This is the fixture Kern checks.</div>`
-    : '';
+  const banner = `<div class="demo-banner" role="note">Demo storefront. Not a real shop. This is the fixture Kern checks.</div>`;
   const footer = staticExport
     ? `<footer>
   <span>Kern Supply Co. static demo storefront · not a real shop</span>
@@ -313,15 +312,17 @@ function layout(
 <style>${STYLES}</style>
 </head>
 <body>
+<div class="store-frame">
 ${banner}
 <header class="site-header">
-  <a class="wordmark" href="${homeHref}">KERN<span>SUPPLY CO.</span></a>
+  <a class="wordmark" href="${homeHref}"><span class="logo-mark">K</span>KERN <span class="wordmark-sub">SUPPLY CO.</span></a>
   ${nav}
 </header>
 <main>
 ${body}
 </main>
 ${footer}
+</div>
 </body>
 </html>`;
 }
