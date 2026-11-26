@@ -49,6 +49,16 @@ test('the front page has the two-line difference and the dynamic runs link', () 
   );
   assert.match(html, /See all 12 real runs/);
   assert.match(html, /href="\/runs"/);
+  assert.match(html, /Kane found/);
+  assert.match(html, /\$9\.00/);
+  assert.match(html, /Pi changed/);
+  assert.match(html, /1 line/);
+  assert.match(html, /Kane re-ran/);
+  assert.match(html, /6\/6/);
+  assert.match(html, /Gate open\./);
+  assert.match(html, /href="\/repair\/2026-11-22T00-53-05-669Z-f5230a"/);
+  assert.match(html, /href="\/store\/before\/eligible-60"/);
+  assert.match(html, /href="\/store\/eligible-60"/);
   const nav = /<nav aria-label="Main">([\s\S]*?)<\/nav>/.exec(html)?.[1] ?? '';
   assert.match(nav, /href="\/store\/">Storefront<\/a>/);
   assert.ok(nav.indexOf('/audits') < nav.indexOf('/store/'));

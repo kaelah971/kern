@@ -557,6 +557,70 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 }
 .hero-runs { margin: .7rem 0 1rem; font-size: .92rem; }
 .hero-runs a { font-weight: 700; }
+.loop-band {
+  background: var(--ink);
+  color: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 1rem 1.15rem;
+  margin: .2rem 0 1.8rem;
+}
+.loop-steps {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: .8rem;
+}
+.loop-step { min-width: 0; }
+.loop-kicker {
+  margin: 0;
+  color: #cdbfa9;
+  font-size: .64rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.loop-value {
+  margin: .15rem 0;
+  color: var(--paper-3);
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 3vw, 2.45rem);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.loop-copy {
+  max-width: 19rem;
+  margin: 0 0 .4rem;
+  color: #e4d8c7;
+  font-size: .82rem;
+  line-height: 1.4;
+}
+.loop-copy strong { color: var(--paper-3); }
+.loop-copy code { color: #f1e7d8; background: rgba(255, 255, 255, .08); padding: .05rem .25rem; }
+.loop-step > a {
+  color: var(--paper-3);
+  font-size: .78rem;
+  font-weight: 700;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.loop-arrow { color: #e27b5f; font-size: 1.35rem; font-weight: 700; }
+.loop-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  border-top: 1px solid rgba(245, 239, 228, .22);
+  margin-top: .8rem;
+  padding-top: .75rem;
+}
+.loop-link {
+  border: 1px solid rgba(245, 239, 228, .55);
+  color: var(--paper-2);
+  font-size: .78rem;
+  font-weight: 700;
+  padding: .32rem .58rem;
+  text-decoration: none;
+}
+.loop-link:hover { background: var(--paper-2); color: var(--ink); }
 .run-totals {
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
@@ -634,6 +698,10 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 @media (max-width: 900px) {
   .hero { flex-direction: column; }
+  .loop-steps { grid-template-columns: 1fr; }
+  .loop-arrow { display: none; }
+  .loop-step { border-top: 1px solid rgba(245, 239, 228, .18); padding-top: .75rem; }
+  .loop-step:first-child { border-top: 0; padding-top: 0; }
   .grid-two, .cards, .receipt-grid, .verdict-grid { grid-template-columns: 1fr; }
   .live-cards { grid-template-columns: 1fr; }
   .contract-grid { grid-template-columns: 1fr 1fr; }

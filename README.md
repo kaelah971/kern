@@ -58,7 +58,7 @@ npm install && npm test && npm run demo
 
 What to click:
 
-1. `/` — the ad snapshot and the merchant's interpretation as separate blocks, the frozen contract, the policy source behind $9.00, the three carts, and the latest audit.
+1. `/` — the above-the-fold loop band (**Kane found $9.00 → Pi changed one line → Kane re-ran 6/6, gate open**), then the ad snapshot, the merchant's interpretation, the frozen contract, the policy source behind $9.00, the three carts, and the latest audit.
 2. **Audits** — every readable audit, newest first, with status, source, post-repair provenance, runs and credits.
 3. **Runs** — every real Kane run, grouped by audit, with session, exit, result, credits, evidence hash and verdict. On the read-only deployment this page carries the operator-machine note and no run controls.
 4. **`2026-11-22T00-53-05-669Z-f5230a`** — Journey X-Ray: $60 Promised $0.00 / Observed $9.00, Kane's confirmed verdict; the $50 boundary and $35 control follow.

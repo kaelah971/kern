@@ -198,6 +198,74 @@ function realRunCount(index: AuditIndex): number {
   );
 }
 
+function campaignLoopBand(index: AuditIndex, publicMode: boolean): string {
+  const post = index.audits.find((summary) => summary.audit.postRepair === true) ?? null;
+  const pre = post?.audit.answersAuditId
+    ? index.audits.find((summary) => summary.audit.auditId === post.audit.answersAuditId) ?? null
+    : null;
+  const eligible = pre?.audit.scenarios.find((scenario) => scenario.scenarioId === 'eligible-60');
+  if (!post || !pre || !eligible) return '';
+
+  const comparisons = post.audit.objectiveHashComparisons ?? [];
+  const matches = comparisons.filter((comparison) => comparison.match).length;
+  const total = comparisons.length;
+  const gateOpen =
+    post.audit.overallStatus === 'HONORED' &&
+    post.audit.objectiveHashesMatch === true &&
+    total > 0 &&
+    matches === total;
+  const promised = formatCents(eligible.oracle.expectedShippingCents);
+  const observed = formatCents(eligible.oracle.observedShippingCents);
+  const scenarioUrl = `/audits/${encodeURIComponent(
+    pre.audit.auditId,
+  )}#scenario-eligible-60`;
+  const postUrl = `/audits/${encodeURIComponent(post.audit.auditId)}`;
+  const repairUrl = `/repair/${encodeURIComponent(pre.audit.auditId)}`;
+  const beforeHref = publicMode ? '/store/before/eligible-60' : null;
+  const afterHref = publicMode ? '/store/eligible-60' : STOREFRONT_URL;
+
+  return `<section class="loop-band" aria-labelledby="loop-band-heading">
+  <h2 id="loop-band-heading" class="sr-only">The closed loop</h2>
+  <div class="loop-steps">
+    <div class="loop-step">
+      <p class="loop-kicker">Kane found</p>
+      <p class="loop-value">${observed}</p>
+      <p class="loop-copy">charged on the ${escapeHtml(
+        eligible.presetLabel,
+      )} cart; the ad promised ${promised}.</p>
+      <a href="${scenarioUrl}">See the failed audit →</a>
+    </div>
+    <div class="loop-arrow" aria-hidden="true">→</div>
+    <div class="loop-step">
+      <p class="loop-kicker">${escapeHtml(REPAIR_AGENT)} changed</p>
+      <p class="loop-value">1 line</p>
+      <p class="loop-copy">the shipping threshold in <code>src/lib/shipping.ts</code>.</p>
+      <a href="${repairUrl}">Open the repair case →</a>
+    </div>
+    <div class="loop-arrow" aria-hidden="true">→</div>
+    <div class="loop-step">
+      <p class="loop-kicker">Kane re-ran</p>
+      <p class="loop-value">${matches}/${total}</p>
+      <p class="loop-copy">objective hashes unchanged. <strong>${
+        gateOpen ? 'Gate open.' : 'Gate closed.'
+      }</strong></p>
+      <a href="${postUrl}">See the post-repair audit →</a>
+    </div>
+  </div>
+  <div class="loop-links">
+    <a class="loop-link" href="${repairUrl}">Repair case</a>
+    ${
+      beforeHref
+        ? `<a class="loop-link" href="${beforeHref}">Audited storefront</a>`
+        : ''
+    }
+    <a class="loop-link" href="${afterHref}">${
+      publicMode ? 'After the repair' : 'Open the store'
+    }</a>
+  </div>
+</section>`;
+}
+
 export function renderCampaign(input: {
   contract: PromiseContract;
   policy: PolicyInfo | null;
@@ -264,6 +332,7 @@ ${auditContractWarning(latest, contract)}`
   return layout(
     'Campaign',
     `<p class="eyebrow">Campaign · ${escapeHtml(contract.campaignId)}</p>
+${campaignLoopBand(index, publicMode)}
 <div class="hero">
   <div>
     <h1>Every ad makes a promise. The checkout has to keep it.</h1>
