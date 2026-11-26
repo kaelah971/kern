@@ -1,148 +1,346 @@
 # Kern
 
-Kern turns an advertised checkout promise into a frozen, merchant-approved contract, sends Kane CLI through the real storefront in a browser, and compares the rendered charge with a deterministic oracle. When the store is wrong, a bounded source repair is followed by the same challenge rerun unchanged. The demo has one storefront, one `free_shipping_threshold` promise, three carts, and two real audits.
+**The promise firewall for checkout.**
 
-**Live demo:** https://tryoutkern.vercel.app — read-only proof site and static demo storefront. Every audit page is real recorded evidence; no account needed. Deployment steps: [`docs/vercel.md`](docs/vercel.md).
+An ad makes a promise. A coding agent changes the checkout. Kern freezes the promise, sends **Kane CLI** through the real rendered storefront, and refuses to accept the agent's patch until Kane reruns the **same six objectives** and passes.
+
+Kern is an independent open-source project built on Kane CLI. It is not an official TestMu AI product.
+
+**Live:** [tryoutkern.vercel.app](https://tryoutkern.vercel.app) · [Demo app](https://tryoutkern.vercel.app/campaign) · [Why Kane CLI](https://tryoutkern.vercel.app/why-kane) · [Gate](https://tryoutkern.vercel.app/gate) · [Store](https://tryoutkern.vercel.app/store/) · [GitHub](https://github.com/kaelah971/kern)
+
+---
+
+## The problem
+
+A browser agent returns one word, `passed` or `failed`, and the pipeline acts on it. The rendered customer experience can still be wrong.
+
+| What happens | Why it matters |
+|---|---|
+| **Promise drift.** The ad promises free shipping over $50; the checkout charges $9.00 on a $60 cart. | The code and its unit tests can both be internally consistent while the customer promise is broken. |
+| **The agent grades itself.** The change passes its own tests, so it is marked done. | The tests were written against the code, not against the rendered checkout the customer sees. |
+| **The fix is too broad.** “Make shipping free” passes the $60 eligible cart and silently gives the $35 control free shipping too. | A happy-path test misses the overcorrection. |
+| **The fix is too narrow.** Only $60+ becomes free; the exact $50 boundary still charges $9.00. | The bug survives for the customer at the advertised boundary. |
+| **The goalposts move.** The agent edits or weakens the test until it passes. | A green test suite is not proof. |
+| **The evidence is vague.** A page screenshot or a prose claim replaces the run result. | There is nothing durable to inspect or gate on. |
+
+Kern's answer is a frozen commercial contract, an independent browser witness, a deterministic oracle, a boundary and a control, and a gate that the agent cannot talk past.
 
 ## The proof
 
-**Pre-repair audit** `2026-11-22T00-53-05-669Z-f5230a` — **BROKEN**
+The demo promise is **$50.00 free standard shipping, after-discount merchandise subtotal, US/USD**.
 
-| Cart | Promised | Observed |
-|---|---:|---:|
-| $60.00 eligible | $0.00 | **$9.00** |
-| $50.00 boundary | $0.00 | **$9.00** |
-| $35.00 control | $9.00 | $9.00 |
+| Cart | Promised | Before repair | After repair |
+|---|---:|---:|---:|
+| $60.00 eligible | $0.00 | **$9.00** | **$0.00** |
+| $50.00 boundary | $0.00 | **$9.00** | **$0.00** |
+| $35.00 control | $9.00 | $9.00 | **$9.00** |
 
-Kane's assert runs returned `status: failed`, `result_code: 740`, `reason_code: assertion_error.confirmed_product_bug`, `verdict.confirmed: true` for the two broken carts. The control passed.
+**Pre-repair audit:** `2026-11-22T00-53-05-669Z-f5230a` — **BROKEN**.  
+**Post-repair audit:** `2026-11-23T12-35-29-692Z-48b993` — **HONORED**, answers the first, and all **6/6** objective hashes match.
 
-**The repair:** remove the `* 100` in `src/lib/shipping.ts` that compared a cents subtotal with a dollar-denominated threshold.
+The repair is one line: remove the `* 100` that compared a cents subtotal with a dollar-denominated threshold. The actual fix commit is `4c8105f`; the human merge is `88536a9`.
 
-**Post-repair audit** `2026-11-23T12-35-29-692Z-48b993` — **HONORED**, `postRepair: true`, answers the pre-repair audit, and all six objective SHA-256 values are identical:
+Read the actual evidence:
 
-| Cart | Promised | Observed |
-|---|---:|---:|
-| $60.00 eligible | $0.00 | **$0.00** |
-| $50.00 boundary | $0.00 | **$0.00** |
-| $35.00 control | $9.00 | **$9.00** |
+- [Why Kane CLI](https://tryoutkern.vercel.app/why-kane)
+- [Closed loop and agent gate](https://tryoutkern.vercel.app/repair/2026-11-22T00-53-05-669Z-f5230a)
+- [Gate and six-patch gauntlet](https://tryoutkern.vercel.app/gate)
+- [Pre-repair X-Ray](https://tryoutkern.vercel.app/audits/2026-11-22T00-53-05-669Z-f5230a)
+- [Post-repair X-Ray](https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993)
+- [Promise Receipt](https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993/receipt)
+- [All runs](https://tryoutkern.vercel.app/runs)
 
-Every assert exited 0; every evidence pack is present.
+The $60 pre-repair row is a provided real Kane capture; the $50 and $35 pre-repair rows are live. A separate live $60 audit in the local `.data/` evidence repeats the observation. The post-repair audit is all live.
 
-The four numbers: **$60 → $9.00 (promised $0.00)** and **$35 → $9.00 (promised $9.00)** before the repair; **$60 → $0.00** and **$35 → $9.00** after it. The exact $50 boundary also moved from $9.00 to $0.00.
+## How the loop works
 
-The $60 row in the full pre-repair audit is a provided real Kane capture; the live replacement `2026-11-23T12-27-07-978Z-a0c39f` repeats the $60.00/$9.00 observation with process exit codes. The $50 and $35 rows are live in the full audit. The post-repair audit is all live.
-
-Full session/exits/reason/evidence ledger: [`docs/proof-ledger.md`](docs/proof-ledger.md).
-
-![Campaign: ad snapshot, merchant interpretation, frozen contract and latest audit](docs/screenshots/01-campaign.png)
-
-![Journey X-Ray: promised versus observed, with Kane's confirmed verdict](docs/screenshots/02-journey-x-ray.png)
-
-*Real captures from the live local app on 2026-11-23. A public clone shows the recorded-audit banner instead.*
-
-## The closed loop
-
-The repair is the committed one-line diff. The post-repair audit answers the pre-repair audit and compares all six objective hashes; none moved.
-
-![Closed-loop view: failed verdict, the actual git diff, and the unchanged rerun](docs/screenshots/03-closed-loop.png)
-
-## Judge it in five minutes
-
-```bash
-npm install && npm test && npm run demo
+```text
+ad + merchant terms
+        │
+        ▼
+frozen promise contract ─── policy source for the $9 baseline
+        │
+        ▼
+eligible · boundary · control carts
+        │
+        ▼
+Kane CLI observes the real rendered checkout
+        │
+        ▼
+deterministic oracle decides promised vs observed
+        │
+        ▼
+Pi patches the real source within a bounded brief
+        │
+        ▼
+human approval
+        │
+        ▼
+Kane reruns the same six objectives
+        │
+        ▼
+6/6 objective hashes match → gate opens → receipt
 ```
 
-`npm run demo` starts the recorded-audit app on **http://127.0.0.1:3000** and the real repaired demo store on **http://127.0.0.1:4173**, then opens both. It does not start Kane and does not need a Kane account.
+The agent never decides whether the fix worked. The oracle owns the expectation. Kane owns the browser observation and the independent rerun. The gate owns whether the patch may ship.
 
-**The app works with no Kane account.** It ships sanitized copies of the two real audits in [`recorded/`](recorded/README.md). If `.data/audits` is absent — a public clone — the app reads `recorded/` and shows a visible banner on every recorded page: **“Recorded audit: replay of real runs, not a live session.”** No mock data is substituted. On the recording machine, `.data/audits` exists and the app prefers the live records.
+## Why Kane is the center
 
-What to click:
+Kane is the only component that opens the customer checkout and reads the rendered quote. A unit test can agree with the bug. A screenshot can hide the number. Kane reads the line the customer sees.
 
-1. `/` — the reference-style landing page. Use **Open the demo app**, **Read the README**, the three test cards and the **Everything is open** links. The demo app is `/campaign`.
-2. `/campaign` — the above-the-fold loop band (**Kane found $9.00 → Pi changed one line → Kane re-ran 6/6, gate open**), then the ad snapshot, the merchant's interpretation, the frozen contract, the policy source behind $9.00, the three carts, and the latest audit.
-3. **Gate** — the evidence gate, the exact promised/observed table, and the six-patch gauntlet: only the correct fix passes all three carts.
-4. **Audits** — every readable audit, newest first, with status, source, post-repair provenance, runs and credits.
-5. **Runs** — every real Kane run, grouped by audit, with session, exit, result, credits, evidence hash and verdict. On the read-only deployment this page carries the operator-machine note and no run controls.
-6. **`2026-11-22T00-53-05-669Z-f5230a`** — Journey X-Ray: $60 Promised $0.00 / Observed $9.00, Kane's confirmed verdict; the $50 boundary and $35 control follow.
-7. **Closed loop** — the actual `git diff ed3dbaf HEAD -- src/lib/shipping.ts`, then the post-repair audit and the 6/6 objective-hash comparison.
-8. **`2026-11-23T12-35-29-692Z-48b993` → Promise Receipt** — the scoped status, contract hash, pre-repair audit id, per-scenario and per-run evidence, and the “what this does not prove” section.
+Kane has three jobs:
 
-The public storefront is **https://tryoutkern.vercel.app/store/**. A 3:30–4:00 recording plan is in [`docs/demo-script.md`](docs/demo-script.md), including the static before/after toggle and the optional operator panel.
+1. **Observe** the actual rendered subtotal and shipping quote.
+2. **Carry the evidence**: terminal `run_end`, exit code, final state and evidence hash.
+3. **Rerun the unchanged objectives** after the repair.
 
-## Run it yourself with Kane
+Kern's job is the loop around the witness: freeze the promise, define the boundary and control carts, own the deterministic oracle, block the agent, and scope the receipt.
 
-This is the second path, and it spends credits. A full three-scenario audit is six Kane runs and costs **roughly 140 credits**. The recorded runs reported 117–142 credits; exact per-run values are in each `audit.json`. The balance at recording time was **4,796.83**.
+This is not a Kane wrapper. Remove Kane and the loop loses the only independent view of the customer checkout. That is why Kane is not a logo in the footer.
+
+## Try it in two minutes
+
+With no account and no Kane run:
+
+- Open the [live landing](https://tryoutkern.vercel.app).
+- Open the [demo app](https://tryoutkern.vercel.app/campaign).
+- Read [Why Kane CLI](https://tryoutkern.vercel.app/why-kane).
+- Inspect the [gate](https://tryoutkern.vercel.app/gate) and the [promise receipt](https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993/receipt).
+
+The public site is a static export of **recorded** evidence. It does not start Kane and it does not need a Kane account. Every recorded page carries the banner:
+
+> **Recorded audit: replay of real runs, not a live session.**
+
+On your machine, with no Kane account:
 
 ```bash
-kane-cli login        # OAuth, or username/access-key
-kane-cli whoami       # must say Authenticated
-npm start             # store on 4173; leave it running
+git clone https://github.com/kaelah971/kern
+cd kern
+npm install
+npm test
+npm run demo
+```
+
+`npm run demo` starts the recorded-audit app on `http://127.0.0.1:3000` and the real repaired store on `http://127.0.0.1:4173`, then opens both. It starts no Kane run.
+
+## The gate
+
+```bash
+npm run gate
+npm run gate -- --audit recorded/2026-11-23T12-35-29-692Z-48b993/audit.json
+npm run gate -- --audit recorded/2026-11-22T00-53-05-669Z-f5230a/audit.json
+npm run --silent gate -- --json
+npm run gate -- --run
+```
+
+The gate reads a completed audit against the current frozen contract. It checks the contract hash, all three carts, observed values, live sources, exit codes and evidence presence. It does not trust `overallStatus` alone.
+
+| Result | Exit code |
+|---|---:|
+| Gate open | `0` |
+| Gate closed | `1` |
+| Usage or infrastructure error | `2` |
+
+A coding agent can use it as a stop gate:
+
+```bash
+npm run gate -- --audit <audit.json> || exit 1
+```
+
+The gate does not start Kane unless you pass `--run`. With `--run`, it invokes the real audit first and then evaluates the result.
+
+## The patch gauntlet
+
+The `/gate` page evaluates six candidate repairs against the same contract, boundary and control:
+
+| Patch | Result |
+|---|---|
+| Correct cents comparison | **SHIP** |
+| Make all shipping free | **REJECT** — fails the $35 control |
+| Free only at $60+ | **REJECT** — fails the $50 boundary |
+| Label the charge as Free | **REJECT** — the charge is still $9.00 |
+| Fix the threshold, free the control | **REJECT** — breaks the control |
+| The audited pre-repair rule | **REJECT** — fails $60 and $50 |
+
+The gauntlet is labelled as deterministic contract coverage, not a new Kane browser run. The real Kane evidence is the linked pre/post audits.
+
+## Promise Receipt
+
+The receipt is the scoped record of what happened:
+
+- the contract id and SHA-256;
+- the pre-repair audit it answers;
+- promised vs observed per cart;
+- the actual patch that passed and the human merge;
+- 6/6 unchanged objective hashes;
+- the gate status;
+- every run's session, exit, result, reason and evidence SHA-256;
+- what this does **not** prove.
+
+It is **hash-linked, not signed or certified**. It says “verified for the tested conditions at the recorded time,” not “this store honors all ads.”
+
+## Contract compiler and preview gate
+
+The contract compiler is a **local operator tool** at `/compile`:
+
+```bash
+npm run app
+# open http://127.0.0.1:3000/compile
+```
+
+It takes the ad snapshot, merchant interpretation, threshold, destination, policy source and approver; validates them; generates the eligible, boundary and control cart plan; freezes the canonical contract; and writes it under `.data/contracts/`.
+
+The public deployment returns **404** for `/compile`. There is no public write path and no fake form.
+
+Use a compiled contract against a preview:
+
+```bash
+node scripts/kane-audit.ts \
+  --contract .data/contracts/<id>.json \
+  --url https://preview.example
+
+npm run gate -- \
+  --contract .data/contracts/<id>.json \
+  --run --url https://preview.example
+```
+
+The audit objectives point at the preview; the contract and gate still judge. The preview must expose the three generated carts. The local demo store is fixed at $60/$50/$35; the compiler warns when a generated plan does not match the local fixture.
+
+## Agent hook
+
+Claude Code can use the Stop hook:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/claude-code-stop.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The hook evaluates the newest audit under `.data/audits` or `recorded/`; set `KERN_AUDIT_PATH` / `KERN_CONTRACT_PATH` for a specific audit. A closed gate returns a Claude Code `block` decision. It does not start Kane.
+
+Pi and any other agent use the same exit contract:
+
+```bash
+npm run gate -- --audit <audit.json> || exit 1
+```
+
+## Run a real Kane audit
+
+This spends credits. The recorded evidence was produced with **Kane CLI 0.10.6**; do not upgrade mid-evidence. The balance at recording time was **4,796.83**.
+
+```bash
+kane-cli login
+kane-cli whoami
+npm start                       # store on 127.0.0.1:4173
 # in another terminal:
 node scripts/kane-audit.ts
 ```
 
-`0.10.6` was used; do not upgrade mid-evidence. The CLI writes `.data/audits/<auditId>/audit.json`, copies the real `.evidence` packs, and the app prefers those files. The public/recorded app never starts Kane. On the operator machine only, `KERN_LIVE=1 npm run app` adds a local check panel that spawns the same audit script; it is disabled on the public deployment and is not part of the recorded demo.
+A full three-scenario audit is six Kane runs and costs roughly 140 credits. A cheap smoke run is:
 
-A cheap smoke run is `node scripts/kane-audit.ts --scenario control-35 --kind observe` (one run, roughly 20 credits).
+```bash
+node scripts/kane-audit.ts --scenario control-35 --kind observe
+```
 
-## What is built
+The CLI writes `.data/audits/<auditId>/audit.json`, copies the real `.evidence` packs and stores the objective and artifact hashes. The public recorded bundle keeps the evidence SHA-256 values, not the `.evidence` files.
 
-- One local storefront on 4173 with server-calculated shipping, three deterministic carts, and no payment fields.
-- A frozen promise contract with SHA-256, a deterministic oracle, and boundary tests at 4,999 / 5,000 / 5,001 cents.
-- A two-run Kane audit engine (observe + assert), strict NDJSON/USD parsing, fail-closed statuses, evidence copy and hash.
-- A bounded repair and an unchanged post-repair audit gated by all six objective hashes. The `/repair` page shows the mixed evidence chain: exact failure → Pi's bounded scope → actual commit → human merge → unchanged Kane rerun → gate.
-- A public/recorded read-only app on 3000: campaign, gate, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff. **90/90 tests pass.**
-- `npm run demo` — one command starts the recorded app and the repaired store and opens both; no Kane account or credits needed.
-- An operator-only local check panel (`KERN_LIVE=1`): fixed scenarios, one child at a time, balance/store guards, and a real audit link when a check completes. The public deployment returns 404.
-- `/gate` — the evidence gate and a six-patch gauntlet. The correct repair passes all three carts; all-free, $60-only, UI-only, control-regression and the audited pre-repair rule are rejected. The page labels the gauntlet as contract coverage, not a new Kane run.
-- `npm run gate` — a real gate CLI. It exits `0` only when the audit is open, with `--audit`, `--contract`, `--url`, `--json`, and an explicit `--run` that spends Kane credits. The coding agent can use the exit code as a stop hook.
-- `/compile` — local-only contract compiler. The merchant enters ad, interpretation, threshold, destination, policy source and approver; Kern freezes a contract, hashes it, writes it under `.data/contracts/`, and generates the eligible, boundary and control cart plan. The public site returns 404.
-- Preview support: `kane-audit.ts --contract <path> --url <preview>` and `npm run gate -- --contract <path> --run --url <preview>` — the browser objectives point at the preview; the contract and gate still judge. No preview is called in the recorded demo.
-- `hooks/claude-code-stop.mjs` — a sample Stop hook: a closed Kern gate returns a Claude Code block decision; Pi can use `npm run gate -- --audit <path> || exit 1`.
-- `/runs` — every real Kane run in the audit JSON, newest first, grouped by audit; 15 locally with `.data`, 12 in the two-audit `recorded/` bundle.
-- `/store/` — static demo storefront with three fixed cart quotes; `/store/<cart>` shows the quote and the recorded "What Kern saw" values. No add-to-cart or checkout POST is exported.
-- `/store/before/<cart>` — the audited `ed3dbaf` revision's quotes, labelled **“The revision Kern audited”**; the current pages link to it under **“After the repair.”** The before page states that it is not the current store.
-- Public `recorded/` copies, a restore-safe pre-repair replay, and a pre-repair store runner for filming.
+## Evidence ledger
 
-## What is not built
+| Audit | Result | Runs | Credits | Notes |
+|---|---|---:|---:|---|
+| `2026-11-22T00-53-05-669Z-f5230a` | BROKEN | 6 | 141.999039 | pre-repair; $60 row is a provided real capture; $50/$35 live |
+| `2026-11-23T12-35-29-692Z-48b993` | HONORED | 6 | 117.137467 | post-repair; all live; 6/6 objective hashes |
+| **Recorded total** | | **12** | **259.14** | public bundle |
 
-- A general campaign wizard beyond the local contract compiler.
-- Automated in-app coding-agent repair or approval UI. The repair was terminal-driven by Pi; the actual commit, scope and gate are shown as evidence, with no invented transcript.
-- Database, auth, or multi-tenancy.
-- Public/hosted live Kane execution. The local operator-only check exists; the public site is read-only.
-- Screenshot viewer or fabricated evidence imagery.
-- Signed or certified receipts.
+The local `.data/` evidence has more runs, including a live $60 replacement audit. The public site intentionally exports the two canonical audits and labels them as recorded. See [`docs/proof-ledger.md`](docs/proof-ledger.md) for sessions, exits, reasons, evidence hashes and spend.
+
+## Tests
+
+```bash
+npm test                 # 90/90
+npm run typecheck
+npm run verify:vercel    # static export in a different cwd
+```
+
+The suite covers the oracle boundary at 4,999 / 5,000 / 5,001 cents, the real cart maths, the audit parser and fail-closed statuses, the recorded fallback, the repair gate, the six-patch gauntlet, the contract compiler, the preview objectives and the agent hook. The pre-repair replay characterization is excluded from the default glob and runs with `npm run demo:replay-pre-repair`.
+
+## Repository layout
+
+```text
+src/app/          read-only proof app, live-check controller, gate/compiler UI
+src/lib/          contract, oracle, cart, shipping, audit engine, gate, Kane adapter
+scripts/          export, demo, gate, audit, replay and verification scripts
+hooks/            Claude Code Stop-hook adapter
+tests/            node:test suite, fixtures, excluded replay characterization
+contracts/        frozen demo promise
+recorded/         sanitized real audits used by the public static site
+site/             static export and Vercel project config
+docs/             proof ledger, architecture, decisions, demo script, deployment
+```
+
+The public site is a static export of the app plus the storefront:
+
+```bash
+npm run app:recorded      # recorded app on :3300
+npm run export:static     # writes 18 pages under site/
+cd site && vercel --prod --yes
+```
+
+The local app is `npm run app`; the one-command demo is `npm run demo`.
 
 ## Limitations
 
-- One owned demo store, one promise type (`free_shipping_threshold`), USD/US only, standard shipping.
-- The evidence is **hash-linked, not signed or certified**. The receipt says “verified for the tested conditions at the recorded time” and explicitly lists what it does not prove.
-- **Boundary-50 recording quirk:** the pre-repair boundary assert has an empty `final_state`; the observed `$9.00` is only in the run's `context.memory`. The parser reads that recorded value; the raw NDJSON remains the source of truth, and `tests/boundary-50.test.ts` pins it. Kane's boundary verdict describes the boundary rule, while the actual code defect was the `* 100` cents/dollars error. Treat the verdict as an observation, not a code diagnosis.
-- Recorded copies keep the evidence SHA-256 values but not the `.evidence` files. A live `.data` audit keeps the files.
-- A public clone uses `recorded/`; live `.data` evidence is local and gitignored.
+- One owned demo store, one promise type (`free_shipping_threshold`), USD/US, standard shipping.
+- The public live site is static recorded evidence. Real Kane execution is local and operator-controlled.
+- The public site does not expose a live Kane runner. The operator-only check is gated by `KERN_LIVE=1`.
+- The repair was terminal-driven by Pi and human-approved. It was not an in-app autonomous repair.
+- Evidence is **hash-linked, not signed or certified**.
+- Recorded copies keep evidence SHA-256 values, not the `.evidence` files.
+- The store stops at the shipping quote. There are no payment fields, no card data and no order submission.
+- The contract compiler is local-only; the public `/compile` route is 404.
 
-## History
+## Why this is different
 
-The buggy revision is reachable at `ed3dbaf`. Replay the defect without rewriting history:
+Most browser-agent tools test whether the app still works. Kern tests whether the customer still gets the promise the ad made, at the exact boundary, without overcorrecting the control.
 
-```bash
-git checkout ed3dbaf -- src/lib/shipping.ts
-npm start
-# the $60 cart is charged $9.00 again
-git checkout HEAD -- src/lib/shipping.ts
-```
+The defensible combination is:
 
-`npm run demo:store-pre-repair` does the swap, prints **“PRE-REPAIR REVISION — seeded defect active”**, serves the store on 4173, and restores the fixed file when stopped. Narrate it as the revision that was audited, not a live audit.
+- the ad is the input, not a test script;
+- the merchant’s interpretation is frozen separately;
+- the $9 baseline has a separate policy source;
+- the $50 boundary and $35 control make the result falsifiable;
+- Kane is the independent rendered-checkout witness;
+- the same six objective hashes gate the repair;
+- the result is a scoped evidence record, not a confidence score.
 
-The pre-repair characterization lives at `tests/replay/pre-repair.test.ts` and is excluded from `npm test`; `npm run demo:replay-pre-repair` restores `ed3dbaf`, runs only that file, restores the current file, and verifies the hash.
+## License
 
-## Deeper docs
+MIT. See [LICENSE](LICENSE).
 
-- [`docs/proof-ledger.md`](docs/proof-ledger.md) — real runs, sessions, exits, reasons, evidence hashes, spend.
-- [`docs/decisions.md`](docs/decisions.md) — scope, boundary, claim rules.
-- [`docs/demo-script.md`](docs/demo-script.md) — 3:30 shot list.
-- [`hooks/README.md`](hooks/README.md) — Claude Code Stop-hook adapter and the Pi command.
-- [`docs/vercel.md`](docs/vercel.md) — read-only Vercel deployment, audit-root resolution, simulation result.
-- [`docs/publish.md`](docs/publish.md) — publication commands, scan findings, post drafts.
-- [`recorded/README.md`](recorded/README.md) — what was stripped, how to verify the originals.
-- [`LICENSE`](LICENSE) — MIT.
+## Links
+
+- [Live proof](https://tryoutkern.vercel.app)
+- [Demo app](https://tryoutkern.vercel.app/campaign)
+- [Why Kane CLI](https://tryoutkern.vercel.app/why-kane)
+- [Gate](https://tryoutkern.vercel.app/gate)
+- [Audits](https://tryoutkern.vercel.app/audits)
+- [Runs](https://tryoutkern.vercel.app/runs)
+- [Storefront](https://tryoutkern.vercel.app/store/)
+- [Audited storefront](https://tryoutkern.vercel.app/store/before/eligible-60)
+- [GitHub repository](https://github.com/kaelah971/kern)
+- [Proof ledger](docs/proof-ledger.md)
+- [Architecture](docs/architecture.md)
+- [Decisions](docs/decisions.md)
+- [Deployment](docs/vercel.md)
+- [Demo script](docs/demo-script.md)
