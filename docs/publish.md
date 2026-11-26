@@ -11,7 +11,7 @@ git ls-files .data .testmuai
 git ls-files recorded
 ```
 
-- `npm test` must be green (61 tests at the time of writing; the replay
+- `npm test` must be green (currently **78 tests**; the replay
   characterization is excluded and runs via `npm run demo:replay-pre-repair`).
 - `git status` must be clean.
 - `git ls-files .data .testmuai` must print nothing.
@@ -21,8 +21,9 @@ git ls-files recorded
 
 ## 1b. Clean-clone verification (2026-11-23)
 
-Run from `C:\dev\kern` at commit `515e6cf` (before the fixture sanitation and
-screenshot layout fixes; the recorded fallback is unchanged in substance):
+Run from `C:\dev\kern` at commit `515e6cf` (before the fixture sanitation,
+static export, storefront and operator check; the recorded fallback is
+unchanged in substance). The current suite is **78/78**.
 
 ```bash
 git clone . ../kern-clone-verify
@@ -35,7 +36,7 @@ PORT=3100 npm run app
 Result:
 
 - `.data` absent in the clone.
-- `npm test`: **61 tests, 61 pass, 0 fail**.
+- This historical clone predates the static storefront and operator check. The current suite is **78 tests, 78 pass, 0 fail**.
 - `GET /health`: `{"ok":true,"app":"kern","auditRoot":"C:\\dev\\kern-clone-verify\\recorded","auditSource":"recorded"}`.
 - `/` 200 with the recorded banner; `/audits` 200 with the banner and exactly
   the two canonical audit IDs.
@@ -97,6 +98,14 @@ git remote set-url origin git@github.com:<your-github-user>/kern.git
 git push -u origin main
 ```
 
+The public proof site is **https://kern-site-mocha.vercel.app** and the
+storefront is **https://kern-site-mocha.vercel.app/store/**. The operator-only
+live check is local; the public site returns 404 for `/check/*`.
+
+For the submission “about” field: the coding agent was **Pi** (terminal-driven),
+Kane CLI did the real browser observation and assertion runs, and the deterministic
+oracle decided the verdict. The repair was not an in-app autonomous repair.
+
 After the push, verify the public clone:
 
 ```bash
@@ -135,8 +144,11 @@ Open the GitHub repository page and confirm:
 > audit; every assert exited 0.
 >
 > The app replays recorded copies of the two audits, so you can inspect the
-> X-Ray, the diff and the receipt without a Kane account:
-> [repo link]
+> X-Ray, the agent gate, the diff and the receipt without a Kane account. The
+> public storefront is a static export of the same fixture at
+> https://kern-site-mocha.vercel.app/store/ (current) and
+> https://kern-site-mocha.vercel.app/store/before/eligible-60 (the audited
+> revision): [repo link]
 >
 > Limits: one demo store, one promise type, USD/US; evidence is hash-linked,
 > not signed; verified for the tested conditions, not certified.

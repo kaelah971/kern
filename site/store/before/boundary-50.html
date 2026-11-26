@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shipping quote · Kern Supply Co.</title>
+<style>
+:root {
+  --paper: #f5efe4;
+  --paper-2: #fbf7ef;
+  --ink: #201c16;
+  --muted: #6d6252;
+  --line: #d8cbb6;
+  --accent: #a93f24;
+  --accent-dark: #7e2b16;
+  --accent-surface: #f6e4dc;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255,255,255,.65), transparent 34rem),
+    var(--paper);
+}
+a { color: inherit; }
+.demo-banner {
+  background: var(--ink);
+  color: var(--paper-2);
+  border-bottom: 4px solid var(--accent);
+  padding: .55rem 1rem;
+  text-align: center;
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: .035em;
+}
+.site-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.wordmark {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  letter-spacing: .16em;
+  text-decoration: none;
+  font-weight: 700;
+}
+.wordmark span {
+  display: block;
+  font-family: var(--sans);
+  font-size: .58rem;
+  letter-spacing: .34em;
+  color: var(--muted);
+  font-weight: 500;
+}
+nav { display: flex; gap: 1.25rem; font-size: .9rem; }
+nav a { text-decoration: none; border-bottom: 1px solid transparent; }
+nav a:hover { border-bottom-color: var(--ink); }
+main { max-width: 1080px; margin: 0 auto; padding: 2.25rem 1.25rem 4rem; }
+h1, h2, h3 { font-family: var(--serif); line-height: 1.15; font-weight: 600; }
+h1 { font-size: clamp(2rem, 4vw, 2.9rem); margin: 0 0 1rem; }
+h2 { font-size: 1.45rem; margin: 0 0 .75rem; }
+h3 { font-size: 1.15rem; margin: 0 0 .35rem; }
+p { margin: 0 0 1rem; }
+.promise {
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--accent);
+  background: var(--paper-2);
+  padding: .95rem 1.1rem;
+  font-size: .98rem;
+  margin-bottom: 2.25rem;
+}
+.promise strong { white-space: nowrap; }
+.intro { max-width: 42rem; color: var(--muted); }
+.demo-carts {
+  margin: 2rem 0 2.5rem;
+  padding: 1.25rem;
+  border: 1px dashed var(--line);
+  background: rgba(255,255,255,.28);
+}
+.demo-carts h2 { font-size: 1.1rem; margin-bottom: .25rem; }
+.demo-carts p { color: var(--muted); font-size: .9rem; margin-bottom: 1rem; }
+.preset-row { display: flex; flex-wrap: wrap; gap: .6rem; }
+.preset-row form { margin: 0; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+.card {
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+.swatch {
+  height: 132px;
+  margin: -.25rem -.25rem 1rem;
+  background: var(--swatch);
+  border: 1px solid rgba(32,28,22,.12);
+}
+.card p { color: var(--muted); font-size: .9rem; flex: 1; }
+.price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+.card .price { margin-bottom: .85rem; }
+button, .button {
+  display: inline-block;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper-2);
+  font: inherit;
+  font-size: .88rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  padding: .55rem .95rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+button:hover, .button:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+button.secondary {
+  background: transparent;
+  color: var(--ink);
+  font-weight: 500;
+}
+button.secondary:hover { background: var(--ink); color: var(--paper-2); }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { text-align: left; padding: .8rem .5rem; border-bottom: 1px solid var(--line); }
+th { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.subtotal-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem .5rem;
+  border-bottom: 1px solid var(--line);
+  font-weight: 600;
+}
+.actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem; }
+.summary {
+  max-width: 34rem;
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  padding: 1.25rem;
+  margin: 1.75rem 0 1.25rem;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid rgba(216,203,182,.65);
+}
+.summary-row:last-child { border-bottom: 0; }
+.summary-row.total { font-weight: 700; font-size: 1.05rem; padding-top: .9rem; }
+.summary-row .amount { font-variant-numeric: tabular-nums; }
+.line-items { margin: 0 0 .75rem; padding: 0 0 .75rem; border-bottom: 1px solid var(--line); }
+.line-item { display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; color: var(--muted); padding: .2rem 0; }
+.kern-saw {
+  max-width: 34rem;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--accent);
+  background: var(--paper-2);
+  padding: 1.1rem 1.2rem;
+  margin: 1.5rem 0 1.25rem;
+}
+.kern-saw h2 { font-size: 1.1rem; margin: 0 0 .6rem; }
+.kern-saw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .75rem;
+  margin: .75rem 0;
+}
+.kern-saw-grid dt {
+  font-size: .66rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+.kern-saw-grid dd {
+  margin: .15rem 0 0;
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+.kern-saw .verdict-text { font-family: var(--sans); font-size: .9rem; font-weight: 700; letter-spacing: .06em; }
+.kern-saw .source { margin: 0; font-size: .82rem; color: var(--muted); }
+.revision-toggle {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .45rem;
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  padding: .35rem .45rem;
+  margin: 0 0 1rem;
+  font-size: .82rem;
+}
+.revision-toggle > span { color: var(--muted); padding: 0 .25rem; }
+.revision-toggle a {
+  text-decoration: none;
+  padding: .3rem .6rem;
+  border: 1px solid transparent;
+}
+.revision-toggle a[aria-current="page"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper-2);
+  font-weight: 600;
+}
+.revision-note {
+  max-width: 34rem;
+  border: 1px solid var(--accent);
+  background: var(--accent-surface);
+  padding: .75rem .9rem;
+  margin: 0 0 1.25rem;
+  font-size: .86rem;
+}
+.stop-note {
+  max-width: 34rem;
+  border-left: 3px solid var(--accent);
+  padding: .25rem 0 .25rem .85rem;
+  color: var(--muted);
+  font-size: .88rem;
+}
+.empty { color: var(--muted); padding: 1.5rem 0; }
+footer {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .78rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+</style>
+</head>
+<body>
+<div class="demo-banner" role="note">Demo storefront. Not a real shop. This is the fixture Kern checks.</div>
+<header class="site-header">
+  <a class="wordmark" href="/store/">KERN<span>SUPPLY CO.</span></a>
+  <nav><a href="/store/">Shop</a><a href="/">Kern proof site</a></nav>
+</header>
+<main>
+<h1>Shipping quote</h1>
+<p class="intro">US destination · standard shipping · USD</p>
+<nav class="revision-toggle" aria-label="Store revision">
+  <span>Revision</span>
+  <a href="/store/boundary-50">After the repair</a>
+  <a href="/store/before/boundary-50" aria-current="page">The revision Kern audited</a>
+</nav>
+<div class="revision-note" role="note">You are viewing the pre-repair revision that Kern audited. It is not the current store.</div>
+<div class="summary">
+  <div class="line-items">
+<div class="line-item">
+  <span>Kern Studio Apron × 1</span>
+  <span>$50.00</span>
+</div>
+  </div>
+  <div class="summary-row">
+    <span>Merchandise subtotal (after discounts)</span>
+    <span class="amount" data-testid="subtotal" data-subtotal-cents="5000">$50.00</span>
+  </div>
+  <div class="summary-row">
+    <span>Shipping — Standard (3–5 business days)</span>
+    <span class="amount" data-testid="shipping-quote" data-shipping-cents="900">$9.00</span>
+  </div>
+  <div class="summary-row total">
+    <span>Total before tax</span>
+    <span class="amount" data-testid="total" data-total-cents="5900">$59.00</span>
+  </div>
+</div>
+<section class="kern-saw" aria-labelledby="kern-saw-heading">
+  <p class="eyebrow" style="font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 .35rem">From the recorded audit</p>
+  <h2 id="kern-saw-heading">What Kern saw</h2>
+  <dl class="kern-saw-grid">
+    <div><dt>Promised</dt><dd data-kern-saw-promised-cents="0">$0.00</dd></div>
+    <div><dt>Observed</dt><dd data-kern-saw-observed-cents="900">$9.00</dd></div>
+    <div><dt>Verdict</dt><dd class="verdict-text">BROKEN</dd></div>
+  </dl>
+  <p class="source">Recorded pre-repair audit · <a href="/audits/2026-11-22T00-53-05-669Z-f5230a#scenario-boundary-50">2026-11-22T00-53-05-669Z-f5230a</a></p>
+</section>
+<p class="stop-note">This demo stops at the shipping quote. There are no payment fields, no card data, and no order is placed.</p>
+<div class="actions">
+  <a class="button secondary" href="/store/">Back to demo store</a>
+</div>
+</main>
+<footer>
+  <span>Kern Supply Co. static demo storefront · not a real shop</span>
+  <span>Checkout stops at the shipping quote. No payment, no order.</span>
+</footer>
+</body>
+</html>

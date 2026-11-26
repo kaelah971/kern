@@ -5,6 +5,10 @@
  * templates and the cart totals come from CartStore + getStandardShippingCents,
  * not from labels or query parameters. The "What Kern saw" values come from
  * the committed recorded audits.
+ *
+ * The current pages are written to site/store/. The pre-repair pages are
+ * written to site/store/before/ by running this script with --before while the
+ * audited shipping.ts revision is swapped into place.
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -20,6 +24,8 @@ import {
   type AuditSummary,
 } from '../src/app/audits.ts';
 
+export type StoreVariant = 'current' | 'before';
+
 export type StorePage = {
   path: string;
   file: string;
@@ -34,12 +40,14 @@ export type StoreExportResult = {
   siteDir: string;
   pages: StorePage[];
   auditId: string;
-  indexFile: string;
+  indexFile: string | null;
+  variant: StoreVariant;
 };
 
 export type StoreExportOptions = {
   siteDir?: string;
   repoRoot?: string;
+  variant?: StoreVariant;
 };
 
 function findPostRepairAudit(root: string): AuditSummary {
@@ -51,34 +59,62 @@ function findPostRepairAudit(root: string): AuditSummary {
   return post;
 }
 
+function findPreRepairAudit(root: string, post: AuditSummary): AuditSummary {
+  const index = loadAudits(root);
+  const pre =
+    index.audits.find((summary) => summary.audit.auditId === post.audit.answersAuditId) ??
+    index.audits.find(
+      (summary) =>
+        summary.audit.postRepair !== true && summary.audit.overallStatus === 'BROKEN',
+    );
+  if (!pre) {
+    throw new Error(`No pre-repair recorded audit answers ${post.audit.auditId}`);
+  }
+  return pre;
+}
+
 /**
- * Render and write the three fixed cart pages plus the store index.
- * Returns the exact quotes that were exported so tests can assert them.
+ * Render and write the three fixed cart pages. The current variant also writes
+ * the store index. Returns the exact quotes that were exported so tests can
+ * assert them.
  */
 export function exportStore(options: StoreExportOptions = {}): StoreExportResult {
   const repoRoot = options.repoRoot ?? process.cwd();
   const siteDir = options.siteDir ?? join(repoRoot, 'site');
   const storeDir = join(siteDir, 'store');
+  const variant = options.variant ?? 'current';
   const recordedRoot = recordedAuditRoot(repoRoot);
   const post = findPostRepairAudit(recordedRoot);
+  const audit = variant === 'before' ? findPreRepairAudit(recordedRoot, post) : post;
+  const outDir = variant === 'before' ? join(storeDir, 'before') : storeDir;
 
-  rmSync(storeDir, { recursive: true, force: true });
-  mkdirSync(storeDir, { recursive: true });
+  if (variant === 'before') {
+    rmSync(outDir, { recursive: true, force: true });
+    mkdirSync(outDir, { recursive: true });
+  } else {
+    rmSync(storeDir, { recursive: true, force: true });
+    mkdirSync(outDir, { recursive: true });
+  }
 
-  const indexHtml = renderHome(0, { staticExport: true });
-  const indexFile = join(storeDir, 'index.html');
-  writeFileSync(indexFile, indexHtml, 'utf8');
+  let indexFile: string | null = null;
+  if (variant === 'current') {
+    const indexHtml = renderHome(0, { staticExport: true });
+    indexFile = join(outDir, 'index.html');
+    writeFileSync(indexFile, indexHtml, 'utf8');
+  }
 
   const pages: StorePage[] = [];
 
   for (const preset of Object.values(PRESET_CARTS)) {
-    const scenario = post.audit.scenarios.find((item) => item.scenarioId === preset.id);
+    const scenario = audit.audit.scenarios.find((item) => item.scenarioId === preset.id);
     if (!scenario) {
-      throw new Error(`Recorded audit ${post.audit.auditId} has no ${preset.id} scenario`);
+      throw new Error(`Recorded audit ${audit.audit.auditId} has no ${preset.id} scenario`);
     }
     const observedCents = scenario.oracle.observedShippingCents;
     if (typeof observedCents !== 'number') {
-      throw new Error(`Recorded audit ${post.audit.auditId} has no observed shipping for ${preset.id}`);
+      throw new Error(
+        `Recorded audit ${audit.audit.auditId} has no observed shipping for ${preset.id}`,
+      );
     }
 
     const carts = new CartStore();
@@ -92,7 +128,7 @@ export function exportStore(options: StoreExportOptions = {}): StoreExportResult
 
     if (shippingCents !== observedCents) {
       throw new Error(
-        `Current store quote for ${preset.id} is ${formatUsd(
+        `Store quote for ${preset.id} is ${formatUsd(
           shippingCents,
         )}, but the recorded audit observed ${formatUsd(
           observedCents,
@@ -102,7 +138,7 @@ export function exportStore(options: StoreExportOptions = {}): StoreExportResult
 
     const promisedCents = scenario.oracle.expectedShippingCents;
     const auditUrl = `/audits/${encodeURIComponent(
-      post.audit.auditId,
+      audit.audit.auditId,
     )}#scenario-${encodeURIComponent(preset.id)}`;
     const html = renderCheckout(
       {
@@ -118,27 +154,35 @@ export function exportStore(options: StoreExportOptions = {}): StoreExportResult
           promisedCents,
           observedCents,
           verdict: scenario.status,
-          auditId: post.audit.auditId,
+          auditId: audit.audit.auditId,
           auditUrl,
-          auditLabel: 'Recorded after-repair audit',
+          auditLabel:
+            variant === 'before'
+              ? 'Recorded pre-repair audit'
+              : 'Recorded after-repair audit',
+        },
+        revision: {
+          active: variant === 'before' ? 'before' : 'current',
+          currentHref: `/store/${preset.id}`,
+          beforeHref: `/store/before/${preset.id}`,
         },
       },
     );
 
-    const file = join(storeDir, `${preset.id}.html`);
+    const file = join(outDir, `${preset.id}.html`);
     writeFileSync(file, html, 'utf8');
     pages.push({
-      path: `/store/${preset.id}`,
+      path: variant === 'before' ? `/store/before/${preset.id}` : `/store/${preset.id}`,
       file,
       shippingCents,
       promisedCents,
       observedCents,
       verdict: scenario.status,
-      auditId: post.audit.auditId,
+      auditId: audit.audit.auditId,
     });
   }
 
-  return { siteDir, pages, auditId: post.audit.auditId, indexFile };
+  return { siteDir, pages, auditId: audit.audit.auditId, indexFile, variant };
 }
 
 const isMain =
@@ -146,8 +190,9 @@ const isMain =
 
 if (isMain) {
   try {
-    const result = exportStore();
-    console.log(`exported storefront index -> ${result.indexFile}`);
+    const variant = process.argv.includes('--before') ? 'before' : 'current';
+    const result = exportStore({ variant });
+    if (result.indexFile) console.log(`exported storefront index -> ${result.indexFile}`);
     for (const page of result.pages) {
       console.log(
         `  ${page.path} -> ${page.file} (shipping ${formatUsd(page.shippingCents)}, ${

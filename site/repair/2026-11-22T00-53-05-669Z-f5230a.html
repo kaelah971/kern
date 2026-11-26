@@ -408,6 +408,87 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .repair-col .scenario-head { padding: .7rem .8rem; }
 .repair-col .scenario-head h3 { font-size: 1rem; }
 .repair-col .verdict { padding: .8rem .9rem; }
+.agent-loop {
+  border: 1px solid var(--line-strong);
+  background: var(--paper-2);
+  padding: 1.2rem 1.25rem;
+  margin: 1.4rem 0 1.5rem;
+}
+.agent-loop-head { max-width: 58rem; }
+.agent-loop-head h2 { font-size: 1.6rem; margin: .2rem 0 .55rem; }
+.agent-loop-head .lede { margin-bottom: .8rem; }
+.agent-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .9rem;
+  margin-top: 1rem;
+}
+.agent-step {
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--paper-3);
+  padding: .9rem 1rem;
+}
+.agent-step h3 { font-size: 1.05rem; margin: .15rem 0 .55rem; }
+.step-number {
+  margin: 0 0 .35rem;
+  color: var(--accent-dark);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.repair-brief {
+  border: 1px dashed var(--line-strong);
+  background: rgba(255, 255, 255, .45);
+  padding: .65rem .8rem;
+  margin: .6rem 0;
+}
+.repair-brief p:last-child { margin-bottom: 0; }
+.agent-facts { display: grid; gap: .45rem; margin: .6rem 0; }
+.agent-facts div { min-width: 0; }
+.agent-facts dt, .agent-commit dt {
+  color: var(--muted);
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.agent-facts dd { margin: .1rem 0 0; overflow-wrap: anywhere; font-size: .82rem; }
+.agent-commit {
+  display: grid;
+  gap: .3rem;
+  border-top: 1px solid var(--line);
+  padding-top: .55rem;
+  margin: .55rem 0 0;
+}
+.agent-commit dd { margin: .1rem 0 0; overflow-wrap: anywhere; font-size: .82rem; }
+.agent-commit code { font-size: .78rem; }
+.repair-failure td, .repair-failure th { font-size: .78rem; }
+.repair-failure td { vertical-align: top; }
+.gate {
+  border: 1px solid var(--line-strong);
+  border-left: 6px solid var(--slate);
+  background: var(--slate-surface);
+  padding: .8rem 1rem;
+  margin: .8rem 0 0;
+}
+.gate--open {
+  border-left-color: var(--honored);
+  background: var(--honored-surface);
+}
+.gate--closed {
+  border-left-color: var(--warning);
+  background: var(--warning-surface);
+}
+.gate .panel-label { margin-bottom: .2rem; }
+.gate-status { font-size: 1.02rem; margin: 0 0 .3rem; }
+.gate-callout {
+  font-family: var(--serif);
+  font-size: 1.04rem;
+  margin: 0 0 .35rem;
+}
+.gate .meta { margin: 0; }
 .receipt {
   max-width: 940px;
   margin: 0 auto;
@@ -564,6 +645,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .live-cards { grid-template-columns: 1fr; }
   .contract-grid { grid-template-columns: 1fr 1fr; }
   .repair-grid { grid-template-columns: 1fr; }
+  .agent-steps { grid-template-columns: 1fr; }
   .live-facts { grid-template-columns: 1fr; }
   .lanes { grid-template-columns: 1fr; }
   .lane-rule { height: 1px; }
@@ -600,6 +682,88 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 <h1>What failed, what changed, what reran.</h1>
 <p class="lede">Pre-repair audit <a href="/audits/2026-11-22T00-53-05-669Z-f5230a">2026-11-22T00-53-05-669Z-f5230a</a>. The diff is read from git; the objective hashes are read from the audit artifacts.</p>
 <div class="recorded-banner" role="status"><strong>Recorded audit: replay of real runs, not a live session.</strong><br><span class="meta">Original audit SHA-256: <code class="hash">f42f8359bb40b9dc36114a125e7ce65e4b6a63bbd6d6523d726e4dd12fb425af</code></span></div><div class="recorded-banner" role="status"><strong>Recorded audit: replay of real runs, not a live session.</strong><br><span class="meta">Original audit SHA-256: <code class="hash">6d9a2c1ddc078166fe32dbdf1b975ebba59a6598bca3bfaf8e7f2a037eec1eb6</code></span></div>
+<section class="agent-loop" aria-labelledby="agent-loop-heading">
+  <div class="agent-loop-head">
+    <p class="eyebrow">Agent loop · terminal-driven</p>
+    <h2 id="agent-loop-heading">Kane's result gated the patch.</h2>
+    <p class="lede">Pi is the coding agent that made the bounded repair. The repair was terminal-driven, not an in-app autonomous repair. No agent transcript is reproduced here; this is the recorded scope and git/audit evidence.</p>
+  </div>
+
+  <div class="agent-steps">
+    <article class="agent-step" aria-labelledby="step-fail">
+      <p class="step-number">01 · Kane fails</p>
+      <h3 id="step-fail">The promise did not survive checkout.</h3>
+      <p>Audit <a href="/audits/2026-11-22T00-53-05-669Z-f5230a">2026-11-22T00-53-05-669Z-f5230a</a> recorded these exact values. The $35 control stayed at $9.00, so the failure is specific.</p>
+      <div class="table-wrap">
+<table class="repair-failure">
+  <caption class="sr-only">Exact pre-repair Kane observations</caption>
+  <thead><tr><th scope="col">Cart</th><th scope="col" class="num">Promised</th><th scope="col" class="num">Observed</th><th scope="col">Kane</th></tr></thead>
+  <tbody><tr>
+  <td>$60.00 eligible<br><span class="meta">eligible-60</span></td>
+  <td class="num">$0.00</td>
+  <td class="num">$9.00</td>
+  <td><span class="status status--broken"><span class="status-mark" aria-hidden="true"></span>BROKEN</span><br><span class="meta">Eligible $60 cart is charged standard shipping</span><br><span class="meta">740 / assertion_error.confirmed_product_bug</span></td>
+</tr>
+<tr>
+  <td>$50.00 boundary<br><span class="meta">boundary-50</span></td>
+  <td class="num">$0.00</td>
+  <td class="num">$9.00</td>
+  <td><span class="status status--broken"><span class="status-mark" aria-hidden="true"></span>BROKEN</span><br><span class="meta">$50.00 boundary cart is charged standard shipping</span><br><span class="meta">740 / assertion_error.confirmed_product_bug</span></td>
+</tr>
+<tr>
+  <td>$35.00 control<br><span class="meta">control-35</span></td>
+  <td class="num">$9.00</td>
+  <td class="num">$9.00</td>
+  <td><span class="status status--honored"><span class="status-mark" aria-hidden="true"></span>HONORED</span><br><span class="meta">100 / success.complete</span></td>
+</tr></tbody>
+</table>
+</div>
+    </article>
+
+    <article class="agent-step" aria-labelledby="step-patch">
+      <p class="step-number">02 · Pi patches within the brief</p>
+      <h3 id="step-patch">A bounded source change.</h3>
+      <p><strong>Agent:</strong> Pi · terminal-driven. <strong>Branch:</strong> <code>repair/free-shipping-threshold</code>.</p>
+      <div class="repair-brief">
+        <p class="panel-label">Bounded brief · scope record, not a transcript</p>
+        <p>Repair the shipping threshold in <code>src/lib/shipping.ts</code> and add the post-repair acceptance test. Do not edit the frozen contract, oracle, audit engine, parser, scenario definitions, fixtures, recorded evidence, receipt language, app configuration or secrets. Preserve unrelated work. The patch is accepted only after the unchanged six objectives rerun through Kane.</p>
+      </div>
+      <dl class="agent-facts">
+        <div><dt>Allowed</dt><dd><code>src/lib/shipping.ts</code> · <code>tests/post-repair.test.ts</code></dd></div>
+        <div><dt>Forbidden</dt><dd><code>contracts/demo-promise.json</code> · <code>src/lib/contract.ts</code> · <code>src/lib/audit.ts</code> · <code>scripts/kane-audit.ts</code> · <code>recorded/</code> · <code>tests/fixtures/</code> · <code>docs/store-policy.md</code> · <code>.env* and secrets</code></dd></div>
+      </dl>
+      <dl class="agent-commit">
+  <div><dt>Fix commit 4c8105f</dt><dd><code>4c8105f</code> fix: compare free-shipping threshold in cents</dd></div>
+  <div><dt>Author</dt><dd>kaelah971 · 2026-11-23 12:33:01 UTC</dd></div>
+<div><dt>Files changed</dt><dd><code>src/lib/shipping.ts</code> · <code>tests/post-repair.test.ts</code></dd></div>
+</dl>
+    </article>
+
+    <article class="agent-step" aria-labelledby="step-approve">
+      <p class="step-number">03 · Human approval</p>
+      <h3 id="step-approve">The branch was merged by the owner.</h3>
+      <p>The patch was not self-approved by the agent. The merge is a separate human action; the audit above ran on the repair branch.</p>
+      <dl class="agent-commit">
+  <div><dt>Merge 88536a9</dt><dd><code>88536a9</code> merge: free-shipping threshold repair</dd></div>
+  <div><dt>Author</dt><dd>kaelah971 · 2026-11-23 12:47:35 UTC</dd></div>
+
+</dl>
+    </article>
+
+    <article class="agent-step" aria-labelledby="step-gate">
+      <p class="step-number">04 · Kane reruns the same objectives</p>
+      <h3 id="step-gate">The gate, not the patch, decides.</h3>
+      <p><a href="/audits/2026-11-23T12-35-29-692Z-48b993">2026-11-23T12-35-29-692Z-48b993</a> answers the pre-repair audit with the same objectives.</p>
+      <p><strong>6/6</strong> objective hashes match. 6/6 objective hashes match. Post-repair audit <span class="status status--honored"><span class="status-mark" aria-hidden="true"></span>HONORED</span>.</p>
+      <div class="gate gate--open" role="status">
+        <p class="panel-label">Ship gate</p>
+        <p class="gate-status"><strong>OPEN</strong> for the tested scope.</p>
+        <p class="gate-callout">“The agent may not ship until Kane passes the same objectives.”</p>
+        <p class="meta">6/6 objective hashes match. Post-repair audit <span class="status status--honored"><span class="status-mark" aria-hidden="true"></span>HONORED</span>.</p>
+      </div>
+    </article>
+  </div>
+</section>
 
 <div class="repair-grid">
   <section class="repair-col" aria-labelledby="failed-heading">

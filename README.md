@@ -49,10 +49,10 @@ The repair is the committed one-line diff. The post-repair audit answers the pre
 ## Judge it in five minutes
 
 ```bash
-npm install && npm test && npm run dev
+npm install && npm test && npm run demo
 ```
 
-Open **http://127.0.0.1:3000**.
+`npm run demo` starts the recorded-audit app on **http://127.0.0.1:3000** and the real repaired demo store on **http://127.0.0.1:4173**, then opens both. It does not start Kane and does not need a Kane account.
 
 **The app works with no Kane account.** It ships sanitized copies of the two real audits in [`recorded/`](recorded/README.md). If `.data/audits` is absent — a public clone — the app reads `recorded/` and shows a visible banner on every recorded page: **“Recorded audit: replay of real runs, not a live session.”** No mock data is substituted. On the recording machine, `.data/audits` exists and the app prefers the live records.
 
@@ -65,7 +65,7 @@ What to click:
 5. **Closed loop** — the actual `git diff ed3dbaf HEAD -- src/lib/shipping.ts`, then the post-repair audit and the 6/6 objective-hash comparison.
 6. **`2026-11-23T12-35-29-692Z-48b993` → Promise Receipt** — the scoped status, contract hash, pre-repair audit id, per-scenario and per-run evidence, and the “what this does not prove” section.
 
-The store is on `http://127.0.0.1:4173`. A 3:30 recording plan is in [`docs/demo-script.md`](docs/demo-script.md).
+The public storefront is **https://kern-site-mocha.vercel.app/store/**. A 3:30–4:00 recording plan is in [`docs/demo-script.md`](docs/demo-script.md), including the static before/after toggle and the optional operator panel.
 
 ## Run it yourself with Kane
 
@@ -79,7 +79,7 @@ npm start             # store on 4173; leave it running
 node scripts/kane-audit.ts
 ```
 
-`0.10.6` was used; do not upgrade mid-evidence. The CLI writes `.data/audits/<auditId>/audit.json`, copies the real `.evidence` packs, and the app prefers those files. The app never starts Kane itself.
+`0.10.6` was used; do not upgrade mid-evidence. The CLI writes `.data/audits/<auditId>/audit.json`, copies the real `.evidence` packs, and the app prefers those files. The public/recorded app never starts Kane. On the operator machine only, `KERN_LIVE=1 npm run app` adds a local check panel that spawns the same audit script; it is disabled on the public deployment and is not part of the recorded demo.
 
 A cheap smoke run is `node scripts/kane-audit.ts --scenario control-35 --kind observe` (one run, roughly 20 credits).
 
@@ -88,18 +88,21 @@ A cheap smoke run is `node scripts/kane-audit.ts --scenario control-35 --kind ob
 - One local storefront on 4173 with server-calculated shipping, three deterministic carts, and no payment fields.
 - A frozen promise contract with SHA-256, a deterministic oracle, and boundary tests at 4,999 / 5,000 / 5,001 cents.
 - A two-run Kane audit engine (observe + assert), strict NDJSON/USD parsing, fail-closed statuses, evidence copy and hash.
-- A bounded repair and an unchanged post-repair audit gated by all six objective hashes.
-- A read-only server-rendered app on 3000: campaign, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff.
+- A bounded repair and an unchanged post-repair audit gated by all six objective hashes. The `/repair` page shows the mixed evidence chain: exact failure → Pi's bounded scope → actual commit → human merge → unchanged Kane rerun → gate.
+- A public/recorded read-only app on 3000: campaign, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff. **78/78 tests pass.**
+- `npm run demo` — one command starts the recorded app and the repaired store and opens both; no Kane account or credits needed.
+- An operator-only local check panel (`KERN_LIVE=1`): fixed scenarios, one child at a time, balance/store guards, and a real audit link when a check completes. The public deployment returns 404.
 - `/runs` — every real Kane run in the audit JSON, newest first, grouped by audit; 15 locally with `.data`, 12 in the two-audit `recorded/` bundle.
 - `/store/` — static demo storefront with three fixed cart quotes; `/store/<cart>` shows the quote and the recorded "What Kern saw" values. No add-to-cart or checkout POST is exported.
+- `/store/before/<cart>` — the audited `ed3dbaf` revision's quotes, labelled **“The revision Kern audited”**; the current pages link to it under **“After the repair.”** The before page states that it is not the current store.
 - Public `recorded/` copies, a restore-safe pre-repair replay, and a pre-repair store runner for filming.
 
 ## What is not built
 
 - Campaign wizard or contract-authoring UI.
-- Automated coding-agent repair and approval UI; the fix is the committed branch change shown as a diff.
-- Database, auth, multi-tenancy, or deployment.
-- Live Kane execution from the app; the app is read-only.
+- Automated in-app coding-agent repair or approval UI. The repair was terminal-driven by Pi; the actual commit, scope and gate are shown as evidence, with no invented transcript.
+- Database, auth, or multi-tenancy.
+- Public/hosted live Kane execution. The local operator-only check exists; the public site is read-only.
 - Screenshot viewer or fabricated evidence imagery.
 - Signed or certified receipts.
 

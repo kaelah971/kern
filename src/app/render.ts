@@ -4,7 +4,7 @@ import { expectedShippingCents } from '../lib/contract.ts';
 import { PRESET_CARTS } from '../lib/catalog.ts';
 import type { AuditIndex, AuditSummary } from './audits.ts';
 import { latestAudit } from './audits.ts';
-import type { DiffResult } from './git.ts';
+import type { CommitFact, DiffResult, RepairFacts } from './git.ts';
 import type { PolicyInfo } from './data.ts';
 import type { LiveSnapshot } from './live.ts';
 import {
@@ -12,6 +12,10 @@ import {
   formatTimestamp,
   humanize,
   PRE_FIX_SHA,
+  REPAIR_AGENT,
+  REPAIR_BRANCH,
+  REPAIR_COMMIT_SHA,
+  REPAIR_MERGE_SHA,
   statusClass,
   STOREFRONT_URL,
 } from './data.ts';
@@ -956,13 +960,188 @@ function hashComparisonTable(post: AuditSummary): string {
 <p class="meta">First 12 hex characters shown; the complete 64-character values are in the audit artifact (<code>audit.json</code>). Hover a hash for its full value.</p>`;
 }
 
+const REPAIR_ALLOWED = [
+  'src/lib/shipping.ts',
+  'tests/post-repair.test.ts',
+];
+
+const REPAIR_FORBIDDEN = [
+  'contracts/demo-promise.json',
+  'src/lib/contract.ts',
+  'src/lib/audit.ts',
+  'scripts/kane-audit.ts',
+  'recorded/',
+  'tests/fixtures/',
+  'docs/store-policy.md',
+  '.env* and secrets',
+];
+
+function repairFailureTable(pre: AuditSummary): string {
+  const rows = pre.audit.scenarios
+    .map((scenario) => {
+      const result = scenario.assert ? formatResult(scenario.assert) : 'not run';
+      const title = scenario.assertVerdict?.bugTitle;
+      return `<tr>
+  <td>${escapeHtml(scenario.presetLabel)}<br><span class="meta">${escapeHtml(
+        scenario.scenarioId,
+      )}</span></td>
+  <td class="num">${formatCents(scenario.oracle.expectedShippingCents)}</td>
+  <td class="num">${formatCents(scenario.oracle.observedShippingCents)}</td>
+  <td>${statusChip(scenario.status)}${
+        title ? `<br><span class="meta">${escapeHtml(title)}</span>` : ''
+      }<br><span class="meta">${escapeHtml(result)}</span></td>
+</tr>`;
+    })
+    .join('\n');
+  return `<div class="table-wrap">
+<table class="repair-failure">
+  <caption class="sr-only">Exact pre-repair Kane observations</caption>
+  <thead><tr><th scope="col">Cart</th><th scope="col" class="num">Promised</th><th scope="col" class="num">Observed</th><th scope="col">Kane</th></tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+</div>`;
+}
+
+function commitFact(label: string, fact: CommitFact | null, showFiles: boolean): string {
+  if (!fact) {
+    return `<p class="meta">${escapeHtml(label)}: not available from git in this build.</p>`;
+  }
+  const files =
+    showFiles && fact.files.length > 0
+      ? `<div><dt>Files changed</dt><dd>${fact.files
+          .map((file) => `<code>${escapeHtml(file)}</code>`)
+          .join(' · ')}</dd></div>`
+      : '';
+  return `<dl class="agent-commit">
+  <div><dt>${escapeHtml(label)}</dt><dd><code>${escapeHtml(
+    fact.shortSha,
+  )}</code> ${escapeHtml(fact.subject)}</dd></div>
+  <div><dt>Author</dt><dd>${escapeHtml(fact.author)} · ${formatTimestamp(
+    fact.committedAt,
+  )}</dd></div>
+${files}
+</dl>`;
+}
+
+function gateState(
+  pre: AuditSummary,
+  post: AuditSummary | null,
+): { open: boolean; matches: number; total: number } {
+  const comparisons = post?.audit.objectiveHashComparisons ?? [];
+  const matches = comparisons.filter((comparison) => comparison.match).length;
+  const total = comparisons.length;
+  const open =
+    post !== null &&
+    post.audit.overallStatus === 'HONORED' &&
+    post.audit.answersAuditId === pre.audit.auditId &&
+    post.audit.objectiveHashesMatch === true &&
+    total > 0 &&
+    matches === total;
+  return { open, matches, total };
+}
+
+function agentLoop(
+  pre: AuditSummary,
+  post: AuditSummary | null,
+  repair: RepairFacts,
+): string {
+  const gate = gateState(pre, post);
+  const gateStatus = gate.open
+    ? '<strong>OPEN</strong> for the tested scope.'
+    : '<strong>CLOSED.</strong>';
+  const gateDetail = post
+    ? gate.total > 0
+      ? `${gate.matches}/${gate.total} objective hashes match. Post-repair audit ${statusChip(
+          post.audit.overallStatus,
+        )}.`
+      : 'The post-repair audit has no objective-hash comparison table, so the gate stays closed.'
+    : 'No post-repair audit is linked, so the gate stays closed.';
+
+  const repairError = repair.error
+    ? `<div class="warning" role="status">Could not read the repair commit metadata from git: <code>${escapeHtml(
+        repair.error,
+      )}</code>. The rendered facts below are not inferred.</div>`
+    : '';
+
+  return `<section class="agent-loop" aria-labelledby="agent-loop-heading">
+  <div class="agent-loop-head">
+    <p class="eyebrow">Agent loop · terminal-driven</p>
+    <h2 id="agent-loop-heading">Kane's result gated the patch.</h2>
+    <p class="lede">${escapeHtml(
+      REPAIR_AGENT,
+    )} is the coding agent that made the bounded repair. The repair was terminal-driven, not an in-app autonomous repair. No agent transcript is reproduced here; this is the recorded scope and git/audit evidence.</p>
+  </div>
+${repairError}
+  <div class="agent-steps">
+    <article class="agent-step" aria-labelledby="step-fail">
+      <p class="step-number">01 · Kane fails</p>
+      <h3 id="step-fail">The promise did not survive checkout.</h3>
+      <p>Audit <a href="/audits/${encodeURIComponent(
+        pre.audit.auditId,
+      )}">${escapeHtml(pre.audit.auditId)}</a> recorded these exact values. The $35 control stayed at $9.00, so the failure is specific.</p>
+      ${repairFailureTable(pre)}
+    </article>
+
+    <article class="agent-step" aria-labelledby="step-patch">
+      <p class="step-number">02 · ${escapeHtml(REPAIR_AGENT)} patches within the brief</p>
+      <h3 id="step-patch">A bounded source change.</h3>
+      <p><strong>Agent:</strong> ${escapeHtml(
+        REPAIR_AGENT,
+      )} · terminal-driven. <strong>Branch:</strong> <code>${escapeHtml(
+        REPAIR_BRANCH,
+      )}</code>.</p>
+      <div class="repair-brief">
+        <p class="panel-label">Bounded brief · scope record, not a transcript</p>
+        <p>Repair the shipping threshold in <code>src/lib/shipping.ts</code> and add the post-repair acceptance test. Do not edit the frozen contract, oracle, audit engine, parser, scenario definitions, fixtures, recorded evidence, receipt language, app configuration or secrets. Preserve unrelated work. The patch is accepted only after the unchanged six objectives rerun through Kane.</p>
+      </div>
+      <dl class="agent-facts">
+        <div><dt>Allowed</dt><dd>${REPAIR_ALLOWED.map(
+          (file) => `<code>${escapeHtml(file)}</code>`,
+        ).join(' · ')}</dd></div>
+        <div><dt>Forbidden</dt><dd>${REPAIR_FORBIDDEN.map(
+          (file) => `<code>${escapeHtml(file)}</code>`,
+        ).join(' · ')}</dd></div>
+      </dl>
+      ${commitFact(`Fix commit ${REPAIR_COMMIT_SHA}`, repair.fix, true)}
+    </article>
+
+    <article class="agent-step" aria-labelledby="step-approve">
+      <p class="step-number">03 · Human approval</p>
+      <h3 id="step-approve">The branch was merged by the owner.</h3>
+      <p>The patch was not self-approved by the agent. The merge is a separate human action; the audit above ran on the repair branch.</p>
+      ${commitFact(`Merge ${REPAIR_MERGE_SHA}`, repair.merge, false)}
+    </article>
+
+    <article class="agent-step" aria-labelledby="step-gate">
+      <p class="step-number">04 · Kane reruns the same objectives</p>
+      <h3 id="step-gate">The gate, not the patch, decides.</h3>
+      ${
+        post
+          ? `<p><a href="/audits/${encodeURIComponent(
+              post.audit.auditId,
+            )}">${escapeHtml(post.audit.auditId)}</a> answers the pre-repair audit with the same objectives.</p>
+      <p><strong>${gate.matches}/${gate.total}</strong> objective hashes match. ${gateDetail}</p>`
+          : '<p>No post-repair audit is linked.</p>'
+      }
+      <div class="gate ${gate.open ? 'gate--open' : 'gate--closed'}" role="status">
+        <p class="panel-label">Ship gate</p>
+        <p class="gate-status">${gateStatus}</p>
+        <p class="gate-callout">“The agent may not ship until Kane passes the same objectives.”</p>
+        <p class="meta">${gateDetail}</p>
+      </div>
+    </article>
+  </div>
+</section>`;
+}
+
 export function renderRepair(input: {
   pre: AuditSummary;
   post: AuditSummary | null;
   diff: DiffResult;
+  repair: RepairFacts;
   publicMode?: boolean;
 }): string {
-  const { pre, post, diff, publicMode = false } = input;
+  const { pre, post, diff, repair, publicMode = false } = input;
   const banners = `${recordedBanner(pre)}${post ? recordedBanner(post) : ''}`;
   const diffBlock = diff.ok
     ? diff.diff.trim().length > 0
@@ -1005,6 +1184,7 @@ export function renderRepair(input: {
       pre.audit.auditId,
     )}">${escapeHtml(pre.audit.auditId)}</a>. The diff is read from git; the objective hashes are read from the audit artifacts.</p>
 ${banners}
+${agentLoop(pre, post, repair)}
 
 <div class="repair-grid">
   <section class="repair-col" aria-labelledby="failed-heading">

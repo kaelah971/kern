@@ -9,7 +9,7 @@ import {
   type AuditSummary,
 } from './audits.ts';
 import { loadAppContract, readPolicy } from './data.ts';
-import { readShippingDiff } from './git.ts';
+import { readRepairFacts, readShippingDiff } from './git.ts';
 import { getPreset } from '../lib/catalog.ts';
 import { LiveController, LIVE_SCENARIOS, type LiveControllerOptions } from './live.ts';
 import {
@@ -353,6 +353,7 @@ export function createAppRequestHandler(
           pre: loaded.summary,
           post,
           diff: readShippingDiff(repoRoot),
+          repair: readRepairFacts(repoRoot),
           publicMode,
         }),
         headOnly,

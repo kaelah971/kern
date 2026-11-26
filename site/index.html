@@ -408,6 +408,87 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .repair-col .scenario-head { padding: .7rem .8rem; }
 .repair-col .scenario-head h3 { font-size: 1rem; }
 .repair-col .verdict { padding: .8rem .9rem; }
+.agent-loop {
+  border: 1px solid var(--line-strong);
+  background: var(--paper-2);
+  padding: 1.2rem 1.25rem;
+  margin: 1.4rem 0 1.5rem;
+}
+.agent-loop-head { max-width: 58rem; }
+.agent-loop-head h2 { font-size: 1.6rem; margin: .2rem 0 .55rem; }
+.agent-loop-head .lede { margin-bottom: .8rem; }
+.agent-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .9rem;
+  margin-top: 1rem;
+}
+.agent-step {
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--paper-3);
+  padding: .9rem 1rem;
+}
+.agent-step h3 { font-size: 1.05rem; margin: .15rem 0 .55rem; }
+.step-number {
+  margin: 0 0 .35rem;
+  color: var(--accent-dark);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.repair-brief {
+  border: 1px dashed var(--line-strong);
+  background: rgba(255, 255, 255, .45);
+  padding: .65rem .8rem;
+  margin: .6rem 0;
+}
+.repair-brief p:last-child { margin-bottom: 0; }
+.agent-facts { display: grid; gap: .45rem; margin: .6rem 0; }
+.agent-facts div { min-width: 0; }
+.agent-facts dt, .agent-commit dt {
+  color: var(--muted);
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.agent-facts dd { margin: .1rem 0 0; overflow-wrap: anywhere; font-size: .82rem; }
+.agent-commit {
+  display: grid;
+  gap: .3rem;
+  border-top: 1px solid var(--line);
+  padding-top: .55rem;
+  margin: .55rem 0 0;
+}
+.agent-commit dd { margin: .1rem 0 0; overflow-wrap: anywhere; font-size: .82rem; }
+.agent-commit code { font-size: .78rem; }
+.repair-failure td, .repair-failure th { font-size: .78rem; }
+.repair-failure td { vertical-align: top; }
+.gate {
+  border: 1px solid var(--line-strong);
+  border-left: 6px solid var(--slate);
+  background: var(--slate-surface);
+  padding: .8rem 1rem;
+  margin: .8rem 0 0;
+}
+.gate--open {
+  border-left-color: var(--honored);
+  background: var(--honored-surface);
+}
+.gate--closed {
+  border-left-color: var(--warning);
+  background: var(--warning-surface);
+}
+.gate .panel-label { margin-bottom: .2rem; }
+.gate-status { font-size: 1.02rem; margin: 0 0 .3rem; }
+.gate-callout {
+  font-family: var(--serif);
+  font-size: 1.04rem;
+  margin: 0 0 .35rem;
+}
+.gate .meta { margin: 0; }
 .receipt {
   max-width: 940px;
   margin: 0 auto;
@@ -564,6 +645,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .live-cards { grid-template-columns: 1fr; }
   .contract-grid { grid-template-columns: 1fr 1fr; }
   .repair-grid { grid-template-columns: 1fr; }
+  .agent-steps { grid-template-columns: 1fr; }
   .live-facts { grid-template-columns: 1fr; }
   .lanes { grid-template-columns: 1fr; }
   .lane-rule { height: 1px; }

@@ -140,6 +140,17 @@ test('repair page reads the real diff from git and shows the hash comparison', a
   assert.match(text, /Unchanged rerun/);
   assert.match(text, new RegExp(HONORED.auditId));
   assert.match(text, /MATCH/);
+  assert.match(text, /Agent loop · terminal-driven/);
+  assert.match(text, /Pi is the coding agent/);
+  assert.match(text, /not an in-app autonomous repair/);
+  assert.match(text, /Bounded brief/);
+  assert.match(text, /Allowed/);
+  assert.match(text, /Forbidden/);
+  assert.match(text, /4c8105f/);
+  assert.match(text, /88536a9/);
+  assert.match(text, /The agent may not ship until Kane passes the same objectives\./);
+  assert.match(text, /6\/6/);
+  assert.match(text, /OPEN/);
 });
 
 test('repair page says when no post-repair audit exists', async () => {

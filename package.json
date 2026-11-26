@@ -11,6 +11,7 @@
     "start": "node src/server.ts",
     "app": "node src/app/server.ts",
     "dev": "node scripts/dev.ts",
+    "demo": "node scripts/demo.ts",
     "test": "node --test tests/*.test.ts",
     "test:replay": "node --test tests/replay/pre-repair.test.ts",
     "demo:replay-pre-repair": "node scripts/demo-replay-pre-repair.ts",
@@ -19,7 +20,7 @@
     "typecheck": "tsc --noEmit",
     "verify:vercel": "node scripts/vercel-simulate.ts",
     "app:recorded": "node scripts/app-recorded.ts",
-    "export:static": "node scripts/export-static.ts http://127.0.0.1:3300 && node scripts/export-store.ts"
+    "export:static": "node scripts/export-static.ts http://127.0.0.1:3300 && node scripts/export-store.ts && node scripts/export-store-before.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

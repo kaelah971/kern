@@ -5,6 +5,10 @@ import type { AuditStatus } from '../lib/audit.ts';
 import { formatUsd } from '../lib/money.ts';
 
 export const PRE_FIX_SHA = 'ed3dbaf';
+export const REPAIR_COMMIT_SHA = '4c8105f';
+export const REPAIR_MERGE_SHA = '88536a9';
+export const REPAIR_AGENT = 'Pi';
+export const REPAIR_BRANCH = 'repair/free-shipping-threshold';
 export const STOREFRONT_URL = 'http://127.0.0.1:4173/';
 
 export type PolicyInfo = {
