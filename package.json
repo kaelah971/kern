@@ -13,6 +13,8 @@
     "dev": "node scripts/dev.ts",
     "demo": "node scripts/demo.ts",
     "gate": "node scripts/gate.ts",
+    "promises": "node scripts/promise-check.ts",
+    "promise:audit": "node scripts/promise-audit.ts",
     "test": "node --test tests/*.test.ts",
     "test:replay": "node --test tests/replay/pre-repair.test.ts",
     "demo:replay-pre-repair": "node scripts/demo-replay-pre-repair.ts",

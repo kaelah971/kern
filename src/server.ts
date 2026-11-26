@@ -5,6 +5,7 @@ import { CartStore } from './lib/cart.ts';
 import { getPreset, getProduct } from './lib/catalog.ts';
 import { getStandardShippingCents } from './lib/shipping.ts';
 import { renderCart, renderCheckout, renderError, renderHome, renderNotFound } from './lib/render.ts';
+import { renderPromiseIndex, renderPromisePage } from './lib/promise-render.ts';
 
 const SESSION_COOKIE = 'kern_sid';
 const MAX_FORM_BYTES = 64 * 1024;
@@ -85,6 +86,25 @@ export function createStoreServer(): ReturnType<typeof createHttpServer> {
     if (method === 'GET' && path === '/') {
       const sessionId = ensureSession(req, res);
       sendHtml(res, 200, renderHome(carts.itemCount(sessionId)));
+      return;
+    }
+
+    if (method === 'GET' && path === '/promise') {
+      const page = renderPromiseIndex();
+      sendHtml(res, page.status, page.html);
+      return;
+    }
+
+    if (method === 'GET' && path.startsWith('/promise/')) {
+      const parts = path.split('/').filter(Boolean);
+      if (parts.length === 3) {
+        const page = renderPromisePage(parts[1]!, parts[2]!);
+        if (page) {
+          sendHtml(res, page.status, page.html);
+          return;
+        }
+      }
+      sendHtml(res, 404, renderNotFound(0));
       return;
     }
 

@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, initial-scale=1">
+<title>Kern — system architecture and start-to-finish flow</title>
+<style>
+  :root{
+    --paper:#eef0eb;
+    --paper-2:#e4e8e1;
+    --ink:#0b1512;
+    --ink-2:#14201b;
+    --muted:#4d5b54;
+    --muted-2:#7e8d83;
+    --line:#c7d0c8;
+    --line-2:#d9dfd8;
+    --teal:#0f766e;
+    --mint:#7ef0c0;
+    --mint-soft:#e3f1e8;
+    --red:#bd4335;
+    --red-soft:#f6e2dd;
+    --amber:#f6efdf;
+    --amber-line:#d8c6a1;
+    --green:#2f7a57;
+    --white:#fff;
+    --sans: Inter, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#cfd4cc;scrollbar-width:none;-ms-overflow-style:none}
+  html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
+  body{font-family:var(--sans);color:var(--ink);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet{
+    position:relative;width:1920px;height:1200px;overflow:hidden;background:var(--paper);
+    margin:0 auto;page-break-after:always;break-after:page;
+  }
+  .sheet:last-child{page-break-after:auto;break-after:auto}
+  .sheet:first-child{margin-top:0}
+  @media screen{.sheet{margin-bottom:24px;box-shadow:0 20px 50px rgba(11,21,18,.14)}}
+  @media print{html,body{background:#fff}.sheet{margin:0;box-shadow:none}@page{size:1920px 1200px;margin:0}}
+  .kmark{
+    position:absolute;left:64px;top:56px;width:54px;height:54px;border-radius:12px;background:var(--ink);color:var(--white);
+    display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;line-height:1;letter-spacing:-.08em;z-index:5;
+  }
+  .doc-title{position:absolute;left:138px;top:50px;font-size:46px;line-height:1;letter-spacing:-.055em;font-weight:900;color:var(--ink);z-index:5}
+  .doc-sub{position:absolute;left:140px;top:108px;font-size:17px;line-height:1.3;color:var(--muted);z-index:5}
+  .doc-right{position:absolute;right:64px;top:58px;text-align:right;font-family:var(--mono);font-size:10px;line-height:1.55;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);z-index:5}
+  .doc-right b{color:var(--ink);font-weight:600}
+  .legend{
+    position:absolute;right:64px;top:128px;display:flex;gap:18px;align-items:center;
+    font-family:var(--mono);font-size:9px;line-height:1.2;letter-spacing:.06em;color:var(--muted);z-index:5;
+  }
+  .legend span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .legend i{display:inline-block;width:22px;height:0;border-top:2px solid var(--teal)}
+  .legend .dash{border-top:2px dashed var(--teal)}
+  .legend .dot{border-top:2px dotted var(--green)}
+  .legend .red{border-top:2px dashed var(--red)}
+  .stage-rail{
+    position:absolute;left:64px;right:64px;top:160px;height:38px;display:flex;gap:8px;z-index:5;
+  }
+  .stage{
+    flex:1;min-width:0;display:flex;align-items:center;gap:7px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.4);
+    font-family:var(--mono);font-size:8px;line-height:1.1;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+  }
+  .stage b{font-size:8px;color:var(--teal);font-weight:600}
+  .stage--key{border-color:rgba(15,118,110,.4);background:#e5f2ea;color:var(--ink)}
+  .stage--key b{color:var(--green)}
+  .boundary{
+    position:absolute;left:48px;top:226px;width:1824px;height:856px;border:1.5px dashed #aebbb1;border-radius:18px;z-index:0;pointer-events:none;
+  }
+  .boundary-label{
+    position:absolute;left:64px;top:212px;font-family:var(--mono);font-size:9px;line-height:1;letter-spacing:.13em;text-transform:uppercase;color:var(--teal);z-index:4;
+  }
+  .boundary-label b{font-weight:600;color:var(--ink)}
+  .public-boundary{
+    position:absolute;left:48px;top:1092px;width:1824px;height:76px;border:1.5px dotted #91b09e;border-radius:12px;z-index:0;pointer-events:none;background:rgba(227,241,232,.32);
+  }
+  .public-label{
+    position:absolute;left:64px;top:1081px;font-family:var(--mono);font-size:9px;line-height:1;letter-spacing:.13em;text-transform:uppercase;color:var(--green);z-index:4;
+  }
+  .public-label b{font-weight:600;color:var(--ink)}
+  .col-head{position:absolute;top:240px;width:420px;z-index:5}
+  .col-head .k{font-family:var(--mono);font-size:9px;line-height:1;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+  .col-head .line{height:1px;background:#bcc8be;margin-top:9px}
+  .col1{left:64px}.col2{left:512px}.col3{left:960px}.col4{left:1408px}
+  .card{
+    position:absolute;width:420px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px 11px;z-index:3;
+    box-shadow:0 8px 18px rgba(11,21,18,.035);
+  }
+  .card .k{font-family:var(--mono);font-size:8px;line-height:1.2;letter-spacing:.11em;text-transform:uppercase;color:var(--teal);padding-right:76px}
+  .card h3{margin-top:6px;font-size:16px;line-height:1.08;letter-spacing:-.025em;font-weight:800;color:var(--ink)}
+  .card p{margin-top:5px;font-size:11px;line-height:1.34;color:var(--muted)}
+  .card .meta{margin-top:6px;font-family:var(--mono);font-size:8px;line-height:1.35;letter-spacing:.035em;color:#78877d}
+  .card .meta b{color:var(--ink);font-weight:600}
+  .tag{
+    position:absolute;right:10px;top:10px;font-family:var(--mono);font-size:7px;line-height:1;letter-spacing:.08em;text-transform:uppercase;
+    padding:4px 6px;border-radius:3px;background:#edf0ea;color:#6e7d72;white-space:nowrap;
+  }
+  .tag--red{background:var(--red-soft);color:var(--red)}
+  .tag--green{background:#dff0e5;color:var(--green)}
+  .tag--mint{background:#e0f7ea;color:#286d4d}
+  .tag--amber{background:#f4ead2;color:#8c7135}
+  .card--dark{background:var(--ink);border-color:var(--ink);color:#f4f8f3}
+  .card--dark .k{color:var(--mint)}
+  .card--dark h3{color:#f4f8f3}
+  .card--dark p{color:#b7c7ba}
+  .card--dark .meta{color:#8fa398}
+  .card--dark .tag{background:rgba(126,240,192,.1);color:var(--mint)}
+  .card--evidence{background:var(--amber);border-color:var(--amber-line)}
+  .card--evidence .k{color:#8a6b2e}
+  .card--evidence .tag{background:#efe2c7;color:#7c622d}
+  .card--public{background:var(--mint-soft);border-color:#b8d3c2}
+  .card--optional{border-style:dashed;background:rgba(255,255,255,.55)}
+  .card--red{border-color:#d9a9a1}
+  .card--red .k{color:var(--red)}
+  .card--key{border-top:3px solid var(--teal)}
+  .card--key .k{color:var(--teal)}
+  .card--greenline{border-top:3px solid var(--green)}
+  .card--redline{border-top:3px solid var(--red)}
+  .note{
+    position:absolute;font-family:var(--mono);font-size:9px;line-height:1.35;letter-spacing:.03em;color:#7e8d83;z-index:4;
+  }
+  .note b{color:var(--ink);font-weight:600}
+  .callout{
+    position:absolute;left:64px;bottom:28px;font-family:var(--mono);font-size:9px;line-height:1.3;letter-spacing:.04em;color:#7e8d83;z-index:5;
+  }
+  .callout b{color:var(--ink);font-weight:600}
+  .footer-right{position:absolute;right:64px;bottom:28px;font-family:var(--mono);font-size:9px;line-height:1.3;letter-spacing:.08em;text-transform:uppercase;color:#7e8d83;z-index:5}
+  .wires{position:absolute;inset:0;width:1920px;height:1200px;z-index:1;pointer-events:none}
+  .wires path{fill:none;stroke:var(--teal);stroke-width:1.7}
+  .wires path.control{stroke-dasharray:6 5}
+  .wires path.public{stroke:var(--green);stroke-dasharray:2 6}
+  .wires path.repair{stroke:var(--red);stroke-dasharray:7 5}
+  .wires path.gateopen{stroke:var(--green);stroke-dasharray:6 4}
+  .wires text{font-family:var(--mono);font-size:8px;letter-spacing:.04em;fill:#6f7f74;paint-order:stroke;stroke:var(--paper);stroke-width:4px;stroke-linejoin:round}
+  .wires .label-b{fill:var(--ink);font-weight:600}
+
+  /* public band */
+  .public-band{position:absolute;left:64px;top:1100px;width:1792px;height:64px;display:flex;gap:12px;z-index:5}
+  .pub-card{
+    flex:1;min-width:0;border:1px solid #bfd2c4;background:rgba(255,255,255,.58);border-radius:7px;padding:8px 11px;
+    font-family:var(--mono);font-size:8px;line-height:1.35;color:#52665a;
+  }
+  .pub-card .p{font-family:var(--sans);font-size:12px;line-height:1.15;letter-spacing:-.01em;color:var(--ink);font-weight:700;margin-top:4px}
+  .pub-card b{color:var(--green);font-weight:600}
+  .pub-card .mini{font-family:var(--mono);font-size:7px;line-height:1.3;color:#7c8e81;margin-top:3px}
+
+  /* page 2 */
+  .p2-title{position:absolute;left:64px;top:96px;font-size:48px;line-height:.98;letter-spacing:-.055em;font-weight:900;color:var(--ink)}
+  .p2-title span{color:var(--teal)}
+  .p2-lead{position:absolute;left:64px;top:158px;font-size:16px;line-height:1.35;color:var(--muted);width:1180px}
+  .p2-tag{position:absolute;right:64px;top:100px;font-family:var(--mono);font-size:9px;line-height:1.5;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);text-align:right}
+  .p2-table{position:absolute;left:64px;top:206px;width:1792px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+  .p2-row{display:grid;grid-template-columns:44px 190px 200px 430px 570px 358px;gap:0;align-items:start;border-bottom:1px solid var(--line-2)}
+  .p2-row:last-child{border-bottom:none}
+  .p2-cell{padding:8px 10px;font-size:11px;line-height:1.32;color:var(--muted);min-height:62px}
+  .p2-cell b{color:var(--ink);font-weight:700}
+  .p2-cell .mono{font-family:var(--mono);font-size:8px;line-height:1.4;color:#6f7f74}
+  .p2-head{background:var(--ink);border-bottom:none}
+  .p2-head .p2-cell{font-family:var(--mono);font-size:8px;line-height:1.2;letter-spacing:.1em;text-transform:uppercase;color:#b8c9bd;min-height:0;padding:9px 10px}
+  .p2-row .n{font-family:var(--mono);font-size:9px;color:var(--teal);padding-top:10px}
+  .p2-row .stage-name{font-size:12px;font-weight:800;letter-spacing:-.01em;color:var(--ink)}
+  .p2-row .stage-name span{display:block;margin-top:2px;font-family:var(--mono);font-size:7px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:#7e8d83}
+  .p2-row .mono{font-family:var(--mono);font-size:8px;line-height:1.4;color:#6f7f74}
+  .p2-row .ok{color:var(--green);font-weight:600}
+  .p2-row .bad{color:var(--red);font-weight:600}
+  .p2-panels{position:absolute;left:64px;top:910px;width:1792px;display:grid;grid-template-columns:580px 580px 1fr;gap:14px}
+  .panel{border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.5);padding:14px 16px;min-height:208px}
+  .panel .k{font-family:var(--mono);font-size:8px;line-height:1.2;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+  .panel h3{margin-top:7px;font-size:19px;line-height:1.1;letter-spacing:-.025em;font-weight:800;color:var(--ink)}
+  .panel p{margin-top:7px;font-size:11px;line-height:1.4;color:var(--muted)}
+  .panel p + p{margin-top:4px}
+  .panel b{color:var(--ink);font-weight:700}
+  .panel .red{color:var(--red)}
+  .panel .green{color:var(--green)}
+  .panel .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+  .panel .chip{font-family:var(--mono);font-size:7px;line-height:1.2;letter-spacing:.04em;padding:4px 6px;border-radius:3px;background:#edf0ea;color:#65746a}
+  .panel .chip.red{background:var(--red-soft);color:var(--red)}
+  .panel .chip.green{background:#dff0e5;color:var(--green)}
+  .panel .chip.amber{background:#f4ead2;color:#8c7135}
+  .p2-foot{position:absolute;left:64px;right:64px;bottom:30px;display:flex;justify-content:space-between;gap:20px;font-family:var(--mono);font-size:9px;line-height:1.3;letter-spacing:.06em;color:#7e8d83;z-index:5}
+  .p2-foot b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- ================= PAGE 1 ================= -->
+<section class="sheet" id="architecture">
+  <div class="kmark">K</div>
+  <div class="doc-title">Kern / system architecture</div>
+  <div class="doc-sub">The promise firewall — how the ad, the checkout, Kane, the gate and the receipt connect.</div>
+  <div class="doc-right"><b>Implemented P0 · November 2026</b><br>Kane CLI Online Hackathon<br>Node HTTP · files · local CLI</div>
+  <div class="legend">
+    <span><i></i>runtime data</span>
+    <span><i class="dash"></i>control / approval</span>
+    <span><i class="dot"></i>public / read-only</span>
+    <span><i class="red"></i>repair loop</span>
+  </div>
+
+  <div class="stage-rail">
+    <div class="stage"><b>01</b> AD + TERMS</div>
+    <div class="stage"><b>02</b> CONTRACT</div>
+    <div class="stage"><b>03</b> 3 CARTS</div>
+    <div class="stage stage--key"><b>04</b> KANE</div>
+    <div class="stage"><b>05</b> ORACLE</div>
+    <div class="stage"><b>06</b> AUDIT</div>
+    <div class="stage stage--key"><b>07</b> GATE</div>
+    <div class="stage"><b>08</b> REPAIR</div>
+    <div class="stage"><b>09</b> RERUN</div>
+    <div class="stage stage--key"><b>10</b> RECEIPT</div>
+  </div>
+
+  <div class="boundary"></div>
+  <div class="boundary-label"><b>LOCAL WORKSTATION</b> · trusted operator · Kane / Chrome / files</div>
+
+  <div class="col-head col1"><div class="k">01 / Promise</div><div class="line"></div></div>
+  <div class="col-head col2"><div class="k">02 / Witness</div><div class="line"></div></div>
+  <div class="col-head col3"><div class="k">03 / Verdict</div><div class="line"></div></div>
+  <div class="col-head col4"><div class="k">04 / Prove + repair</div><div class="line"></div></div>
+
+  <!-- col1 -->
+  <div class="card col1" style="top:278px;height:110px">
+    <span class="k">Actor / human</span><span class="tag">operator</span>
+    <h3>Merchant / operator</h3>
+    <p>Owns the ad and terms. Approves the contract and the human merge.</p>
+    <div class="meta">local operator · trusted</div>
+  </div>
+  <div class="card col1" style="top:410px;height:132px">
+    <span class="k">Input</span><span class="tag tag--red">untrusted copy</span>
+    <h3>Ad snapshot + stated interpretation</h3>
+    <p>Public words and approved meaning are stored separately. Ad text is quoted as data, never instructions.</p>
+    <div class="meta">two records · not silently rewritten</div>
+  </div>
+  <div class="card card--optional col1" style="top:558px;height:98px">
+    <span class="k">Local tool / optional</span><span class="tag">404 public</span>
+    <h3>Contract compiler</h3>
+    <p><span class="mono">/compile</span> freezes the canonical contract and writes <span class="mono">.data/contracts/</span>.</p>
+    <div class="meta">src/lib/contract-compiler.ts</div>
+  </div>
+  <div class="card card--key col1" style="top:674px;height:145px">
+    <span class="k">Source of truth</span><span class="tag tag--mint">hashed</span>
+    <h3>Frozen contract</h3>
+    <p><span class="mono">kern-demo-free-shipping-v1</span></p>
+    <div class="meta">spec SHA-256 <b>032dbd00…</b><br>threshold <b>5000¢</b> · $9 baseline from <b>SP-01</b></div>
+  </div>
+  <div class="card col1" style="top:838px;height:138px">
+    <span class="k">Challenge</span><span class="tag">deterministic</span>
+    <h3>Three fixed carts</h3>
+    <p><b>$60</b> eligible · <b>$50</b> exact boundary · <b>$35</b> control.</p>
+    <div class="meta">expected <b>$0 / $0 / $9</b><br>observe + assert objective per cart</div>
+  </div>
+  <div class="card card--evidence col1" style="top:994px;height:86px">
+    <span class="k">Separate policy</span>
+    <h3>SP-01 baseline</h3>
+    <p>$9 ordinary shipping. The ad establishes free shipping; it does not establish $9.</p>
+    <div class="meta">docs/store-policy.md</div>
+  </div>
+
+  <!-- col2 -->
+  <div class="card col2" style="top:278px;height:168px">
+    <span class="k">Owned store / local</span><span class="tag tag--red">untrusted page</span>
+    <h3>Demo storefront</h3>
+    <p>Node HTTP <b>:4173</b> · <span class="mono">/health</span> · <span class="mono">/cart</span> · <span class="mono">/checkout</span>.</p>
+    <p>Shipping quote is calculated on the server from the real cart. No payment fields, no order.</p>
+    <div class="meta">src/server.ts · src/lib/shipping.ts<br>stops at the shipping quote</div>
+  </div>
+  <div class="card card--dark col2" style="top:466px;height:150px">
+    <span class="k">Independent witness</span><span class="tag">TestMu AI</span>
+    <h3>Kane CLI + Chrome</h3>
+    <p>Opens the real store, follows the fixed cart, and reads the rendered shipping quote.</p>
+    <div class="meta">kane-cli 0.10.6 · headless Chrome<br>observe / assert · no store internals</div>
+  </div>
+  <div class="card col2" style="top:634px;height:150px">
+    <span class="k">Six objectives</span><span class="tag">real runs</span>
+    <h3>Observe + assert</h3>
+    <p>Two runs per scenario. Each returns <span class="mono">run_end</span>, exit code, final state and an evidence pack.</p>
+    <div class="meta">3 scenarios × 2 = <b>6 runs</b><br>NDJSON + .evidence</div>
+  </div>
+  <div class="card card--key col2" style="top:802px;height:160px">
+    <span class="k">Local runner</span><span class="tag">synchronous</span>
+    <h3>Audit runner</h3>
+    <p><span class="mono">scripts/kane-audit.ts</span> checks store health and Kane auth, then spawns the CLI with <span class="mono">shell:false</span>.</p>
+    <div class="meta">writes <span class="mono">.data/audits/&lt;id&gt;/</span><br>no queue · no database</div>
+  </div>
+  <div class="card card--optional col2" style="top:966px;height:114px">
+    <span class="k">Operator only / optional</span><span class="tag tag--amber">not public</span>
+    <h3>Live check</h3>
+    <p><span class="mono">KERN_LIVE=1</span> · <span class="mono">/check/run</span> · 3/hr · 20/day · 120 credits · 5-min watchdog.</p>
+    <div class="meta">not in static export</div>
+  </div>
+
+  <!-- col3 -->
+  <div class="card col3" style="top:278px;height:140px">
+    <span class="k">Trusted / local</span><span class="tag">parse only</span>
+    <h3>Parser</h3>
+    <p>Turns NDJSON, final state and exit metadata into typed observations.</p>
+    <div class="meta">src/lib/kane/parse.ts<br>does not invent a missing value</div>
+  </div>
+  <div class="card card--key col3" style="top:436px;height:158px">
+    <span class="k">Trusted / decider</span><span class="tag tag--green">the oracle</span>
+    <h3>Deterministic oracle</h3>
+    <p>Expected cents from the frozen contract vs observed cents. It never reads the store’s shipping function.</p>
+    <div class="meta">src/lib/contract.ts<br>integer cents · fail closed</div>
+  </div>
+  <div class="card col3" style="top:612px;height:164px">
+    <span class="k">Record</span><span class="tag tag--amber">private</span>
+    <h3>Audit JSON</h3>
+    <p><span class="mono">.data/audits/&lt;id&gt;/audit.json</span></p>
+    <p>Scenarios, run IDs, observed values, evidence SHA-256 and the derived status.</p>
+    <div class="meta">gitignored · source for the app and gate</div>
+  </div>
+  <div class="card col3" style="top:794px;height:134px">
+    <span class="k">Fail closed</span><span class="tag tag--red">no false green</span>
+    <h3>Verdicts</h3>
+    <p><b>HONORED · BROKEN · INCONCLUSIVE · INFRA_ERROR</b></p>
+    <div class="meta">missing evidence never becomes a pass</div>
+  </div>
+  <div class="card card--evidence col3" style="top:946px;height:134px">
+    <span class="k">Fallback</span><span class="tag tag--amber">sanitized</span>
+    <h3>Recorded copy</h3>
+    <p><span class="mono">recorded/&lt;id&gt;/audit.json</span> committed; the static export builds from it.</p>
+    <div class="meta">KERN_AUDIT_SOURCE=recorded</div>
+  </div>
+
+  <!-- col4 -->
+  <div class="card col4" style="top:278px;height:164px">
+    <span class="k">Read-only UI</span><span class="tag">no writes</span>
+    <h3>Kern app</h3>
+    <p>Node HTTP <b>:3000</b>: X-Ray, campaign, runs, receipt, gate and repair case.</p>
+    <div class="meta">reads audits; live <span class="mono">.data</span> or <span class="mono">recorded/</span><br>renderer reused by the static export</div>
+  </div>
+  <div class="card card--key col4" style="top:460px;height:150px">
+    <span class="k">Agent gate</span><span class="tag tag--green">exit 0 / 1</span>
+    <h3>Gate</h3>
+    <p><span class="mono">evaluateGate(audit, contract)</span> checks hashes, carts, values, live runs, exits and evidence.</p>
+    <div class="meta">scripts/gate.ts · hooks/claude-code-stop.mjs<br>0 open · 1 closed · 2 error</div>
+  </div>
+  <div class="card card--dark col4" style="top:628px;height:125px">
+    <span class="k">Coding agent / outside app</span><span class="tag">Pi</span>
+    <h3>Bounded patch</h3>
+    <p>Terminal-driven. Fixes <span class="mono">src/lib/shipping.ts</span> plus one acceptance test, inside the allowed files.</p>
+    <div class="meta">branch repair/free-shipping-threshold</div>
+  </div>
+  <div class="card col4" style="top:771px;height:125px">
+    <span class="k">Human</span><span class="tag tag--green">approval</span>
+    <h3>Review + merge</h3>
+    <p>Reads the diff. The agent cannot self-approve or self-merge.</p>
+    <div class="meta">fix <b>4c8105f</b> → merge <b>88536a9</b></div>
+  </div>
+  <div class="card card--red col4" style="top:914px;height:166px">
+    <span class="k">Source change + rerun</span><span class="tag tag--red">gate closed</span>
+    <h3>The loop</h3>
+    <p>Merge the repaired source → store serves the fixed quote → Kane reruns the same six objectives.</p>
+    <div class="meta">6/6 objective hashes match<br>gate opens only when evidence matches</div>
+  </div>
+
+  <!-- arrows -->
+  <svg class="wires" viewBox="0 0 1920 1200" aria-hidden="true">
+    <defs>
+      <marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0f766e"/></marker>
+      <marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#bd4335"/></marker>
+      <marker id="ag" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2f7a57"/></marker>
+    </defs>
+
+    <!-- col1 -->
+    <path d="M274 388 L274 410" marker-end="url(#a)"/>
+    <path d="M274 542 L274 558" marker-end="url(#a)"/>
+    <path d="M274 656 L274 674" marker-end="url(#a)"/>
+    <path d="M274 819 L274 838" marker-end="url(#a)"/>
+    <!-- col1 contract bus to oracle -->
+    <path class="control" d="M484 740 L498 740 L498 222 L1390 222 L1390 500 L1380 500" marker-end="url(#a)"/>
+    <text x="700" y="215">frozen contract / expected values</text>
+
+    <!-- col2 -->
+    <path d="M722 446 L722 466" marker-end="url(#a)"/>
+    <path d="M722 466 L722 446" marker-end="url(#a)"/>
+    <text x="732" y="460">rendered quote</text>
+    <path d="M722 616 L722 634" marker-end="url(#a)"/>
+    <path d="M722 784 L722 802" marker-end="url(#a)"/>
+    <path class="control" d="M512 872 L496 872 L496 850 L512 850" marker-end="url(#a)"/>
+    <text x="404" y="860">health / auth</text>
+
+    <!-- col2 runner to col3 parser -->
+    <path d="M932 850 L946 850 L946 348 L960 348" marker-end="url(#a)"/>
+    <text x="938" y="840">runs</text>
+
+    <!-- col3 -->
+    <path d="M1170 418 L1170 436" marker-end="url(#a)"/>
+    <path d="M1170 594 L1170 612" marker-end="url(#a)"/>
+    <path d="M1170 776 L1170 794" marker-end="url(#a)"/>
+    <path d="M1380 700 L1394 700 L1394 360 L1408 360" marker-end="url(#a)"/>
+    <path d="M1394 535 L1408 535" marker-end="url(#a)"/>
+
+    <!-- col4 gate / repair / loop -->
+    <path class="repair" d="M1618 610 L1618 628" marker-end="url(#ar)"/>
+    <text x="1628" y="622" fill="#bd4335">closed</text>
+    <path class="control" d="M1618 753 L1618 771" marker-end="url(#a)"/>
+    <path class="control" d="M1618 896 L1618 914" marker-end="url(#a)"/>
+    <path class="gateopen" d="M1828 535 L1846 535 L1846 360 L1828 360" marker-end="url(#ag)"/>
+    <text x="1852" y="450" fill="#2f7a57">open</text>
+  </svg>
+
+  <div class="public-boundary"></div>
+  <div class="public-label"><b>PUBLIC SURFACE</b> · read-only · no Kane · no .data · no writes</div>
+  <div class="public-band">
+    <div class="pub-card"><span>01 / BUILD</span><div class="p">Static export</div><div class="mini">scripts/export-static.ts · export-store.ts · export-store-before.ts</div></div>
+    <div class="pub-card"><span>02 / HOST</span><div class="p">Vercel</div><div class="mini">tryoutkern.vercel.app · static HTML · /compile &amp; /check 404</div></div>
+    <div class="pub-card"><span>03 / READ</span><div class="p">Public surfaces</div><div class="mini">landing · campaign · why-kane · gate · audits · receipt · store · before</div></div>
+    <div class="pub-card"><span>04 / USE</span><div class="p">Support / judges / agents</div><div class="mini">scoped receipt · recorded banner · Stop hook · no live Kane</div></div>
+  </div>
+
+  <div class="callout"><b>Rule:</b> the oracle reads the frozen contract, never the store’s shipping function. <b>Public:</b> recorded audits only.</div>
+  <div class="footer-right">Kern / Kane CLI / TestMu AI · 01 / 02</div>
+</section>
+
+<!-- ================= PAGE 2 ================= -->
+<section class="sheet" id="flow">
+  <div class="kmark">K</div>
+  <div class="doc-title">Kern / start to finish</div>
+  <div class="doc-sub">From the ad to the receipt: what each stage reads, writes and trusts.</div>
+  <div class="p2-tag"><b>P0 · implemented</b><br>one store · one promise<br>three carts · one recorded time</div>
+  <p class="p2-lead">The promise is frozen before the repair. Kane sees the rendered checkout. The oracle decides. The gate blocks the agent. The receipt records what was tested — and what it does not prove.</p>
+
+  <div class="p2-table">
+    <div class="p2-row p2-head">
+      <div class="p2-cell">#</div><div class="p2-cell">Stage</div><div class="p2-cell">Actor</div><div class="p2-cell">Reads</div><div class="p2-cell">Writes / visible result</div><div class="p2-cell">Where</div>
+    </div>
+    <div class="p2-row">
+      <div class="p2-cell n">01</div>
+      <div class="p2-cell"><div class="stage-name">Promise<span>ad + terms</span></div></div>
+      <div class="p2-cell">Merchant / operator</div>
+      <div class="p2-cell">ad copy, offer terms, destination, policy</div>
+      <div class="p2-cell"><b>Ad snapshot</b> + separately approved <b>interpretation</b>. No silent rewrite.</div>
+      <div class="p2-cell"><span class="mono">contracts/demo-promise.json</span><br>local · human</div>
+    </div>
+    <div class="p2-row">
+      <div class="p2-cell n">02</div>
+      <div class="p2-cell"><div class="stage-name">Compile<span>freeze</span></div></div>
+      <div class="p2-cell">Contract compiler</div>
+      <div class="p2-cell">ad + terms · SP-01 policy · destination</div>
+      <div class="p2-cell"><b>Canonical contract</b> + spec SHA-256; threshold basis, expected eligible/ineligible shipping.</div>
+      <div class="p2-cell"><span class="mono">/compile</span> local · <span class="mono">.data/contracts/</span><br>404 public</div>
+    </div>
+    <div class="p2-row">
+      <div class="p2-cell n">03</div>
+      <div class="p2-cell"><div class="stage-name">Challenge<span>three carts</span></div></div>
+      <div class="p2-cell">Scenario plan</div>
+      <div class="p2-cell">contract · catalog · policy · objective template</div>
+      <div class="p2-cell"><b>$60 eligible · $50 boundary · $35 control</b>; expected $0 / $0 / $9; observe + assert objectives.</div>
+      <div class="p2-cell"><span class="mono">src/lib/catalog.ts</span><br><span class="mono">src/lib/kane/objective.ts</span></div>
+    </div>
+    <div class="p2-row">
+      <div class="p2-cell n">04</div>
+      <div class="p2-cell"><div class="stage-name">Observe<span>the witness</span></div></div>
+      <div class="p2-cell">Kane CLI + Chrome</div>
+      <div class="p2-cell">store URL <span class="mono">:4173</span> · objective · Kane auth</div>
+      <div class="p2-cell"><b>Real browser run</b>: rendered quote, <span class="mono">run_end</span>, exit code, final state, <span class="mono">.evidence</span> pack.</div>
+      <div class="p2-cell">Kane 0.10.6 · TestMu AI<br>local Chrome · 6 runs</div>
+    </div>
+    <div class="p2-row">
+      <div class="p2-cell n">05</div>
+      <div class="p2-cell"><div class="stage-name">Decide<span>the oracle</span></div></div>
+      <div class="p2-cell">Parser + oracle</div>
+      <div class="p2-cell">runs · evidence · frozen contract</div>
+      <div class="p2-cell"><b>Observed cents vs expected cents</b>; audit status. Missing values never pass.</div>
+      <div class="p2-cell"><span class="mono">src/lib/kane/parse.ts</span><br><span class="mono">src/lib/contract.ts</span></div>
+    </div>
+    <div class="p2-row">
+      <div class="p2-cell n">06</div>
+      <div class="p2-cell"><div class="stage-name">Record<span>audit</span></div></div>
+      <div class="p2-cell">Audit runner</div>
+      <div class="p2-cell">scenario runs · evidence · verdicts</div>
+      <div class="p2-cell"><span class="mono">.data/audits/&lt;id&gt;/audit.json</span>: scenarios, run IDs, values, evidence SHA, status; <b>HONORED / BROKEN / INCONCLUSIVE / INFRA_ERROR</b>.</div>
+      <div class="p2-cell">private · gitignored<br>source for app / gate</div>
+    </div>
+    <div class="p2-row">
+      <div class="p2-cell n">07</div>
+      <div class="p2-cell"><div class="stage-name">Gate<span>agent stop</span></div></div>
+      <div class="p2-cell">Gate CLI + Stop hook</div>
+      <div class="p2-cell">audit · current frozen contract</div>
+      <div class="p2-cell"><b>Exit 0 open / 1 closed / 2 error</b>; a closed gate returns a Claude Code <span class="mono">block</span> decision. The agent cannot self-certify.</div>
+      <div class="p2-cell"><span class="mono">src/lib/gate.ts</span><br><span class="mono">scripts/gate.ts</span> · local</div>
+    </div>
+    <div class="p2-row">
+      <div class="p2-cell n">08</div>
+      <div class="p2-cell"><div class="stage-name">Repair<span>Pi + human</span></div></div>
+      <div class="p2-cell">Pi / human</div>
+      <div class="p2-cell">broken audit · bounded brief · allowed files</div>
+      <div class="p2-cell"><b>One-line source patch</b> + acceptance test; human diff review and merge. No in-app autonomous repair.</div>
+      <div class="p2-cell"><span class="mono">src/lib/shipping.ts</span><br>fix <b>4c8105f</b> · merge <b>88536a9</b></div>
+    </div>
+    <div class="p2-row">
+      <div class="p2-cell n">09</div>
+      <div class="p2-cell"><div class="stage-name">Rerun<span>unchanged</span></div></div>
+      <div class="p2-cell">Kane + audit runner</div>
+      <div class="p2-cell">repaired store · same six objectives · same contract</div>
+      <div class="p2-cell"><b>6/6 objective hashes match</b>; $60/$50 → $0, $35 → $9; post-repair audit is HONORED; gate opens.</div>
+      <div class="p2-cell">post-repair audit<br>answers the pre-repair audit</div>
+    </div>
+    <div class="p2-row">
+      <div class="p2-cell n">10</div>
+      <div class="p2-cell"><div class="stage-name">Prove<span>receipt + public</span></div></div>
+      <div class="p2-cell">App / static export / Vercel</div>
+      <div class="p2-cell">audit · contract · code revision · evidence</div>
+      <div class="p2-cell"><b>Promise Receipt</b> (scoped, hash-linked); static <span class="mono">site/</span>; recorded banner; public store before/after; support answer.</div>
+      <div class="p2-cell">read-only · no Kane<br><span class="mono">tryoutkern.vercel.app</span></div>
+    </div>
+  </div>
+
+  <div class="p2-panels">
+    <div class="panel">
+      <div class="k">Trust boundaries</div>
+      <h3>Who is allowed to decide.</h3>
+      <p><b>Untrusted:</b> ad copy, the rendered page, Kane logs. They are data, never instructions.</p>
+      <p><b>Trusted:</b> the frozen contract, oracle and gate; the local operator. The oracle never reads the store’s shipping function.</p>
+      <p><b>Human:</b> the merge. The agent proposes; the human approves.</p>
+      <p><b>Public:</b> static, sanitized <span class="mono">recorded/</span> evidence; no <span class="mono">.data</span>, no Kane, no writes.</p>
+    </div>
+    <div class="panel">
+      <div class="k">Failure states / proof</div>
+      <h3>The gate fails closed.</h3>
+      <p><b>BROKEN</b> → gate closed → repair loop. <b>INCONCLUSIVE / INFRA_ERROR</b> → no verdict, no green.</p>
+      <p><b>HONORED</b> → gate open → receipt. A timeout is never “verified”.</p>
+      <div class="chips">
+        <span class="chip green">HONORED</span><span class="chip red">BROKEN</span><span class="chip amber">INCONCLUSIVE</span><span class="chip">INFRA_ERROR</span>
+      </div>
+      <p><b>Proof chain:</b> contract SHA → objective hashes → run IDs / exit / evidence SHA → audit → gate → receipt. Hash-linked, not signed.</p>
+    </div>
+    <div class="panel">
+      <div class="k">Scope / not in P0</div>
+      <h3>What this is not.</h3>
+      <p>This is the implemented P0: <b>Node HTTP + files + local CLI</b>. The earlier SQLite / Next.js / hosted queue design is not the runtime.</p>
+      <p><b>Not built:</b> real payments, arbitrary URLs, Shopify/Meta connectors, scheduled monitoring, auto-deploy, signed receipts, in-app autonomous repair.</p>
+      <p><b>Public:</b> landing, campaign, why-kane, gate, audits, receipt, store, before. <span class="mono">/compile</span> and <span class="mono">/check/*</span> return 404.</p>
+    </div>
+  </div>
+
+  <div class="p2-foot"><span><b>Source:</b> src/ · scripts/ · contracts/ · recorded/</span><span><b>Demo:</b> npm run demo (app :3000 + store :4173, no Kane)</span><span><b>Gate:</b> npm run gate -- --audit &lt;path&gt;</span><span>Kern / Kane CLI / TestMu AI · 02 / 02</span></div>
+</section>
+
+</body>
+</html>

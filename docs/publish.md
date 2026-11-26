@@ -157,27 +157,14 @@ Open the GitHub repository page and confirm:
 > Limits: one demo store, one promise type, USD/US; evidence is hash-linked,
 > not signed; verified for the tested conditions, not certified.
 
-## 5. Post 2 — the control cart
+## 5. Post 2 — the vendor receipt
 
-> **The $35 control is the cart that keeps a free-shipping fix honest**
->
-> A lazy fix makes all shipping free. That passes the $60 eligible cart and
-> fails the control: the $35 cart is below the $50 threshold and must keep
-> paying $9.
->
-> In the pre-repair audit the $35 cart paid $9 correctly, while the live exact
-> $50 boundary paid $9 against a $0 promise. (The $60 row is a provided real
-> capture; a live $60 run repeats it.) After the repair, the unchanged six-run
-> rerun shows $60/$50 → $0 and $35 → $9. The six objective hashes are identical,
-> so the challenge did not move.
->
-> The exact $50 boundary is the other guard: a fix that only frees $60 and up
-> would pass the original $60 test and fail there.
->
-> Receipt language: verified for the tested conditions at the recorded time.
-> Not certified, not signed — hash-linked.
->
-> [repo link]
+Final draft: `docs/social/kern-post-2.md`. Attach
+`docs/screenshots/04-receipt.png` or a short clip from the demo.
 
-Do not post either draft until the repository URL is live and the public clone
-has been checked.
+The post leads with the vendor/support problem, then shows the receipt, the
+control cart, the unchanged rerun and the limit. It includes the live and repo
+links.
+
+Do not post either post until the repository URL is live, the public clone has
+been checked, and the demo video link is available.

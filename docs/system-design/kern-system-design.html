@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1600, initial-scale=1">
+<title>Kern — system design</title>
+<style>
+  :root{
+    --paper:#eef0eb;
+    --ink:#0b1512;
+    --muted:#4d5b54;
+    --muted-2:#7e8d83;
+    --line:#c7d0c8;
+    --line-2:#dbe1da;
+    --teal:#0f766e;
+    --teal-soft:#e3f1e8;
+    --mint:#7ef0c0;
+    --mint-soft:#e6f7ee;
+    --red:#bd4335;
+    --red-soft:#f7e4df;
+    --amber:#f6efdf;
+    --amber-line:#d9c8a3;
+    --green:#2f7a57;
+    --white:#fff;
+    --sans: Inter, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#cfd4cc;scrollbar-width:none;-ms-overflow-style:none}
+  html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
+  body{font-family:var(--sans);color:var(--ink);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet{position:relative;width:1600px;height:1000px;overflow:hidden;background:var(--paper);margin:0 auto;page-break-after:always;break-after:page}
+  .sheet:last-child{page-break-after:auto;break-after:auto}
+  @media screen{.sheet{margin-bottom:20px;box-shadow:0 18px 46px rgba(11,21,18,.14)}}
+  @media print{html,body{background:#fff}.sheet{margin:0;box-shadow:none}@page{size:1600px 1000px;margin:0}}
+  .kmark{position:absolute;left:56px;top:34px;width:38px;height:38px;border-radius:9px;background:var(--ink);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900;line-height:1;letter-spacing:-.08em;z-index:5}
+  .doc-title{position:absolute;left:108px;top:32px;font-size:30px;line-height:1;letter-spacing:-.045em;font-weight:900;color:var(--ink);z-index:5}
+  .doc-section{position:absolute;left:108px;top:72px;font-family:var(--mono);font-size:9px;line-height:1.2;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);z-index:5}
+  .page-no{position:absolute;right:56px;top:42px;font-family:var(--mono);font-size:9px;line-height:1;letter-spacing:.14em;color:var(--muted-2);z-index:5}
+  .rule{position:absolute;left:56px;right:56px;top:100px;height:1px;background:var(--line);z-index:4}
+  .intro{position:absolute;left:56px;top:120px;width:1100px;font-size:14px;line-height:1.45;color:var(--muted);z-index:5}
+  .intro b{color:var(--ink);font-weight:700}
+  .foot{position:absolute;left:56px;right:56px;bottom:28px;display:flex;justify-content:space-between;gap:20px;font-family:var(--mono);font-size:8px;line-height:1.3;letter-spacing:.08em;text-transform:uppercase;color:#7e8d83;z-index:5}
+  .foot b{color:var(--ink);font-weight:600}
+  .tag{display:inline-block;font-family:var(--mono);font-size:7px;line-height:1;letter-spacing:.07em;text-transform:uppercase;padding:4px 6px;border-radius:3px;background:#edf0ea;color:#6e7d72;white-space:nowrap}
+  .tag--mint{background:#dff5e9;color:#256b4b}
+  .tag--amber{background:#f4ead2;color:#876b2e}
+  .tag--red{background:var(--red-soft);color:var(--red)}
+  .wires{position:absolute;inset:0;width:1600px;height:1000px;z-index:1;pointer-events:none}
+  .wires path{fill:none;stroke:#7f9b8b;stroke-width:1.5}
+  .wires path.teal{stroke:var(--teal)}
+  .wires path.dash{stroke-dasharray:6 5}
+  .wires path.red{stroke:var(--red);stroke-dasharray:6 5}
+  .wires path.green{stroke:var(--green);stroke-dasharray:6 4}
+  .wires path.dot{stroke:var(--green);stroke-dasharray:2 6}
+  .wires text{font-family:var(--mono);font-size:7px;letter-spacing:.04em;fill:#6f7f74;paint-order:stroke;stroke:var(--paper);stroke-width:4px;stroke-linejoin:round}
+  .wires text.b{fill:var(--ink);font-weight:600}
+  .box{position:absolute;background:#fff;border:1px solid var(--line);border-radius:7px;padding:8px 10px;z-index:3;box-shadow:0 5px 12px rgba(11,21,18,.025)}
+  .box .k{font-family:var(--mono);font-size:7px;line-height:1.2;letter-spacing:.1em;text-transform:uppercase;color:var(--teal)}
+  .box b{display:block;margin-top:3px;font-size:12px;line-height:1.15;letter-spacing:-.015em;font-weight:800;color:var(--ink)}
+  .box .s{display:block;margin-top:2px;font-size:9px;line-height:1.25;color:var(--muted)}
+  .box .m{display:block;margin-top:3px;font-family:var(--mono);font-size:7px;line-height:1.3;color:#7e8d83}
+  .box--dark{background:var(--ink);border-color:var(--ink)}
+  .box--dark .k{color:var(--mint)}
+  .box--dark b{color:#f4f8f3}
+  .box--dark .s{color:#b9c9bd}
+  .box--dark .m{color:#8fa398}
+  .box--mint{background:var(--mint-soft);border-color:#b9d7c7}
+  .box--amber{background:var(--amber);border-color:var(--amber-line)}
+  .box--amber .k{color:#876b2e}
+  .box--red{background:var(--red-soft);border-color:#e0b3ab}
+  .box--red .k{color:var(--red)}
+  .box--dash{border-style:dashed}
+
+  /* information architecture */
+  .ia-root{position:absolute;left:56px;top:452px;width:112px;height:46px;background:var(--ink);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;letter-spacing:.02em;z-index:3}
+  .ia-cat{position:absolute;top:178px;width:250px;height:37px;border-radius:5px;display:flex;align-items:center;padding:0 10px;font-family:var(--mono);font-size:9px;line-height:1.1;letter-spacing:.08em;text-transform:uppercase;font-weight:600;z-index:3}
+  .ia-cat--public{background:var(--mint-soft);border:1px solid #b9d7c7;color:#256b4b}
+  .ia-cat--store{background:var(--mint-soft);border:1px solid #b9d7c7;color:#256b4b}
+  .ia-cat--ops{background:#fff;border:1px solid #b7c9bd;color:var(--teal)}
+  .ia-cat--data{background:var(--amber);border:1px solid var(--amber-line);color:#876b2e}
+  .ia-item{position:absolute;width:200px;height:42px;border:1px solid var(--line);border-radius:5px;background:#fff;padding:6px 8px;z-index:3}
+  .ia-item b{display:block;font-size:10px;line-height:1.15;font-weight:700;letter-spacing:-.005em;color:var(--ink)}
+  .ia-item span{display:block;margin-top:2px;font-family:var(--mono);font-size:7px;line-height:1.25;color:#7e8d83}
+  .ia-item .tag{position:absolute;right:5px;top:5px;font-size:6px}
+  .ia-item--amber{background:var(--amber);border-color:var(--amber-line)}
+  .ia-item--ops{background:#f8faf7}
+  .ia-note{position:absolute;left:1370px;top:178px;width:174px;border-left:2px solid var(--teal);padding-left:13px;z-index:3}
+  .ia-note h4{font-size:11px;line-height:1.2;letter-spacing:-.01em;font-weight:800}
+  .ia-note p{margin-top:7px;font-size:9px;line-height:1.4;color:var(--muted)}
+  .ia-note .legend{margin-top:9px;display:grid;gap:5px;font-family:var(--mono);font-size:7px;line-height:1.3;color:#7e8d83}
+  .ia-note .legend span{display:flex;align-items:center;gap:5px}
+  .ia-note .legend i{width:8px;height:8px;border-radius:2px;display:inline-block;background:#dff5e9;border:1px solid #b9d7c7}
+  .ia-note .legend .ops{background:#fff;border-color:#b7c9bd}
+  .ia-note .legend .data{background:var(--amber);border-color:var(--amber-line)}
+  .ia-note .legend .no{background:var(--red-soft);border-color:#e0b3ab}
+  .ia-bottom{position:absolute;left:56px;right:56px;bottom:60px;display:flex;justify-content:space-between;gap:24px;border-top:1px solid var(--line);padding-top:9px;z-index:4}
+  .ia-bottom p{font-size:10px;line-height:1.4;color:var(--muted)}
+  .ia-bottom b{color:var(--ink)}
+  .ia-bottom .mono{font-family:var(--mono);font-size:8px;letter-spacing:.03em}
+
+  /* user flow */
+  .flow-box{position:absolute;width:340px;min-height:36px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:9px 12px;z-index:3}
+  .flow-box b{display:block;font-size:11px;line-height:1.2;letter-spacing:-.01em;font-weight:700;color:var(--ink)}
+  .flow-box span{display:block;margin-top:2px;font-family:var(--mono);font-size:7px;line-height:1.25;color:#7e8d83}
+  .flow-box--start{background:var(--ink);border-color:var(--ink);border-radius:18px}
+  .flow-box--start b{color:#f4f8f3}
+  .flow-box--start span{color:var(--mint)}
+  .flow-box--end{background:var(--mint-soft);border-color:#b9d7c7;border-radius:18px}
+  .flow-box--end b{color:#256b4b}
+  .flow-box--red{background:var(--red-soft);border-color:#e0b3ab}
+  .flow-box--red b{color:var(--red)}
+  .flow-box--amber{background:var(--amber);border-color:var(--amber-line)}
+  .flow-box--amber b{color:#876b2e}
+  .flow-box--teal{border-color:#9fc8b2;background:#f4fbf7}
+  .flow-box--teal b{color:var(--green)}
+  .flow-box--loop{background:var(--red-soft);border-color:#e0b3ab}
+  .flow-box--loop b{color:var(--red)}
+  .diamond{position:absolute;left:750px;top:424px;width:100px;height:92px;background:#dff5e9;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);z-index:3;display:flex;align-items:center;justify-content:center}
+  .diamond span{font-family:var(--mono);font-size:9px;line-height:1.15;letter-spacing:.02em;text-align:center;color:#256b4b;font-weight:600}
+  .flow-label{position:absolute;font-family:var(--mono);font-size:8px;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;color:#7e8d83;z-index:4}
+  .flow-label--yes{color:var(--green)}
+  .flow-label--no{color:var(--red)}
+  .flow-side{position:absolute;z-index:3;border-left:2px solid var(--line);padding-left:12px}
+  .flow-side h4{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal)}
+  .flow-side p{margin-top:5px;font-size:9px;line-height:1.4;color:var(--muted)}
+  .flow-note{position:absolute;z-index:3;font-family:var(--mono);font-size:7px;line-height:1.4;color:#7e8d83}
+  .flow-legend{position:absolute;left:56px;bottom:60px;display:flex;gap:18px;font-family:var(--mono);font-size:7px;line-height:1.3;color:#7e8d83;z-index:4}
+  .flow-legend span{display:flex;align-items:center;gap:5px}
+  .flow-legend i{width:16px;height:0;border-top:2px solid var(--teal)}
+  .flow-legend .r{border-top:2px dashed var(--red)}
+  .flow-legend .a{border-top:2px dashed #b28c45}
+
+  /* system architecture */
+  .sys-boundary{position:absolute;left:270px;top:150px;width:1080px;height:570px;border:1.5px dashed #aebbb1;border-radius:14px;z-index:0}
+  .sys-boundary-label{position:absolute;left:286px;top:158px;font-family:var(--mono);font-size:8px;line-height:1;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);z-index:4}
+  .sys-box{position:absolute;width:230px;min-height:76px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:9px 11px;z-index:3}
+  .sys-box .k{font-family:var(--mono);font-size:7px;line-height:1.2;letter-spacing:.1em;text-transform:uppercase;color:var(--teal)}
+  .sys-box b{display:block;margin-top:4px;font-size:12px;line-height:1.15;font-weight:800;letter-spacing:-.015em}
+  .sys-box span{display:block;margin-top:3px;font-size:9px;line-height:1.3;color:var(--muted)}
+  .sys-box--dark{background:var(--ink);border-color:var(--ink)}
+  .sys-box--dark .k{color:var(--mint)}
+  .sys-box--dark b{color:#f4f8f3}
+  .sys-box--dark span{color:#b7c7ba}
+  .sys-box--mint{background:var(--mint-soft);border-color:#b9d7c7}
+  .sys-box--mint b{color:#256b4b}
+  .sys-box--amber{background:var(--amber);border-color:var(--amber-line)}
+  .sys-box--amber .k{color:#876b2e}
+  .sys-actor{position:absolute;width:190px;min-height:74px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:9px 11px;z-index:3}
+  .sys-actor .k{font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .sys-actor b{display:block;margin-top:4px;font-size:12px;font-weight:800;line-height:1.15}
+  .sys-actor span{display:block;margin-top:3px;font-size:9px;line-height:1.3;color:var(--muted)}
+  .sys-legend{position:absolute;left:56px;bottom:60px;display:flex;gap:18px;font-family:var(--mono);font-size:7px;line-height:1.3;color:#7e8d83;z-index:4}
+  .sys-legend span{display:flex;align-items:center;gap:5px}
+  .sys-legend i{width:16px;height:0;border-top:2px solid var(--teal)}
+  .sys-legend .d{border-top:2px dashed var(--teal)}
+  .sys-legend .p{border-top:2px dotted var(--green)}
+
+  /* technical architecture */
+  .tech-layer-label{position:absolute;left:56px;width:110px;font-family:var(--mono);font-size:8px;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);z-index:3}
+  .tech-row{position:absolute;left:180px;right:820px;display:flex;gap:8px;z-index:3}
+  .tech-box{flex:1;min-width:0;background:#fff;border:1px solid var(--line);border-radius:5px;padding:7px 8px;min-height:48px}
+  .tech-box b{display:block;font-size:9px;line-height:1.15;font-weight:700;color:var(--ink)}
+  .tech-box span{display:block;margin-top:2px;font-family:var(--mono);font-size:6.5px;line-height:1.25;color:#7e8d83}
+  .tech-box--mint{background:var(--mint-soft);border-color:#b9d7c7}
+  .tech-box--amber{background:var(--amber);border-color:var(--amber-line)}
+  .tech-side{position:absolute;left:820px;right:56px;top:166px;display:grid;gap:9px;z-index:3}
+  .tech-side-card{background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-height:96px}
+  .tech-side-card .k{font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal)}
+  .tech-side-card h4{margin-top:4px;font-size:12px;line-height:1.15;font-weight:800}
+  .tech-side-card p{margin-top:5px;font-size:8.5px;line-height:1.4;color:var(--muted)}
+  .tech-side-card .mono{font-family:var(--mono);font-size:7px;line-height:1.4;color:#7e8d83}
+  .tech-side-card b{color:var(--ink)}
+  .tech-bottom{position:absolute;left:180px;right:820px;bottom:56px;display:flex;gap:22px;border-top:1px solid var(--line);padding-top:8px;z-index:4}
+  .tech-bottom p{font-family:var(--mono);font-size:7px;line-height:1.45;color:#7e8d83}
+  .tech-bottom b{color:var(--ink)}
+
+  /* tooling */
+  .stack{position:absolute;left:56px;top:166px;width:380px;display:grid;gap:6px;z-index:3}
+  .stack-row{background:#fff;border:1px solid var(--line);border-radius:5px;padding:8px 10px;min-height:54px}
+  .stack-row .k{font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal)}
+  .stack-row b{display:block;margin-top:3px;font-size:10px;font-weight:800;line-height:1.2}
+  .stack-row span{display:block;margin-top:2px;font-size:8px;line-height:1.35;color:var(--muted)}
+  .stack-row--mint{background:var(--mint-soft);border-color:#b9d7c7}
+  .tool-table{position:absolute;left:480px;right:56px;top:166px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#fff;z-index:3}
+  .tool-row{display:grid;grid-template-columns:190px 190px 1fr 240px;border-bottom:1px solid var(--line-2)}
+  .tool-row:last-child{border-bottom:none}
+  .tool-cell{padding:8px 10px;font-size:9px;line-height:1.3;color:var(--muted);min-height:38px}
+  .tool-cell b{color:var(--ink);font-weight:700}
+  .tool-cell .mono{font-family:var(--mono);font-size:7px;line-height:1.35;color:#7e8d83}
+  .tool-head{background:var(--ink)}
+  .tool-head .tool-cell{font-family:var(--mono);font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:#b8c9bd;min-height:0;padding:7px 10px}
+  .tool-bottom{position:absolute;left:56px;right:56px;bottom:54px;display:grid;grid-template-columns:1.1fr 1fr;gap:18px;z-index:4}
+  .tool-box{background:rgba(255,255,255,.55);border:1px solid var(--line);border-radius:6px;padding:10px 12px;min-height:116px}
+  .tool-box .k{font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal)}
+  .tool-box h4{margin-top:4px;font-size:11px;font-weight:800;line-height:1.15}
+  .tool-box p{margin-top:4px;font-size:8.5px;line-height:1.4;color:var(--muted)}
+  .tool-box code{display:block;margin-top:2px;font-family:var(--mono);font-size:7.5px;line-height:1.45;color:var(--ink)}
+  .tool-box .no{color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- ================= PAGE 1 — IA ================= -->
+<section class="sheet" id="ia">
+  <div class="kmark">K</div>
+  <div class="doc-title">Kern / system design</div>
+  <div class="doc-section">01 / Information architecture</div>
+  <div class="page-no">01 / 05</div>
+  <div class="rule"></div>
+  <p class="intro">The app has two faces: a <b>read-only public proof surface</b> and a <b>local operator workflow</b>. The public site replays recorded audits; the operator tools create and verify them. The storefront is the fixture the witness shops.</p>
+
+  <div class="ia-root">KERN</div>
+
+  <div class="ia-cat ia-cat--public" style="left:210px">PUBLIC APP <span class="tag tag--mint" style="margin-left:auto">static</span></div>
+  <div class="ia-cat ia-cat--store" style="left:500px">STOREFRONT <span class="tag tag--mint" style="margin-left:auto">static</span></div>
+  <div class="ia-cat ia-cat--ops" style="left:790px">OPERATOR TOOLS <span class="tag tag--amber" style="margin-left:auto">local</span></div>
+  <div class="ia-cat ia-cat--data" style="left:1080px">EVIDENCE &amp; ARTIFACTS <span class="tag tag--amber" style="margin-left:auto">private</span></div>
+
+  <div class="ia-item" style="left:244px;top:232px"><b>Landing</b><span>/</span></div>
+  <div class="ia-item" style="left:244px;top:286px"><b>Campaign</b><span>/campaign</span></div>
+  <div class="ia-item" style="left:244px;top:340px"><b>Why Kane</b><span>/why-kane</span></div>
+  <div class="ia-item" style="left:244px;top:394px"><b>Gate</b><span>/gate</span></div>
+  <div class="ia-item" style="left:244px;top:448px"><b>Audits</b><span>/audits · X-Ray · Receipt · Repair</span></div>
+  <div class="ia-item" style="left:244px;top:502px"><b>Runs</b><span>/runs</span></div>
+
+  <div class="ia-item" style="left:534px;top:232px"><b>Shop</b><span>/store/</span></div>
+  <div class="ia-item" style="left:534px;top:286px"><b>$60 eligible</b><span>/store/eligible-60</span></div>
+  <div class="ia-item" style="left:534px;top:340px"><b>$50 boundary</b><span>/store/boundary-50</span></div>
+  <div class="ia-item" style="left:534px;top:394px"><b>$35 control</b><span>/store/control-35</span></div>
+  <div class="ia-item" style="left:534px;top:448px"><b>Before repair</b><span>/store/before/:cart</span></div>
+
+  <div class="ia-item ia-item--ops" style="left:824px;top:232px"><b>Demo app</b><span>:3000 · local</span><span class="tag tag--amber">local</span></div>
+  <div class="ia-item ia-item--ops" style="left:824px;top:286px"><b>Compiler</b><span>/compile · writes .data</span><span class="tag tag--red">404</span></div>
+  <div class="ia-item ia-item--ops" style="left:824px;top:340px"><b>Live check</b><span>/check · KERN_LIVE=1</span><span class="tag tag--amber">local</span></div>
+  <div class="ia-item ia-item--ops" style="left:824px;top:394px"><b>Audit runner</b><span>scripts/kane-audit.ts</span><span class="tag tag--amber">CLI</span></div>
+  <div class="ia-item ia-item--ops" style="left:824px;top:448px"><b>Gate CLI</b><span>npm run gate</span><span class="tag tag--amber">CLI</span></div>
+  <div class="ia-item ia-item--ops" style="left:824px;top:502px"><b>Static export</b><span>npm run export:static</span><span class="tag tag--amber">build</span></div>
+
+  <div class="ia-item ia-item--amber" style="left:1114px;top:232px"><b>Contract</b><span>contracts/ · SHA-256</span><span class="tag tag--amber">hashed</span></div>
+  <div class="ia-item ia-item--amber" style="left:1114px;top:286px"><b>Audit JSON</b><span>.data/audits/&lt;id&gt;</span><span class="tag tag--amber">private</span></div>
+  <div class="ia-item ia-item--amber" style="left:1114px;top:340px"><b>Evidence</b><span>.data/evidence · packs</span><span class="tag tag--amber">private</span></div>
+  <div class="ia-item ia-item--amber" style="left:1114px;top:394px"><b>Recorded</b><span>recorded/&lt;id&gt;</span><span class="tag tag--amber">sanitized</span></div>
+  <div class="ia-item ia-item--amber" style="left:1114px;top:448px"><b>Receipt record</b><span>rendered from audit</span><span class="tag tag--amber">scoped</span></div>
+  <div class="ia-item ia-item--amber" style="left:1114px;top:502px"><b>Source patch</b><span>src/lib/shipping.ts</span><span class="tag tag--amber">git</span></div>
+
+  <div class="ia-note">
+    <h4>Access model</h4>
+    <p>The public site is static and read-only. Operator tools run on the local workstation. The compiler and live check are not public.</p>
+    <div class="legend">
+      <span><i></i>public / static</span>
+      <span><i class="ops"></i>local operator</span>
+      <span><i class="data"></i>private / sanitized</span>
+      <span><i class="no"></i>404 / no public write</span>
+    </div>
+  </div>
+
+  <div class="ia-bottom">
+    <p><b>The public surface</b> is a proof reader: landing, campaign, why, gate, audits, receipt, repair, runs, store and before/after.</p>
+    <p class="mono">No login. No public write. No arbitrary URL. /compile and /check/* are local-only.</p>
+  </div>
+
+  <svg class="wires" viewBox="0 0 1600 1000" aria-hidden="true">
+    <path d="M168 475 L188 475 L188 158 L1205 158"/>
+    <path d="M335 158 L335 178" class="teal"/>
+    <path d="M625 158 L625 178" class="teal"/>
+    <path d="M915 158 L915 178" class="teal"/>
+    <path d="M1205 158 L1205 178" class="teal"/>
+    <path d="M226 215 L226 523" class="teal"/>
+    <path d="M516 215 L516 469" class="teal"/>
+    <path d="M806 215 L806 523" class="teal"/>
+    <path d="M1096 215 L1096 523" class="teal"/>
+    <path d="M226 253 L244 253" class="teal"/>
+    <path d="M226 307 L244 307" class="teal"/>
+    <path d="M226 361 L244 361" class="teal"/>
+    <path d="M226 415 L244 415" class="teal"/>
+    <path d="M226 469 L244 469" class="teal"/>
+    <path d="M226 523 L244 523" class="teal"/>
+    <path d="M516 253 L534 253" class="teal"/>
+    <path d="M516 307 L534 307" class="teal"/>
+    <path d="M516 361 L534 361" class="teal"/>
+    <path d="M516 415 L534 415" class="teal"/>
+    <path d="M516 469 L534 469" class="teal"/>
+    <path d="M806 253 L824 253" class="teal"/>
+    <path d="M806 307 L824 307" class="teal"/>
+    <path d="M806 361 L824 361" class="teal"/>
+    <path d="M806 415 L824 415" class="teal"/>
+    <path d="M806 469 L824 469" class="teal"/>
+    <path d="M806 523 L824 523" class="teal"/>
+    <path d="M1096 253 L1114 253" class="teal"/>
+    <path d="M1096 307 L1114 307" class="teal"/>
+    <path d="M1096 361 L1114 361" class="teal"/>
+    <path d="M1096 415 L1114 415" class="teal"/>
+    <path d="M1096 469 L1114 469" class="teal"/>
+    <path d="M1096 523 L1114 523" class="teal"/>
+  </svg>
+
+  <div class="foot"><span><b>Kern</b> / system design</span><span>Information architecture · 01 / 05</span><span>Kane CLI / TestMu AI</span></div>
+</section>
+
+<!-- ================= PAGE 2 — USER FLOW ================= -->
+<section class="sheet" id="flow">
+  <div class="kmark">K</div>
+  <div class="doc-title">Kern / user flow</div>
+  <div class="doc-section">02 / Operator journey</div>
+  <div class="page-no">02 / 05</div>
+  <div class="rule"></div>
+  <p class="intro">One promise, followed from the ad to the receipt. A broken promise loops through a bounded repair. A pass becomes evidence. An inconclusive run never becomes a verdict.</p>
+
+  <div class="flow-box flow-box--start" style="left:620px;top:154px"><b>Ad promise + merchant terms</b><span>free shipping over $50 · US / USD · SP-01 baseline</span></div>
+  <div class="flow-box" style="left:620px;top:210px"><b>Freeze contract</b><span>ad snapshot + approved interpretation · spec SHA-256</span></div>
+  <div class="flow-box" style="left:620px;top:266px"><b>Build three carts</b><span>$60 eligible · $50 boundary · $35 control · expected $0/$0/$9</span></div>
+  <div class="flow-box box--dash" style="left:620px;top:322px"><b>Kane runs the real checkout</b><span>:4173 store · observe + assert · 6 runs · run_end / evidence</span></div>
+  <div class="flow-box" style="left:620px;top:378px"><b>Oracle decides</b><span>expected cents vs observed cents · never the store’s shipping function</span></div>
+
+  <div class="diamond"><span>Promise<br>honored?</span></div>
+
+  <div class="flow-box flow-box--teal" style="left:620px;top:530px"><b>Gate open</b><span>exit 0 · all 3 scenarios pass · 6/6 objective hashes</span></div>
+  <div class="flow-box flow-box--end" style="left:620px;top:586px"><b>Promise Receipt</b><span>contract · quoted values · runs · approval · scope · limits</span></div>
+  <div class="flow-box flow-box--end" style="left:620px;top:642px"><b>Public / support reads</b><span>read-only · recorded evidence · no Kane · no writes</span></div>
+
+  <div class="flow-box flow-box--red" style="left:1090px;top:410px"><b>BROKEN</b><span>gate closed · no ship</span></div>
+  <div class="flow-box flow-box--red" style="left:1090px;top:466px"><b>Pi bounded patch</b><span>allowed files · shipping.ts + one test</span></div>
+  <div class="flow-box" style="left:1090px;top:522px"><b>Human review + merge</b><span>diff → approval → commit</span></div>
+  <div class="flow-box flow-box--red" style="left:1090px;top:578px"><b>Kane reruns the same six</b><span>same objectives · 6/6 hashes</span></div>
+
+  <div class="flow-box flow-box--amber" style="left:200px;top:378px"><b>INCONCLUSIVE / INFRA</b><span>missing evidence or setup failure · no verdict</span></div>
+  <div class="flow-box flow-box--amber" style="left:200px;top:434px"><b>Fix setup / retry</b><span>auth · store health · evidence · never a false green</span></div>
+
+  <div class="flow-box box--dash" style="left:200px;top:642px;width:340px"><b>Demo path / no Kane</b><span>npm run demo → app :3000 + store :4173 · recorded evidence</span></div>
+
+  <div class="flow-side" style="left:1090px;top:150px;width:300px">
+    <h4>The repair loop</h4>
+    <p>The agent cannot edit the challenge. The gate stays closed until the same six objectives pass on the repaired store.</p>
+  </div>
+  <div class="flow-note" style="left:1080px;top:690px">same contract · same carts · same hashes</div>
+  <div class="flow-note" style="left:200px;top:500px">retry only after the setup is proven</div>
+
+  <div class="flow-label flow-label--yes" style="left:812px;top:520px">yes</div>
+  <div class="flow-label flow-label--no" style="left:866px;top:450px">no</div>
+  <div class="flow-label" style="left:500px;top:360px">inconclusive</div>
+
+  <div class="flow-legend"><span><i></i>normal path</span><span><i class="r"></i>repair loop</span><span><i class="a"></i>no verdict</span></div>
+  <svg class="wires" viewBox="0 0 1600 1000" aria-hidden="true">
+    <defs>
+      <marker id="t" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0f766e"/></marker>
+      <marker id="r" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#bd4335"/></marker>
+      <marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#b28c45"/></marker>
+    </defs>
+    <path d="M790 190 L790 210" class="teal" marker-end="url(#t)"/>
+    <path d="M790 246 L790 266" class="teal" marker-end="url(#t)"/>
+    <path d="M790 302 L790 322" class="teal" marker-end="url(#t)"/>
+    <path d="M790 358 L790 378" class="teal" marker-end="url(#t)"/>
+    <path d="M790 414 L790 424" class="teal" marker-end="url(#t)"/>
+    <path d="M800 516 L800 530" class="teal" marker-end="url(#t)"/>
+    <path d="M790 566 L790 586" class="teal" marker-end="url(#t)"/>
+    <path d="M790 622 L790 642" class="teal" marker-end="url(#t)"/>
+    <path d="M850 470 L1090 428" class="red" marker-end="url(#r)"/>
+    <path d="M1220 446 L1220 466" class="red" marker-end="url(#r)"/>
+    <path d="M1220 502 L1220 522" class="teal" marker-end="url(#t)"/>
+    <path d="M1220 558 L1220 578" class="teal" marker-end="url(#t)"/>
+    <path d="M1090 596 L1050 596 L1050 396 L960 396" class="red" marker-end="url(#r)"/>
+    <path d="M620 396 L540 396" class="dot" marker-end="url(#a)"/>
+    <path d="M540 452 L580 452 L580 340 L620 340" class="dot" marker-end="url(#a)"/>
+  </svg>
+
+  <div class="foot"><span><b>Kern</b> / system design</span><span>User flow · 02 / 05</span><span>Kane CLI / TestMu AI</span></div>
+</section>
+
+<!-- ================= PAGE 3 — SYSTEM ARCHITECTURE ================= -->
+<section class="sheet" id="system">
+  <div class="kmark">K</div>
+  <div class="doc-title">Kern / system architecture</div>
+  <div class="doc-section">03 / Containers and boundaries</div>
+  <div class="page-no">03 / 05</div>
+  <div class="rule"></div>
+  <p class="intro">A local workstation runs the store, the app, the audit runner and Kane. The public site is a static copy of the evidence. Kern owns the contract, oracle, gate and receipt; Kane owns the browser observation.</p>
+
+  <div class="sys-boundary"></div>
+  <div class="sys-boundary-label">LOCAL WORKSTATION · TRUSTED OPERATOR</div>
+
+  <div class="sys-actor" style="left:50px;top:240px"><span class="k">ACTOR</span><b>Merchant / operator</b><span>ad + terms · approve · merge</span></div>
+  <div class="sys-actor" style="left:50px;top:440px"><span class="k">ACTOR</span><b>Pi</b><span>terminal patch · human merge → store</span></div>
+  <div class="sys-actor" style="left:50px;top:800px"><span class="k">ACTOR</span><b>Public / support</b><span>read-only evidence</span></div>
+
+  <div class="sys-box" style="left:310px;top:190px"><span class="k">APP</span><b>Kern app</b><span>Node :3000 · read-only X-Ray, campaign, runs, receipt, gate, repair case</span></div>
+  <div class="sys-box" style="left:590px;top:190px;width:300px"><span class="k">LOCAL CLI</span><b>Audit runner + oracle</b><span>scripts/kane-audit.ts · spawn Kane · parse · compare</span></div>
+  <div class="sys-box" style="left:310px;top:380px"><span class="k">AGENT GATE</span><b>Gate + receipt</b><span>evaluateGate · exit 0/1/2 · Stop hook · scoped receipt</span></div>
+  <div class="sys-box sys-box--amber" style="left:590px;top:380px;width:300px"><span class="k">DATA</span><b>Artifacts</b><span>contracts · .data audits/evidence · recorded/ · site/</span></div>
+  <div class="sys-box sys-box--dark" style="left:1120px;top:200px;width:200px"><span class="k">WITNESS</span><b>Kane CLI + Chrome</b><span>TestMu AI · real browser</span></div>
+  <div class="sys-box" style="left:1120px;top:380px;width:200px"><span class="k">FIXTURE</span><b>Storefront</b><span>Node :4173 · /checkout · no payments</span></div>
+  <div class="sys-box sys-box--mint" style="left:1120px;top:800px;width:240px"><span class="k">PUBLIC</span><b>Static site / Vercel</b><span>site/ · recorded audits · no Kane · no writes</span></div>
+
+  <svg class="wires" viewBox="0 0 1600 1000" aria-hidden="true">
+    <defs>
+      <marker id="st" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0f766e"/></marker>
+      <marker id="sr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#bd4335"/></marker>
+      <marker id="sg" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2f7a57"/></marker>
+    </defs>
+    <path d="M240 277 L310 229" class="teal" marker-end="url(#st)"/>
+    <path d="M540 229 L590 229" class="teal" marker-end="url(#st)"/>
+    <path d="M890 229 L1120 239" class="teal" marker-end="url(#st)"/>
+    <path d="M1220 278 L1220 380" class="teal" marker-end="url(#st)"/>
+    <path d="M1120 400 L940 400 L940 268 L890 268" class="teal" marker-end="url(#st)"/>
+    <path d="M740 268 L740 380" class="teal" marker-end="url(#st)"/>
+    <path d="M590 419 L540 419" class="teal" marker-end="url(#st)"/>
+    <path d="M310 419 L240 478" class="red" marker-end="url(#sr)"/>
+    <path d="M740 456 L740 780 L1120 800" class="green" marker-end="url(#sg)"/>
+    <path d="M1240 840 L1240 910 L240 910 L240 874" class="green" marker-end="url(#sg)"/>
+  </svg>
+
+  <div class="sys-legend"><span><i></i>runtime / observation</span><span><i class="d"></i>control / approval</span><span><i class="p"></i>static / read-only</span></div>
+  <div class="foot"><span><b>Kern</b> / system design</span><span>System architecture · 03 / 05</span><span>Kane CLI / TestMu AI</span></div>
+</section>
+
+<!-- ================= PAGE 4 — TECHNICAL ARCHITECTURE ================= -->
+<section class="sheet" id="technical">
+  <div class="kmark">K</div>
+  <div class="doc-title">Kern / technical architecture</div>
+  <div class="doc-section">04 / Runtime, data and trust</div>
+  <div class="page-no">04 / 05</div>
+  <div class="rule"></div>
+  <p class="intro">A small local-first system: plain Node HTTP, TypeScript, JSON files and a real browser CLI. No database, no queue, no framework. The public site is a static export of sanitized evidence.</p>
+
+  <div class="tech-layer-label" style="top:170px">PRESENTATION</div>
+  <div class="tech-row" style="top:164px">
+    <div class="tech-box"><b>Public pages</b><span>/ · /campaign · /why-kane · /gate · /audits · /receipt</span></div>
+    <div class="tech-box"><b>Local app</b><span>/compile · /check · /repair · /runs</span></div>
+    <div class="tech-box"><b>Storefront</b><span>/store · /cart · /checkout</span></div>
+  </div>
+
+  <div class="tech-layer-label" style="top:275px">APPLICATION</div>
+  <div class="tech-row" style="top:269px">
+    <div class="tech-box"><b>Audit runner</b><span>kane-audit.ts</span></div>
+    <div class="tech-box"><b>Compiler</b><span>contract-compiler.ts</span></div>
+    <div class="tech-box"><b>Gate</b><span>gate.ts · Stop hook</span></div>
+    <div class="tech-box"><b>Receipt</b><span>receipt.ts</span></div>
+    <div class="tech-box"><b>Export / live</b><span>export-static.ts · live.ts</span></div>
+  </div>
+
+  <div class="tech-layer-label" style="top:380px">DOMAIN</div>
+  <div class="tech-row" style="top:374px">
+    <div class="tech-box tech-box--mint"><b>Contract + oracle</b><span>contract.ts · cents</span></div>
+    <div class="tech-box"><b>Scenarios</b><span>catalog.ts · $60/$50/$35</span></div>
+    <div class="tech-box"><b>Parser</b><span>kane/parse.ts</span></div>
+    <div class="tech-box"><b>Status rules</b><span>audit.ts · fail closed</span></div>
+  </div>
+
+  <div class="tech-layer-label" style="top:485px">INTEGRATION</div>
+  <div class="tech-row" style="top:479px">
+    <div class="tech-box tech-box--amber"><b>Kane CLI / Chrome</b><span>TestMu AI · observe/assert</span></div>
+    <div class="tech-box"><b>Pi / Git</b><span>bounded patch · human merge</span></div>
+    <div class="tech-box"><b>Vercel</b><span>static site</span></div>
+  </div>
+
+  <div class="tech-layer-label" style="top:590px">DATA</div>
+  <div class="tech-row" style="top:584px">
+    <div class="tech-box"><b>contracts/</b><span>canonical JSON</span></div>
+    <div class="tech-box"><b>.data/</b><span>audits · evidence · private</span></div>
+    <div class="tech-box"><b>recorded/</b><span>sanitized copies</span></div>
+    <div class="tech-box"><b>site/</b><span>static export</span></div>
+  </div>
+
+  <div class="tech-side">
+    <div class="tech-side-card"><div class="k">Runtime</div><h4>Node 24 · TypeScript · plain HTTP</h4><p>App <b>:3000</b> · store <b>:4173</b>. No framework, no database, no job queue. Files are the persistence layer.</p><p class="mono">shell:false · integer cents · SHA-256</p></div>
+    <div class="tech-side-card"><div class="k">Data / trust</div><h4>The oracle reads the contract, not the store.</h4><p>Ad copy, rendered pages and Kane logs are untrusted data. The contract, oracle and gate are trusted. The human merge is a separate action.</p><p class="mono">.data private · recorded sanitized · site public</p></div>
+    <div class="tech-side-card"><div class="k">Public / failure</div><h4>Read-only outside the workstation.</h4><p>Static export, recorded banner, no Kane, no writes. <b>/compile</b> and <b>/check/*</b> return 404. Missing evidence is <b>INCONCLUSIVE</b>, never a pass.</p></div>
+  </div>
+
+  <div class="tech-bottom"><p><b>Source of truth:</b> contract + expected cents</p><p><b>Observation:</b> Kane + rendered quote</p><p><b>Decision:</b> oracle + gate</p><p><b>Record:</b> audit + receipt</p></div>
+  <div class="foot"><span><b>Kern</b> / system design</span><span>Technical architecture · 04 / 05</span><span>Kane CLI / TestMu AI</span></div>
+</section>
+
+<!-- ================= PAGE 5 — TOOLING ================= -->
+<section class="sheet" id="tooling">
+  <div class="kmark">K</div>
+  <div class="doc-title">Kern / tooling &amp; stack</div>
+  <div class="doc-section">05 / What runs it</div>
+  <div class="page-no">05 / 05</div>
+  <div class="rule"></div>
+  <p class="intro">The stack is deliberately small. Kane is the real browser witness; everything else is local, file-backed and inspectable. The public deployment is static HTML.</p>
+
+  <div class="stack">
+    <div class="stack-row stack-row--mint"><div class="k">RUNTIME</div><b>Node.js 24 + TypeScript</b><span>plain Node HTTP · no framework · no database</span></div>
+    <div class="stack-row"><div class="k">BROWSER WITNESS</div><b>Kane CLI 0.10.6</b><span>TestMu AI · headless Chrome · observe + assert</span></div>
+    <div class="stack-row"><div class="k">DECISION</div><b>Deterministic oracle</b><span>integer cents · SHA-256 · fail closed</span></div>
+    <div class="stack-row"><div class="k">REPAIR</div><b>Pi + Git</b><span>terminal agent · bounded patch · human merge</span></div>
+    <div class="stack-row"><div class="k">PUBLIC</div><b>Static export + Vercel</b><span>site/ · GitHub · recorded evidence</span></div>
+  </div>
+
+  <div class="tool-table">
+    <div class="tool-row tool-head"><div class="tool-cell">Tool</div><div class="tool-cell">Role</div><div class="tool-cell">What it does</div><div class="tool-cell">Evidence</div></div>
+    <div class="tool-row"><div class="tool-cell"><b>Node 24</b><div class="mono">+ TypeScript</div></div><div class="tool-cell">Runtime</div><div class="tool-cell">Serves the app and store; runs the audit, gate, receipt and static export.</div><div class="tool-cell"><span class="mono">src/ · scripts/ · package.json</span></div></div>
+    <div class="tool-row"><div class="tool-cell"><b>Node http</b><div class="mono">HTML/CSS renderers</div></div><div class="tool-cell">App + storefront</div><div class="tool-cell">Server-rendered pages, no client framework or SPA runtime.</div><div class="tool-cell"><span class="mono">src/app/server.ts · src/server.ts</span></div></div>
+    <div class="tool-row"><div class="tool-cell"><b>Kane CLI</b><div class="mono">0.10.6</div></div><div class="tool-cell">Witness</div><div class="tool-cell">Opens the real storefront, follows the cart, reads the rendered quote, returns runs and evidence.</div><div class="tool-cell"><span class="mono">@testmuai/kane-cli · Chrome</span></div></div>
+    <div class="tool-row"><div class="tool-cell"><b>TestMu AI</b></div><div class="tool-cell">Provider</div><div class="tool-cell">Supplies Kane CLI; Kern is an independent project, not an official TestMu AI product.</div><div class="tool-cell"><span class="mono">Kane CLI Online Hackathon</span></div></div>
+    <div class="tool-row"><div class="tool-cell"><b>Oracle</b><div class="mono">SHA-256</div></div><div class="tool-cell">Verdict</div><div class="tool-cell">Compares expected cents to observed cents; never reads the store’s shipping function.</div><div class="tool-cell"><span class="mono">src/lib/contract.ts</span></div></div>
+    <div class="tool-row"><div class="tool-cell"><b>node:test</b></div><div class="tool-cell">Quality gate</div><div class="tool-cell">90/90 tests pass; typecheck clean; contract, boundary and gate tests.</div><div class="tool-cell"><span class="mono">npm test · tsc --noEmit</span></div></div>
+    <div class="tool-row"><div class="tool-cell"><b>Pi</b><div class="mono">+ Git</div></div><div class="tool-cell">Repair</div><div class="tool-cell">Terminal-driven bounded patch; fix 4c8105f; human merge 88536a9.</div><div class="tool-cell"><span class="mono">repair/free-shipping-threshold</span></div></div>
+    <div class="tool-row"><div class="tool-cell"><b>JSON files</b></div><div class="tool-cell">Data</div><div class="tool-cell">Contracts, audits, evidence metadata; `.data` private, `recorded` sanitized.</div><div class="tool-cell"><span class="mono">contracts/ · .data/ · recorded/</span></div></div>
+    <div class="tool-row"><div class="tool-cell"><b>Static export</b><div class="mono">Vercel</div></div><div class="tool-cell">Public</div><div class="tool-cell">`site/` read-only deployment with the recorded banner; no Kane and no writes.</div><div class="tool-cell"><span class="mono">npm run export:static</span></div></div>
+    <div class="tool-row"><div class="tool-cell"><b>Claude Code</b><div class="mono">Stop hook</div></div><div class="tool-cell">Agent gate</div><div class="tool-cell">Returns a block decision when the gate is closed; Pi uses the same exit contract.</div><div class="tool-cell"><span class="mono">hooks/claude-code-stop.mjs</span></div></div>
+  </div>
+
+  <div class="tool-bottom">
+    <div class="tool-box"><div class="k">Commands</div><h4>Run the proof path.</h4>
+      <code>npm run demo</code>
+      <code>node scripts/kane-audit.ts</code>
+      <code>npm run gate -- --audit &lt;path&gt;</code>
+      <code>npm run export:static</code>
+      <code>npm test</code>
+    </div>
+    <div class="tool-box"><div class="k">Not in P0</div><h4>What this is not.</h4><p>No React/Next.js, no SQLite/Postgres, no job queue, no hosted worker, no Playwright, no payments, no Shopify/Meta connectors, no scheduled monitoring, no auto-deploy, no signed receipts, no in-app autonomous repair.</p><p class="no">The implemented P0 is Node HTTP + files + local CLI.</p></div>
+  </div>
+
+  <div class="foot"><span><b>Kern</b> / system design</span><span>Tooling &amp; stack · 05 / 05</span><span>Kane CLI / TestMu AI</span></div>
+</section>
+
+</body>
+</html>

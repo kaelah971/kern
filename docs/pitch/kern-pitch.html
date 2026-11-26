@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280, initial-scale=1">
+<title>Kern — the promise firewall for checkout</title>
+<style>
+  :root{
+    --paper:#eef0eb;
+    --paper-2:#e3e6df;
+    --ink:#0b1512;
+    --ink-2:#14201b;
+    --muted:#4d5b54;
+    --muted-dark:#b7c4ba;
+    --line:#c8d1c9;
+    --line-dark:rgba(255,255,255,.15);
+    --teal:#0f766e;
+    --mint:#7ef0c0;
+    --mint-soft:#c9f7e5;
+    --red:#bd4335;
+    --red-soft:#f5e1dc;
+    --green:#2f7a57;
+    --white:#fff;
+    --sans: Inter, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#cfd4cc;scrollbar-width:none;-ms-overflow-style:none}
+  html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
+  body{
+    font-family:var(--sans);
+    color:var(--ink);
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+    padding:24px 0;
+  }
+  .slide{
+    position:relative;
+    width:1280px;
+    height:720px;
+    margin:0 auto 24px;
+    overflow:hidden;
+    background:var(--paper);
+    color:var(--ink);
+    padding:52px 64px;
+    box-shadow:0 24px 60px rgba(11,21,18,.15);
+    page-break-after:always;
+    break-after:page;
+  }
+  .slide--dark{background:var(--ink);color:var(--white)}
+  .slide--cover{background:var(--ink);color:var(--white)}
+  .slide--close{background:var(--ink);color:var(--white)}
+  .slide:last-child{margin-bottom:0;page-break-after:auto;break-after:auto}
+  .grid{
+    position:absolute;inset:0;
+    background-image:linear-gradient(rgba(126,240,192,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(126,240,192,.05) 1px,transparent 1px);
+    background-size:64px 64px;
+    pointer-events:none;
+  }
+  .slide--dark .grid{opacity:.8}
+  .slide--cover .grid{opacity:.7}
+  .topline{
+    position:absolute;left:64px;right:64px;top:30px;height:1px;
+    background:var(--line);
+  }
+  .slide--dark .topline,.slide--cover .topline,.slide--close .topline{background:var(--line-dark)}
+  .kicker{
+    font-family:var(--mono);
+    font-size:10px;
+    line-height:1.3;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--teal);
+    position:relative;
+    z-index:1;
+  }
+  .slide--dark .kicker,.slide--cover .kicker,.slide--close .kicker{color:var(--mint)}
+  h1,h2,h3,p{margin:0}
+  .display{
+    font-size:76px;
+    line-height:.96;
+    letter-spacing:-.055em;
+    font-weight:900;
+    position:relative;
+    z-index:1;
+  }
+  .h2{
+    font-size:56px;
+    line-height:.98;
+    letter-spacing:-.052em;
+    font-weight:900;
+    position:relative;
+    z-index:1;
+  }
+  .h3{font-size:27px;line-height:1.1;letter-spacing:-.03em;font-weight:800}
+  .lead{
+    font-size:18px;
+    line-height:1.45;
+    color:var(--muted);
+    position:relative;
+    z-index:1;
+  }
+  .slide--dark .lead,.slide--cover .lead,.slide--close .lead{color:var(--muted-dark)}
+  .mono{font-family:var(--mono)}
+  .mint{color:var(--mint)}
+  .teal{color:var(--teal)}
+  .red{color:var(--red)}
+  .muted{color:var(--muted)}
+  .muted-dark{color:var(--muted-dark)}
+  .foot{
+    position:absolute;
+    left:64px;
+    right:64px;
+    bottom:27px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:20px;
+    font-family:var(--mono);
+    font-size:9px;
+    line-height:1.3;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:#7e8d83;
+  }
+  .slide--dark .foot,.slide--cover .foot,.slide--close .foot{color:#8fa398}
+  .foot b{font-weight:500;color:var(--ink)}
+  .slide--dark .foot b,.slide--cover .foot b,.slide--close .foot b{color:#c2d3c7}
+  .brandfoot{display:flex;align-items:center;gap:8px}
+  .brandmark{
+    width:16px;height:16px;border-radius:4px;background:var(--ink);color:var(--white);
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:900;line-height:1;letter-spacing:-.04em;
+  }
+  .slide--dark .brandmark,.slide--cover .brandmark,.slide--close .brandmark{background:var(--mint);color:var(--ink)}
+  .pageno{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:#7e8d83}
+  .slide--dark .pageno,.slide--cover .pageno,.slide--close .pageno{color:#8fa398}
+
+  /* cover */
+  .cover-mark{
+    position:absolute;
+    left:64px;top:92px;
+    width:54px;height:54px;
+    border-radius:12px;
+    background:var(--mint);
+    color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:30px;line-height:1;font-weight:900;letter-spacing:-.08em;
+  }
+  .cover-eyebrow{
+    position:absolute;right:64px;top:104px;
+    font-family:var(--mono);font-size:10px;line-height:1.4;letter-spacing:.16em;text-transform:uppercase;
+    text-align:right;color:var(--mint);
+  }
+  .cover-title{
+    position:absolute;left:64px;top:196px;
+    width:900px;
+    font-size:100px;line-height:.9;letter-spacing:-.065em;font-weight:900;color:#f4f8f3;
+  }
+  .cover-title span{color:var(--mint)}
+  .cover-sub{
+    position:absolute;left:66px;top:430px;
+    font-size:26px;line-height:1.15;letter-spacing:-.03em;color:#d8e5dc;
+  }
+  .cover-strip{
+    position:absolute;left:64px;top:520px;
+    display:flex;gap:0;align-items:center;
+    border-top:1px solid rgba(255,255,255,.16);
+    border-bottom:1px solid rgba(255,255,255,.16);
+  }
+  .cover-strip span{
+    display:block;padding:18px 32px 17px 0;
+    font-family:var(--mono);font-size:11px;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;
+    color:#a8b9ad;
+  }
+  .cover-strip span+span{padding-left:32px;border-left:1px solid rgba(255,255,255,.12)}
+  .cover-strip b{display:block;margin-top:5px;font-family:var(--sans);font-size:25px;letter-spacing:-.035em;font-weight:800;color:#f4f8f3;text-transform:none}
+  .cover-strip .bad b{color:#ff9a88}
+  .cover-foot{
+    position:absolute;left:64px;right:64px;bottom:34px;
+    display:flex;justify-content:space-between;gap:20px;
+    font-family:var(--mono);font-size:10px;line-height:1.3;letter-spacing:.1em;text-transform:uppercase;color:#93a69a;
+  }
+  .cover-foot b{color:var(--mint);font-weight:500}
+
+  /* slide 2 */
+  .problem-title{
+    position:absolute;left:64px;top:112px;width:650px;
+    font-size:56px;line-height:.97;letter-spacing:-.055em;font-weight:900;
+  }
+  .problem-title span{color:var(--red)}
+  .problem-lead{position:absolute;left:64px;top:360px;width:610px;font-size:18px;line-height:1.45;color:var(--muted)}
+  .problem-big{
+    position:absolute;left:64px;top:462px;
+    display:flex;align-items:flex-end;gap:24px;
+  }
+  .problem-big .promise{
+    font-family:var(--mono);font-size:10px;line-height:1.3;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);
+  }
+  .problem-big .promise b{display:block;margin-top:5px;font-family:var(--sans);font-size:44px;letter-spacing:-.045em;font-weight:900;color:var(--teal)}
+  .problem-big .arrow{font-family:var(--mono);font-size:24px;color:#8b9a90;padding-bottom:8px}
+  .problem-big .obs{
+    font-family:var(--mono);font-size:10px;line-height:1.3;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);
+  }
+  .problem-big .obs b{display:block;margin-top:5px;font-family:var(--sans);font-size:76px;letter-spacing:-.055em;font-weight:900;color:var(--red)}
+  .problem-quote{
+    position:absolute;left:64px;right:64px;bottom:84px;
+    font-size:17px;line-height:1.4;color:var(--ink);max-width:690px;
+  }
+  .problem-quote::before{content:"";display:inline-block;width:24px;height:2px;background:var(--red);vertical-align:middle;margin-right:11px}
+  .browser{
+    position:absolute;background:#f7f8f4;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    box-shadow:0 20px 44px rgba(11,21,18,.13);
+  }
+  .browser-bar{
+    height:30px;display:flex;align-items:center;gap:5px;padding:0 11px;background:var(--ink);color:#b8c7bd;
+    font-family:var(--mono);font-size:8px;letter-spacing:.11em;
+  }
+  .browser-bar i{width:5px;height:5px;border-radius:50%;background:#71847a;display:inline-block}
+  .browser-bar em{font-style:normal;margin-left:7px;flex:1;color:#9daf9f}
+  .browser-bar b{font-weight:500;color:var(--mint);font-size:7px;letter-spacing:.13em}
+  .browser img{display:block;width:100%;height:auto}
+  .problem-browser{right:64px;top:112px;width:490px;border-color:#d3bdb8}
+
+  /* slide 3 */
+  .blind-title{position:absolute;left:64px;top:102px;width:1000px;font-size:56px;line-height:.98;letter-spacing:-.052em;font-weight:900}
+  .blind-lead{position:absolute;left:64px;top:214px;width:880px;font-size:18px;line-height:1.4;color:var(--muted)}
+  .blind-table{position:absolute;left:64px;top:296px;width:1152px;border-top:1px solid #b8c3ba}
+  .blind-row{display:grid;grid-template-columns:230px 280px 1fr;gap:22px;align-items:center;min-height:56px;border-bottom:1px solid #cbd3cb}
+  .blind-row .who{font-family:var(--mono);font-size:11px;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .blind-row .sees{font-size:18px;line-height:1.2;letter-spacing:-.015em;color:var(--ink)}
+  .blind-row .miss{font-family:var(--mono);font-size:10px;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;color:#8a978e}
+  .blind-row--gap{min-height:82px;border-bottom:none;background:var(--red-soft);margin-top:10px;border-radius:8px;padding:0 14px;border-top:1px solid #e3c4be}
+  .blind-row--gap .who{color:var(--red)}
+  .blind-row--gap .sees{font-weight:800;color:var(--red)}
+  .blind-row--gap .miss{color:#8f5d55}
+  .blind-q{position:absolute;right:64px;top:96px;font-size:104px;line-height:1;font-weight:900;color:#e0b9b0;letter-spacing:-.07em}
+  .blind-foot{position:absolute;left:64px;bottom:70px;font-size:26px;line-height:1.1;letter-spacing:-.03em;font-weight:800}
+  .blind-foot span{color:var(--red)}
+
+  /* slide 4 */
+  .agent-title{position:absolute;left:64px;top:104px;width:900px;font-size:60px;line-height:.96;letter-spacing:-.055em;font-weight:900;color:#f4f8f3}
+  .agent-lead{position:absolute;left:64px;top:226px;width:760px;font-size:18px;line-height:1.45;color:#b7c4ba}
+  .agent-rows{position:absolute;left:64px;top:322px;width:1152px;border-top:1px solid rgba(255,255,255,.15)}
+  .agent-row{display:grid;grid-template-columns:60px 190px 1fr;gap:22px;align-items:start;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+  .agent-row .n{font-family:var(--mono);font-size:10px;color:#7f9488;padding-top:3px}
+  .agent-row .label{font-family:var(--mono);font-size:10px;line-height:1.3;letter-spacing:.14em;text-transform:uppercase;color:var(--mint);padding-top:3px}
+  .agent-row h3{font-size:25px;line-height:1.1;letter-spacing:-.025em;font-weight:800;color:#eef6f0}
+  .agent-row p{margin-top:5px;font-size:15px;line-height:1.35;color:#a6b8ab}
+  .agent-bottom{position:absolute;left:64px;right:64px;bottom:64px;display:flex;justify-content:space-between;align-items:flex-end;gap:30px}
+  .agent-bottom .quote{font-size:27px;line-height:1.16;letter-spacing:-.03em;color:#e3eee6;max-width:820px}
+  .agent-bottom .quote span{color:var(--mint)}
+  .agent-bottom .side{font-family:var(--mono);font-size:9px;line-height:1.4;letter-spacing:.1em;text-transform:uppercase;color:#8fa398;text-align:right}
+
+  /* slide 5 */
+  .insight-title{position:absolute;left:64px;top:100px;width:1000px;font-size:58px;line-height:.97;letter-spacing:-.055em;font-weight:900}
+  .insight-title span{color:var(--teal)}
+  .insight-lead{position:absolute;left:64px;top:218px;width:900px;font-size:18px;line-height:1.4;color:var(--muted)}
+  .insight-grid{position:absolute;left:64px;top:292px;width:1152px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .insight-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-height:158px}
+  .insight-card .k{font-family:var(--mono);font-size:9px;line-height:1.2;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+  .insight-card p{margin-top:10px;font-size:21px;line-height:1.25;letter-spacing:-.02em;color:var(--ink)}
+  .insight-card .footnote{margin-top:11px;font-family:var(--mono);font-size:9px;line-height:1.4;letter-spacing:.05em;color:#87958b;text-transform:uppercase}
+  .insight-contract{position:absolute;left:64px;right:64px;bottom:114px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:15px 0}
+  .insight-contract .id{font-family:var(--mono);font-size:13px;letter-spacing:.03em;color:var(--ink)}
+  .insight-contract .sha{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:#87958b}
+  .insight-contract .price{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:right}
+  .insight-contract .price b{display:block;margin-top:3px;font-family:var(--sans);font-size:20px;letter-spacing:-.03em;color:var(--ink);text-transform:none}
+  .insight-bottom{position:absolute;left:64px;bottom:64px;font-size:22px;line-height:1.2;letter-spacing:-.025em;color:var(--ink)}
+  .insight-bottom span{color:var(--teal);font-weight:700}
+
+  /* slide 6 */
+  .loop-title{position:absolute;left:64px;top:96px;font-size:58px;line-height:.97;letter-spacing:-.055em;font-weight:900;color:#f4f8f3}
+  .loop-title span{color:var(--mint)}
+  .loop-sub{position:absolute;left:64px;top:206px;width:900px;font-size:17px;line-height:1.4;color:#a9bbae}
+  .loop-wrap{position:absolute;left:64px;right:64px;top:292px;display:flex;align-items:flex-start;gap:7px}
+  .loop-step{flex:1;min-width:0;border:1px solid rgba(255,255,255,.16);border-radius:8px;background:rgba(255,255,255,.025);padding:12px 10px 11px;min-height:88px}
+  .loop-step .n{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:#7f9488;margin-bottom:8px}
+  .loop-step b{display:block;font-family:var(--mono);font-size:9px;line-height:1.25;letter-spacing:.06em;color:#e7efe9;font-weight:600}
+  .loop-step em{display:block;margin-top:5px;font-family:var(--sans);font-size:9px;line-height:1.25;color:#8fa398;font-style:normal}
+  .loop-step--kane{border-color:rgba(126,240,192,.55);background:rgba(126,240,192,.09)}
+  .loop-step--kane b{color:var(--mint)}
+  .loop-step--kane em{color:#b9e4d1}
+  .loop-arrow{align-self:center;font-family:var(--mono);font-size:13px;color:#5f786a;padding-top:3px}
+  .loop-carts{position:absolute;left:64px;right:64px;top:402px;display:flex;gap:9px}
+  .cart-pill{border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:9px;letter-spacing:.07em;color:#a7b9ac;text-transform:uppercase}
+  .cart-pill b{color:#eef6f0;font-weight:500}
+  .cart-pill--boundary{border-color:rgba(255,255,255,.28)}
+  .loop-notes{position:absolute;left:64px;right:64px;top:470px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px}
+  .loop-note{border-top:1px solid rgba(255,255,255,.14);padding-top:11px}
+  .loop-note .k{font-family:var(--mono);font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#7f9488}
+  .loop-note p{margin-top:6px;font-size:14px;line-height:1.35;color:#cad9ce}
+  .loop-bottom{position:absolute;left:64px;right:64px;bottom:66px;display:flex;justify-content:space-between;gap:24px;align-items:flex-end}
+  .loop-quote{font-size:24px;line-height:1.16;letter-spacing:-.03em;color:#e3eee6;max-width:780px}
+  .loop-quote span{color:var(--mint)}
+  .loop-side{font-family:var(--mono);font-size:9px;line-height:1.5;letter-spacing:.09em;text-transform:uppercase;color:#8fa398;text-align:right}
+
+  /* slide 7 */
+  .kane-title{position:absolute;left:64px;top:104px;width:590px;font-size:54px;line-height:.98;letter-spacing:-.055em;font-weight:900}
+  .kane-title span{color:var(--teal)}
+  .kane-lead{position:absolute;left:64px;top:254px;width:540px;font-size:17px;line-height:1.4;color:var(--muted)}
+  .roles{position:absolute;left:64px;top:344px;width:540px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .role{border-top:2px solid var(--ink);padding-top:10px}
+  .role--kane{border-top-color:var(--teal)}
+  .role .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+  .role p{font-size:13px;line-height:1.35;color:var(--muted)}
+  .role p b{color:var(--ink);font-weight:800}
+  .kane-shot{position:absolute;right:64px;top:104px;width:560px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#f7f8f4;box-shadow:0 18px 40px rgba(11,21,18,.12)}
+  .kane-shot img{display:block;width:100%}
+  .kane-quote{position:absolute;left:64px;bottom:102px;width:540px;font-size:19px;line-height:1.3;letter-spacing:-.02em;color:var(--ink)}
+  .kane-quote span{display:block;margin-top:7px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal)}
+  .kane-bottom{position:absolute;left:64px;right:64px;bottom:58px;display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding-top:11px}
+  .kane-bottom span{font-family:var(--mono);font-size:9px;line-height:1.4;letter-spacing:.09em;text-transform:uppercase;color:#7e8d83}
+
+  /* slide 8 */
+  .proof-title{position:absolute;left:64px;top:96px;font-size:54px;line-height:.98;letter-spacing:-.055em;font-weight:900;color:#f4f8f3}
+  .proof-title span{color:var(--mint)}
+  .proof-sub{position:absolute;left:64px;top:206px;font-size:16px;line-height:1.4;color:#a9bbae}
+  .proof-table{position:absolute;left:64px;top:274px;width:830px}
+  .proof-head{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.18);font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#8fa398}
+  .proof-row{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:12px;align-items:center;min-height:58px;border-bottom:1px solid rgba(255,255,255,.12)}
+  .proof-row .cart{font-size:18px;line-height:1.1;letter-spacing:-.02em;color:#e9f1eb;font-weight:700}
+  .proof-row .cart span{display:block;margin-top:3px;font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#7f9488;font-weight:400}
+  .proof-row .v{font-size:20px;line-height:1;letter-spacing:-.03em;font-weight:800;color:#d6e4d9}
+  .proof-row .v.bad{color:#ff9a88}
+  .proof-row .v.good{color:var(--mint)}
+  .proof-right{position:absolute;right:64px;top:270px;width:270px;text-align:right}
+  .six{font-size:126px;line-height:.78;letter-spacing:-.08em;font-weight:900;color:var(--mint)}
+  .six-cap{margin-top:8px;font-family:var(--mono);font-size:9px;line-height:1.4;letter-spacing:.08em;text-transform:uppercase;color:#9fb3a6}
+  .proof-facts{margin-top:22px;padding-top:12px;border-top:1px solid rgba(255,255,255,.16);display:grid;gap:8px;text-align:left}
+  .proof-fact{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:8px;line-height:1.3;letter-spacing:.06em;text-transform:uppercase;color:#8fa398}
+  .proof-fact b{color:#dce9df;font-weight:500;text-align:right}
+  .proof-bottom{position:absolute;left:64px;right:64px;bottom:55px;display:flex;justify-content:space-between;align-items:flex-end;gap:30px}
+  .proof-claim{font-size:23px;line-height:1.2;letter-spacing:-.025em;color:#e3eee6;max-width:760px}
+  .proof-claim span{color:var(--mint)}
+  .proof-note{max-width:330px;font-family:var(--mono);font-size:8px;line-height:1.5;letter-spacing:.03em;color:#7f9488;text-align:right}
+
+  /* slide 9 */
+  .receipt-title{position:absolute;left:64px;top:100px;width:640px;font-size:46px;line-height:.98;letter-spacing:-.05em;font-weight:900}
+  .receipt-title span{color:var(--teal)}
+  .receipt-lead{position:absolute;left:64px;top:220px;width:530px;font-size:17px;line-height:1.4;color:var(--muted)}
+  .receipt-shot{position:absolute;right:64px;top:102px;width:490px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#f7f8f4;box-shadow:0 18px 40px rgba(11,21,18,.13)}
+  .receipt-shot img{display:block;width:100%}
+  .receipt-list{position:absolute;left:64px;top:348px;width:600px;border-top:1px solid var(--line)}
+  .receipt-item{display:grid;grid-template-columns:22px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid #d5ddd6;font-size:13px;line-height:1.3;color:var(--ink)}
+  .receipt-item span{font-family:var(--mono);font-size:9px;color:var(--teal);padding-top:1px}
+  .receipt-scope{position:absolute;left:64px;right:64px;bottom:86px;display:flex;justify-content:space-between;gap:24px;align-items:flex-end}
+  .receipt-scope .big{font-size:24px;line-height:1.2;letter-spacing:-.03em;color:var(--ink);max-width:690px}
+  .receipt-scope .big span{color:var(--teal)}
+  .receipt-scope .small{font-family:var(--mono);font-size:9px;line-height:1.5;letter-spacing:.07em;text-transform:uppercase;color:#7e8d83;text-align:right}
+
+  /* slide 10 */
+  .product-title{position:absolute;left:64px;top:100px;font-size:54px;line-height:.98;letter-spacing:-.055em;font-weight:900}
+  .product-title span{color:var(--teal)}
+  .product-lead{position:absolute;left:64px;top:206px;width:720px;font-size:17px;line-height:1.4;color:var(--muted)}
+  .product-grid{position:absolute;left:64px;top:290px;width:680px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .product-card{background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px 14px;min-height:100px}
+  .product-card .k{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+  .product-card h3{margin-top:6px;font-size:17px;line-height:1.1;letter-spacing:-.02em;font-weight:800}
+  .product-card p{margin-top:5px;font-size:11px;line-height:1.35;color:var(--muted)}
+  .term{position:absolute;right:64px;top:286px;width:430px;border-radius:11px;background:#0a1210;color:#d5e5da;overflow:hidden;box-shadow:0 20px 40px rgba(11,21,18,.18)}
+  .term-bar{height:27px;display:flex;align-items:center;gap:5px;padding:0 11px;background:#101c18;border-bottom:1px solid rgba(255,255,255,.08);font-family:var(--mono);font-size:7px;letter-spacing:.1em;color:#8fa398}
+  .term-bar i{width:4px;height:4px;border-radius:50%;background:#60766a;display:inline-block}
+  .term-bar em{font-style:normal;margin-left:6px}
+  .term pre{padding:15px 16px 16px;margin:0;font-family:var(--mono);font-size:9px;line-height:1.7;color:#c8dbce;white-space:pre-wrap}
+  .term .ok{color:var(--mint)}
+  .product-bottom{position:absolute;left:64px;right:64px;bottom:63px;display:flex;justify-content:space-between;align-items:flex-end;gap:30px;border-top:1px solid var(--line);padding-top:12px}
+  .product-bottom .quote{font-size:23px;line-height:1.2;letter-spacing:-.03em;color:var(--ink)}
+  .product-bottom .side{font-family:var(--mono);font-size:9px;line-height:1.4;letter-spacing:.08em;text-transform:uppercase;color:#7e8d83;text-align:right}
+
+  /* slide 11 */
+  .position-title{position:absolute;left:64px;top:100px;width:1000px;font-size:56px;line-height:.96;letter-spacing:-.055em;font-weight:900;color:#f4f8f3}
+  .position-title span{color:var(--mint)}
+  .position-lead{position:absolute;left:64px;top:216px;width:930px;font-size:17px;line-height:1.4;color:#a9bbae}
+  .position-grid{position:absolute;left:64px;top:290px;width:1152px;display:grid;grid-template-columns:1fr 1fr 1fr 1.35fr;gap:10px}
+  .position-col{border-top:1px solid rgba(255,255,255,.18);padding-top:11px;min-height:212px}
+  .position-col .k{font-family:var(--mono);font-size:8px;line-height:1.2;letter-spacing:.11em;text-transform:uppercase;color:#8fa398}
+  .position-col h3{margin-top:9px;font-size:19px;line-height:1.08;letter-spacing:-.03em;font-weight:800;color:#e8f1ea}
+  .position-col p{margin-top:9px;font-size:12px;line-height:1.35;color:#9eb1a4}
+  .position-col--kern{border-top-color:var(--mint);background:rgba(126,240,192,.06);padding:11px 12px 10px;border-radius:7px}
+  .position-col--kern .k{color:var(--mint)}
+  .position-col--kern h3{color:var(--mint)}
+  .position-col--kern p{color:#c7ddd0}
+  .position-wedge{position:absolute;left:64px;right:64px;top:536px;border-top:1px solid rgba(255,255,255,.14);padding-top:13px;display:flex;justify-content:space-between;gap:30px;align-items:flex-start}
+  .position-wedge .who{font-size:15px;line-height:1.4;color:#c6d8ca;max-width:760px}
+  .position-wedge .who b{color:#f1f8f3}
+  .position-wedge .note{font-family:var(--mono);font-size:8px;line-height:1.5;letter-spacing:.06em;text-transform:uppercase;color:#7f9488;text-align:right;max-width:270px}
+  .position-bottom{position:absolute;left:64px;right:64px;bottom:56px;display:flex;justify-content:space-between;gap:24px;align-items:baseline}
+  .position-bottom .q{font-size:22px;line-height:1.2;letter-spacing:-.03em;color:#e3eee6}
+  .position-bottom .q span{color:var(--mint)}
+  .position-bottom .s{font-family:var(--mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:#8fa398}
+
+  /* slide 12 */
+  .close-mark{
+    position:absolute;left:64px;top:88px;width:58px;height:58px;border-radius:13px;background:var(--mint);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;letter-spacing:-.08em;
+  }
+  .close-eyebrow{position:absolute;right:64px;top:98px;font-family:var(--mono);font-size:10px;line-height:1.4;letter-spacing:.16em;text-transform:uppercase;color:var(--mint);text-align:right}
+  .close-title{position:absolute;left:64px;top:204px;width:1000px;font-size:88px;line-height:.9;letter-spacing:-.065em;font-weight:900;color:#f4f8f3}
+  .close-title span{color:var(--mint)}
+  .close-sub{position:absolute;left:66px;top:430px;font-size:27px;line-height:1.15;letter-spacing:-.03em;color:#d8e5dc}
+  .close-sub b{color:var(--mint)}
+  .close-links{position:absolute;left:64px;right:64px;bottom:104px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:24px;border-top:1px solid rgba(255,255,255,.16);padding-top:14px}
+  .close-link .k{font-family:var(--mono);font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#7f9488}
+  .close-link p{margin-top:4px;font-size:16px;line-height:1.2;letter-spacing:-.02em;color:#e8f1ea}
+  .close-link p b{color:var(--mint);font-weight:500}
+  .close-bottom{position:absolute;left:64px;right:64px;bottom:40px;display:flex;justify-content:space-between;gap:20px;font-family:var(--mono);font-size:8px;line-height:1.4;letter-spacing:.1em;text-transform:uppercase;color:#8fa398}
+
+  @media print{
+    html,body{background:#fff;padding:0}
+    .slide{margin:0;box-shadow:none}
+    @page{size:1280px 720px;margin:0}
+  }
+</style>
+</head>
+<body>
+
+  <!-- 01 cover -->
+  <section class="slide slide--cover" id="cover">
+    <div class="grid"></div>
+    <div class="topline"></div>
+    <div class="cover-mark">K</div>
+    <div class="cover-eyebrow">Kane CLI Online Hackathon<br>November 2026</div>
+    <h1 class="cover-title">The checkout<br><span>is the proof.</span></h1>
+    <p class="cover-sub">Kern is the promise firewall for checkout.</p>
+    <div class="cover-strip">
+      <span>the cart<b>$60.00</b></span>
+      <span>the promise<b>$0.00</b></span>
+      <span class="bad">the charge<b>$9.00</b></span>
+    </div>
+    <div class="cover-foot"><span>Built with <b>Kane CLI</b> / TestMu AI</span><span>tryoutkern.vercel.app</span></div>
+  </section>
+
+  <!-- 02 problem -->
+  <section class="slide" id="problem">
+    <div class="topline"></div>
+    <p class="kicker" style="position:absolute;left:64px;top:54px">01 / The problem</p>
+    <h2 class="problem-title">The ad promised <span>$0.00</span> shipping. The checkout charged <span>$9.00</span>.</h2>
+    <p class="problem-lead">The code was green. The page loaded. The customer still paid more. A discount promise died at the last screen, where it becomes real.</p>
+    <div class="problem-big">
+      <div class="promise">promised<b>$0.00</b></div>
+      <div class="arrow">→</div>
+      <div class="obs">Kane observed<b>$9.00</b></div>
+    </div>
+    <p class="problem-quote">A merchant in a public Shopify thread: the discount “showed in her checkout” but she was charged full price. The fallback was “constantly refund people.”</p>
+    <div class="browser problem-browser">
+      <div class="browser-bar"><i></i><i></i><i></i><em>SHIPPING QUOTE / PRE-REPAIR</em><b>BROKEN</b></div>
+      <img src="assets/before-quote.png" alt="Kane's pre-repair shipping quote: promised $0.00, observed $9.00, BROKEN">
+    </div>
+    <div class="foot"><span class="brandfoot"><span class="brandmark">K</span> KERN / PROMISE FIREWALL</span><span class="pageno">02 / 12</span></div>
+  </section>
+
+  <!-- 03 blind spot -->
+  <section class="slide" id="blindspot">
+    <div class="topline"></div>
+    <p class="kicker" style="position:absolute;left:64px;top:54px">02 / The vendor blind spot</p>
+    <h2 class="blind-title">Everyone sees a slice.<br>No one sees the promise.</h2>
+    <p class="blind-lead">The ad platform, analytics, tests and support each own one screen. The rendered checkout for the exact advertised cart has no owner.</p>
+    <div class="blind-q">?</div>
+    <div class="blind-table">
+      <div class="blind-row"><span class="who">Ad platform</span><span class="sees">the impression + click</span><span class="miss">not the checkout</span></div>
+      <div class="blind-row"><span class="who">Analytics</span><span class="sees">the visit + order</span><span class="miss">not the quote</span></div>
+      <div class="blind-row"><span class="who">Unit tests</span><span class="sees">the code</span><span class="miss">not the customer</span></div>
+      <div class="blind-row"><span class="who">Support</span><span class="sees">the complaint</span><span class="miss">not the reproduction</span></div>
+      <div class="blind-row blind-row--gap"><span class="who">???</span><span class="sees">the rendered checkout</span><span class="miss">the last mile is unowned</span></div>
+    </div>
+    <p class="blind-foot">The last screen is the one no one can show. <span>Until now.</span></p>
+    <div class="foot"><span class="brandfoot"><span class="brandmark">K</span> KERN / PROMISE FIREWALL</span><span class="pageno">03 / 12</span></div>
+  </section>
+
+  <!-- 04 agents -->
+  <section class="slide slide--dark" id="agents">
+    <div class="grid"></div>
+    <div class="topline"></div>
+    <p class="kicker" style="position:absolute;left:64px;top:54px">03 / Why now</p>
+    <h2 class="agent-title">A green test is not a promise.</h2>
+    <p class="agent-lead">AI agents can change the pricing code, write the test and call the task done. The faster the loop, the more dangerous a self-certified “passed.”</p>
+    <div class="agent-rows">
+      <div class="agent-row"><span class="n">01</span><span class="label">Too broad</span><div><h3>Free everything.</h3><p>The $35 control breaks. The promise becomes a giveaway.</p></div></div>
+      <div class="agent-row"><span class="n">02</span><span class="label">Too narrow</span><div><h3>Miss the boundary.</h3><p>The exact $50 cart still pays. The edge case survives.</p></div></div>
+      <div class="agent-row"><span class="n">03</span><span class="label">Self-certified</span><div><h3>Weaken the test.</h3><p>Green, and meaningless. The agent graded itself.</p></div></div>
+    </div>
+    <div class="agent-bottom">
+      <p class="quote">The agent can change the code. <span>It cannot be the witness.</span></p>
+      <p class="side">Kane is the independent<br>browser witness.</p>
+    </div>
+    <div class="foot"><span class="brandfoot"><span class="brandmark">K</span> KERN / PROMISE FIREWALL</span><span class="pageno">04 / 12</span></div>
+  </section>
+
+  <!-- 05 insight -->
+  <section class="slide" id="insight">
+    <div class="topline"></div>
+    <p class="kicker" style="position:absolute;left:64px;top:54px">04 / The insight</p>
+    <h2 class="insight-title">The ad is the spec.<br><span>The checkout is the truth.</span></h2>
+    <p class="insight-lead">Kern starts where the customer starts — with the ad — and freezes the merchant’s interpretation as a separate, versioned record.</p>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <span class="k">The ad snapshot</span>
+        <p>“Free standard shipping on US orders of $50.00 or more.”</p>
+        <div class="footnote">the merchant’s public words, preserved</div>
+      </div>
+      <div class="insight-card">
+        <span class="k">The merchant’s interpretation</span>
+        <p>Inclusive $50.00 · after-discount merchandise subtotal · US standard · USD.</p>
+        <div class="footnote">approved separately; not silently rewritten</div>
+      </div>
+    </div>
+    <div class="insight-contract">
+      <div><div class="id">kern-demo-free-shipping-v1</div><div class="sha">spec SHA-256 · 032dbd00ff1f5c23… · version 1</div></div>
+      <div class="price">the $9 baseline<b>separate policy source</b></div>
+    </div>
+    <p class="insight-bottom">Most tools start at the rule. <span>Kern starts at the promise.</span></p>
+    <div class="foot"><span class="brandfoot"><span class="brandmark">K</span> KERN / PROMISE FIREWALL</span><span class="pageno">05 / 12</span></div>
+  </section>
+
+  <!-- 06 loop -->
+  <section class="slide slide--dark" id="loop">
+    <div class="grid"></div>
+    <div class="topline"></div>
+    <p class="kicker" style="position:absolute;left:64px;top:54px">05 / The loop</p>
+    <h2 class="loop-title">One promise. Three carts. <span>One witness.</span></h2>
+    <p class="loop-sub">The challenge is frozen before the repair. The same six objectives must pass after it.</p>
+    <div class="loop-wrap">
+      <div class="loop-step"><span class="n">01</span><b>AD + TERMS</b><em>the promise</em></div>
+      <span class="loop-arrow">→</span>
+      <div class="loop-step"><span class="n">02</span><b>CONTRACT</b><em>hashed</em></div>
+      <span class="loop-arrow">→</span>
+      <div class="loop-step"><span class="n">03</span><b>3 CARTS</b><em>$60 / $50 / $35</em></div>
+      <span class="loop-arrow">→</span>
+      <div class="loop-step loop-step--kane"><span class="n">04</span><b>KANE CLI</b><em>the witness</em></div>
+      <span class="loop-arrow">→</span>
+      <div class="loop-step"><span class="n">05</span><b>ORACLE</b><em>the verdict</em></div>
+      <span class="loop-arrow">→</span>
+      <div class="loop-step"><span class="n">06</span><b>PI REPAIR</b><em>bounded</em></div>
+      <span class="loop-arrow">→</span>
+      <div class="loop-step"><span class="n">07</span><b>RERUN + GATE</b><em>same hashes</em></div>
+      <span class="loop-arrow">→</span>
+      <div class="loop-step"><span class="n">08</span><b>RECEIPT</b><em>scoped</em></div>
+    </div>
+    <div class="loop-carts">
+      <span class="cart-pill"><b>$60</b> eligible</span>
+      <span class="cart-pill cart-pill--boundary"><b>$50</b> exact boundary</span>
+      <span class="cart-pill"><b>$35</b> control</span>
+      <span class="cart-pill" style="border-color:rgba(126,240,192,.35);color:#b9e4d1"><b>+</b> human approval</span>
+    </div>
+    <div class="loop-notes">
+      <div class="loop-note"><div class="k">The boundary catches</div><p>A fix that only frees $60 and up.</p></div>
+      <div class="loop-note"><div class="k">The control catches</div><p>A fix that makes all shipping free.</p></div>
+      <div class="loop-note"><div class="k">The gate catches</div><p>A “done” with no passing witness.</p></div>
+    </div>
+    <div class="loop-bottom">
+      <p class="loop-quote">The agent never decides whether the fix worked. <span>The evidence does.</span></p>
+      <p class="loop-side">same six objectives<br>pre / post hashes</p>
+    </div>
+    <div class="foot"><span class="brandfoot"><span class="brandmark">K</span> KERN / PROMISE FIREWALL</span><span class="pageno">06 / 12</span></div>
+  </section>
+
+  <!-- 07 Kane -->
+  <section class="slide" id="kane">
+    <div class="topline"></div>
+    <p class="kicker" style="position:absolute;left:64px;top:54px">06 / Why Kane / TestMu AI</p>
+    <h2 class="kane-title">Kane is the only one who <span>sees the checkout.</span></h2>
+    <p class="kane-lead">Kane CLI opens the real storefront in a real browser, follows the fixed cart, and reads the rendered shipping quote the customer sees. Not a mock. Not the store’s internal function.</p>
+    <div class="roles">
+      <div class="role"><div class="k">Kern owns</div><p><b>the contract, boundary, control, oracle, gate and receipt.</b></p></div>
+      <div class="role role--kane"><div class="k">Kane owns</div><p><b>the observation, the evidence and the unchanged rerun.</b></p></div>
+    </div>
+    <div class="kane-shot">
+      <img src="assets/why-cards.png" alt="Kern Why Kane page: observe the rendered checkout, carry the evidence, independently recheck the fix">
+    </div>
+    <p class="kane-quote">“Kane is the independent witness, not the judge.”<span>Kern / Why Kane CLI</span></p>
+    <div class="kane-bottom"><span>remove Kane and the loop loses the only independent view of the customer checkout</span><span>real Chrome · rendered quote · run_end · evidence pack</span></div>
+    <div class="foot"><span class="brandfoot"><span class="brandmark">K</span> KERN / PROMISE FIREWALL</span><span class="pageno">07 / 12</span></div>
+  </section>
+
+  <!-- 08 proof -->
+  <section class="slide slide--dark" id="proof">
+    <div class="grid"></div>
+    <div class="topline"></div>
+    <p class="kicker" style="position:absolute;left:64px;top:54px">07 / The proof</p>
+    <h2 class="proof-title">The fix was one line. <span>The proof was not.</span></h2>
+    <p class="proof-sub">The pre-repair audit is BROKEN. The post-repair audit is HONORED, answers the first, and all six objective hashes match.</p>
+    <div class="proof-table">
+      <div class="proof-head"><span>Cart</span><span>Promised</span><span>Before</span><span>After</span></div>
+      <div class="proof-row"><div class="cart">$60.00 eligible<span>after-discount subtotal</span></div><div class="v">$0.00</div><div class="v bad">$9.00</div><div class="v good">$0.00</div></div>
+      <div class="proof-row"><div class="cart">$50.00 boundary<span>the exact edge</span></div><div class="v">$0.00</div><div class="v bad">$9.00</div><div class="v good">$0.00</div></div>
+      <div class="proof-row"><div class="cart">$35.00 control<span>the anti-giveaway</span></div><div class="v">$9.00</div><div class="v">$9.00</div><div class="v">$9.00</div></div>
+    </div>
+    <div class="proof-right">
+      <div class="six">6/6</div>
+      <div class="six-cap">objective hashes<br>pre / post match</div>
+      <div class="proof-facts">
+        <div class="proof-fact"><span>patch</span><b>4c8105f</b></div>
+        <div class="proof-fact"><span>merge</span><b>88536a9</b></div>
+        <div class="proof-fact"><span>change</span><b>1 line</b></div>
+        <div class="proof-fact"><span>gate</span><b>OPEN</b></div>
+      </div>
+    </div>
+    <div class="proof-bottom">
+      <p class="proof-claim">The control stayed at $9.00. <span>The fix did not just make shipping free.</span></p>
+      <p class="proof-note">$60 pre-repair row: provided real Kane capture; $50/$35 live. A separate live $60 run repeats it. Post-repair: all live.</p>
+    </div>
+    <div class="foot"><span class="brandfoot"><span class="brandmark">K</span> KERN / PROMISE FIREWALL</span><span class="pageno">08 / 12</span></div>
+  </section>
+
+  <!-- 09 receipt -->
+  <section class="slide" id="receipt">
+    <div class="topline"></div>
+    <p class="kicker" style="position:absolute;left:64px;top:54px">08 / When something goes wrong</p>
+    <h2 class="receipt-title">The vendor needs a <span>receipt,</span> not an argument.</h2>
+    <p class="receipt-lead">The Promise Receipt is the customer-side record for the tested conditions: what was promised, what the checkout showed, which code produced it, and what it does not prove.</p>
+    <div class="receipt-list">
+      <div class="receipt-item"><span>01</span>the ad snapshot and the frozen contract hash</div>
+      <div class="receipt-item"><span>02</span>each cart’s promised vs observed value</div>
+      <div class="receipt-item"><span>03</span>Kane run IDs, exit results and evidence hashes</div>
+      <div class="receipt-item"><span>04</span>the code revision, patch and human approval</div>
+      <div class="receipt-item"><span>05</span>the gate status and the exact scope</div>
+    </div>
+    <div class="receipt-shot"><img src="assets/receipt-top.png" alt="Kern Promise Receipt showing HONORED, contract hash, post-repair audit and observed $0.00"></div>
+    <div class="receipt-scope">
+      <p class="big">A reproducible customer-side record. <span>Not a recording of every shopper.</span></p>
+      <p class="small">hash-linked, not signed<br>not a certification</p>
+    </div>
+    <div class="foot"><span class="brandfoot"><span class="brandmark">K</span> KERN / PROMISE FIREWALL</span><span class="pageno">09 / 12</span></div>
+  </section>
+
+  <!-- 10 product -->
+  <section class="slide" id="product">
+    <div class="topline"></div>
+    <p class="kicker" style="position:absolute;left:64px;top:54px">09 / The product</p>
+    <h2 class="product-title">A gate, not a dashboard.</h2>
+    <p class="product-lead">The command is the product. The receipt is the interface. The agent gets a stop condition, not a badge.</p>
+    <div class="product-grid">
+      <div class="product-card"><div class="k">01 / Gate CLI</div><h3>Exit 0 or 1.</h3><p>A coding agent can run it before it says done. A closed gate blocks the stop hook.</p></div>
+      <div class="product-card"><div class="k">02 / Receipt</div><h3>Scoped proof.</h3><p>The promise, the observed quote, the run, the code and the limits in one record.</p></div>
+      <div class="product-card"><div class="k">03 / Contract compiler</div><h3>Local, writeable.</h3><p>Turns the ad and the merchant’s terms into the frozen challenge. 404 in public mode.</p></div>
+      <div class="product-card"><div class="k">04 / Storefront</div><h3>Before / after.</h3><p>The audited revision and the repaired store side by side, with the recorded evidence.</p></div>
+    </div>
+    <div class="term">
+      <div class="term-bar"><i></i><i></i><i></i><em>kern / gate</em></div>
+      <pre>$ npm run gate -- --audit recorded/…/audit.json
+
+eligible-60  $0.00  <span class="ok">PASS</span>
+boundary-50  $0.00  <span class="ok">PASS</span>
+control-35   $9.00  <span class="ok">PASS</span>
+
+<span class="ok">GATE: OPEN</span></pre>
+    </div>
+    <div class="product-bottom">
+      <p class="quote">The agent cannot self-certify. <span class="teal">Kane can.</span></p>
+      <p class="side">Claude Code Stop hook<br>Pi / any agent: exit contract</p>
+    </div>
+    <div class="foot"><span class="brandfoot"><span class="brandmark">K</span> KERN / PROMISE FIREWALL</span><span class="pageno">10 / 12</span></div>
+  </section>
+
+  <!-- 11 positioning -->
+  <section class="slide slide--dark" id="position">
+    <div class="grid"></div>
+    <div class="topline"></div>
+    <p class="kicker" style="position:absolute;left:64px;top:54px">10 / Where Kern sits</p>
+    <h2 class="position-title">Not a price monitor.<br><span>The promise firewall.</span></h2>
+    <p class="position-lead">Most tools start at the rule or the flow. Kern starts at the ad and ends at the rendered checkout — then closes the loop.</p>
+    <div class="position-grid">
+      <div class="position-col"><div class="k">Price monitoring</div><h3>Watches the number.</h3><p>After the fact. No ad, no cart boundary, no repair.</p></div>
+      <div class="position-col"><div class="k">Promo config</div><h3>Checks the rule.</h3><p>In the platform. Not the customer’s rendered quote.</p></div>
+      <div class="position-col"><div class="k">Generic QA</div><h3>Checks the flow.</h3><p>The page loads. The promise can still be wrong.</p></div>
+      <div class="position-col position-col--kern"><div class="k">Kern</div><h3>Ad → checkout → proof.</h3><p>Frozen promise, boundary + control, Kane’s witness, bounded repair, unchanged rerun, scoped receipt.</p></div>
+    </div>
+    <div class="position-wedge">
+      <p class="who"><b>Who feels it:</b> DTC operations, performance marketing, agencies and platform teams accountable for an offer. <b>Trigger:</b> a launch, a code change, a customer complaint.</p>
+      <p class="note">The loop is the wedge.<br>Willingness to pay is not yet validated.</p>
+    </div>
+    <div class="position-bottom">
+      <p class="q">The checkout is the proof. <span>Kane is the witness. Kern is the gate.</span></p>
+      <span class="s">one promise · one store · one recorded time</span>
+    </div>
+    <div class="foot"><span class="brandfoot"><span class="brandmark">K</span> KERN / PROMISE FIREWALL</span><span class="pageno">11 / 12</span></div>
+  </section>
+
+  <!-- 12 close -->
+  <section class="slide slide--close" id="close">
+    <div class="grid"></div>
+    <div class="topline"></div>
+    <div class="close-mark">K</div>
+    <div class="close-eyebrow">Kane CLI Online Hackathon<br>2026</div>
+    <h2 class="close-title">The checkout<br><span>is the proof.</span></h2>
+    <p class="close-sub"><b>Kane</b> is the witness. <b>Kern</b> is the gate.</p>
+    <div class="close-links">
+      <div class="close-link"><div class="k">Live proof</div><p><b>tryoutkern.vercel.app</b></p></div>
+      <div class="close-link"><div class="k">Source</div><p>github.com/kaelah971/kern</p></div>
+      <div class="close-link"><div class="k">Watch</div><p>3:00 demo · YouTube</p></div>
+    </div>
+    <div class="close-bottom"><span>Built with Kane CLI / TestMu AI</span><span>Pi · terminal-driven bounded repair</span><span>Kern is an independent project</span></div>
+  </section>
+
+</body>
+</html>

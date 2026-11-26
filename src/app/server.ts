@@ -29,6 +29,7 @@ import {
   renderWhyKane,
 } from './render.ts';
 import { renderReceiptPage } from './receipt.ts';
+import { findLatestPromiseAudit, renderPromiseProof } from './promise-proof.ts';
 import { renderLanding } from './landing.ts';
 
 const MAX_ID_LENGTH = 200;
@@ -387,6 +388,20 @@ export function createAppRequestHandler(
           post,
           gate: post ? evaluateGate(post.audit, contract) : null,
           publicMode,
+        }),
+        headOnly,
+      );
+      return;
+    }
+
+    if (path === '/promises') {
+      sendHtml(
+        res,
+        200,
+        renderPromiseProof({
+          audit: findLatestPromiseAudit(repoRoot),
+          publicMode,
+          repoRoot,
         }),
         headOnly,
       );

@@ -87,7 +87,7 @@ function auditContractWarning(audit: AuditSummary, contract: PromiseContract): s
 export function layout(
   title: string,
   body: string,
-  current: 'campaign' | 'why' | 'gate' | 'compile' | 'audits' | 'runs' | 'audit' | 'repair' | 'check' = 'campaign',
+  current: 'campaign' | 'why' | 'gate' | 'promises' | 'compile' | 'audits' | 'runs' | 'audit' | 'repair' | 'check' = 'campaign',
   publicMode = false,
   headExtra = '',
 ): string {
@@ -98,6 +98,8 @@ export function layout(
         ? 'why'
         : current === 'gate'
         ? 'gate'
+        : current === 'promises'
+        ? 'promises'
         : current === 'compile'
           ? 'compile'
           : current === 'runs'
@@ -124,6 +126,7 @@ ${headExtra}
       <a href="/campaign"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
       <a href="/why-kane"${navCurrent === 'why' ? ' aria-current="page"' : ''}>Why Kane</a>
       <a href="/gate"${navCurrent === 'gate' ? ' aria-current="page"' : ''}>Gate</a>
+      <a href="/promises"${navCurrent === 'promises' ? ' aria-current="page"' : ''}>Promises</a>
       ${publicMode ? '' : `<a href="/compile"${navCurrent === 'compile' ? ' aria-current="page"' : ''}>Compiler</a>`}
       <a href="/audits"${navCurrent === 'audits' ? ' aria-current="page"' : ''}>Audits</a>
       <a href="${publicMode ? '/store/' : STOREFRONT_URL}">Storefront</a>
