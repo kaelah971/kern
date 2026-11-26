@@ -489,6 +489,32 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   margin: 0 0 .35rem;
 }
 .gate .meta { margin: 0; }
+.gate-chip {
+  display: inline-block;
+  border: 1px solid currentColor;
+  padding: .04rem .32rem;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.gate-chip--pass { color: var(--honored); background: var(--honored-surface); }
+.gate-chip--fail { color: var(--accent-dark); background: var(--accent-surface); }
+.gauntlet-table td { vertical-align: top; }
+.gauntlet-table .meta { display: block; margin-top: .3rem; }
+.gauntlet-cell--pass { background: rgba(47, 107, 79, .05); }
+.gauntlet-cell--fail { background: rgba(169, 63, 36, .05); }
+.gate-command {
+  background: var(--ink);
+  color: var(--paper-2);
+  padding: .85rem 1rem;
+  font-family: var(--mono);
+  font-size: .8rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+}
 .receipt {
   max-width: 940px;
   margin: 0 auto;
@@ -740,6 +766,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   <a class="wordmark" href="/">KERN<span>PROMISE AUDIT</span></a>
   <nav aria-label="Main">
     <a href="/">Campaign</a>
+    <a href="/gate">Gate</a>
     <a href="/audits">Audits</a>
     <a href="/store/">Storefront</a>
     <a href="/runs" aria-current="page">Runs</a>

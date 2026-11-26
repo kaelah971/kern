@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Kern Gate · Kern</title>
+<style>
+:root {
+  --paper: #f5efe4;
+  --paper-2: #fbf7ef;
+  --paper-3: #fffdf8;
+  --ink: #201c16;
+  --muted: #6d6252;
+  --line: #d8cbb6;
+  --line-strong: #bfae92;
+  --accent: #a93f24;
+  --accent-dark: #7e2b16;
+  --accent-surface: #f6e4dc;
+  --honored: #2f6b4f;
+  --honored-surface: #e6efe8;
+  --warning: #8a5a1f;
+  --warning-surface: #f4ead8;
+  --slate: #4d5560;
+  --slate-surface: #e9ebee;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'Cascadia Mono', 'SFMono-Regular', Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  background:
+    radial-gradient(circle at 10% 4%, rgba(255, 255, 255, .7), transparent 36rem),
+    var(--paper);
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 10;
+  background: var(--ink);
+  color: var(--paper-2);
+  padding: .6rem 1rem;
+  text-decoration: none;
+}
+.skip-link:focus { top: 1rem; }
+.site-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.4rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.wordmark {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  letter-spacing: .16em;
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.1;
+}
+.wordmark span {
+  display: block;
+  font-family: var(--sans);
+  font-size: .56rem;
+  letter-spacing: .3em;
+  color: var(--muted);
+  font-weight: 500;
+  margin-top: .25rem;
+}
+nav { display: flex; flex-wrap: wrap; gap: 1.1rem; font-size: .9rem; }
+nav a {
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: .1rem;
+}
+nav a:hover, nav a[aria-current='page'] { border-bottom-color: var(--ink); }
+main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.15; font-weight: 600; }
+h1 { font-size: clamp(2rem, 3.6vw, 3rem); margin: 0 0 1rem; }
+h2 { font-size: 1.5rem; margin: 0 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 0 0 .45rem; }
+h4 { font-size: 1rem; margin: 0 0 .4rem; }
+p { margin: 0 0 1rem; }
+.eyebrow {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  color: var(--muted);
+  font-weight: 700;
+  margin: 0 0 .5rem;
+}
+.lede { max-width: 48rem; color: var(--muted); font-size: 1.05rem; }
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2.25rem;
+}
+.hero h1 { max-width: 44rem; }
+.hero aside { min-width: 15rem; }
+.grid-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.5rem 0 2rem;
+}
+.panel {
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  padding: 1.2rem 1.3rem;
+}
+.panel--ad { border-left: 5px solid var(--accent); }
+.panel--interpretation { border-left: 5px solid var(--ink); }
+.panel-label {
+  margin: 0 0 .55rem;
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+.quote {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  line-height: 1.4;
+  margin: 0;
+}
+.contract-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+  margin: 1.25rem 0 1.75rem;
+}
+.contract-grid dl, .contract-grid div {
+  background: var(--paper-2);
+  padding: 1rem 1.1rem;
+  margin: 0;
+}
+.contract-grid dt {
+  font-size: .66rem;
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  color: var(--muted);
+  font-weight: 700;
+}
+.contract-grid dd {
+  margin: .3rem 0 0;
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+.hash {
+  font-family: var(--mono);
+  font-size: .76rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+.policy {
+  border: 1px dashed var(--line-strong);
+  background: rgba(255, 255, 255, .32);
+  padding: 1.15rem 1.3rem;
+  margin-bottom: 2rem;
+}
+.policy-rule {
+  font-family: var(--serif);
+  font-size: 1.08rem;
+  margin: .35rem 0 0;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1.25rem 0 2rem;
+}
+.card {
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  padding: 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+.card h3 { margin-bottom: .1rem; }
+.card-meta { color: var(--muted); font-size: .9rem; margin: 0; }
+.card-amount {
+  font-family: var(--serif);
+  font-size: 1.75rem;
+  margin: .35rem 0 .1rem;
+}
+.card-foot { margin-top: auto; padding-top: .65rem; }
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: .42rem;
+  border: 1px solid currentColor;
+  padding: .16rem .48rem;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+.status-mark {
+  width: .46rem;
+  height: .46rem;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+.status--honored { color: var(--honored); background: var(--honored-surface); }
+.status--broken { color: var(--accent); background: var(--accent-surface); }
+.status--inconclusive { color: var(--warning); background: var(--warning-surface); }
+.status--infra-error { color: var(--slate); background: var(--slate-surface); }
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; }
+.hash-compare { table-layout: fixed; }
+.hash-compare th { white-space: normal; vertical-align: bottom; }
+.hash-compare th, .hash-compare td { padding: .5rem .4rem; }
+.hash-compare td:first-child { overflow-wrap: anywhere; }
+.hash-compare .hash { font-size: .7rem; }
+table { width: 100%; border-collapse: collapse; }
+th, td {
+  text-align: left;
+  padding: .7rem .6rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+th {
+  font-size: .66rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--muted);
+  font-weight: 800;
+  white-space: nowrap;
+}
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.audit-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  padding: 1rem 1.2rem;
+  margin: 1.25rem 0 2rem;
+}
+.audit-banner p { margin: 0; }
+.meta { color: var(--muted); font-size: .86rem; }
+.meta strong { color: var(--ink); font-weight: 600; }
+.empty {
+  border: 1px dashed var(--line-strong);
+  background: rgba(255, 255, 255, .3);
+  padding: 1.5rem;
+  color: var(--muted);
+  margin: 1rem 0 2rem;
+}
+.empty h3 { color: var(--ink); }
+.recorded-banner {
+  border: 1px solid var(--warning);
+  border-left: 5px solid var(--warning);
+  background: var(--warning-surface);
+  padding: .75rem 1rem;
+  margin: 0 0 1.25rem;
+  font-size: .9rem;
+}
+.recorded-banner .meta { display: block; margin-top: .3rem; }
+.warning {
+  border: 1px solid var(--warning);
+  background: var(--warning-surface);
+  color: var(--ink);
+  padding: .8rem 1rem;
+  margin: 1rem 0;
+  font-size: .9rem;
+}
+.scenario {
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  margin: 1.5rem 0 2rem;
+}
+.scenario-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--line);
+}
+.scenario-head h2 { margin: 0; font-size: 1.3rem; }
+.lanes {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  align-items: stretch;
+}
+.lane { padding: 1.25rem 1.35rem 1.35rem; background: var(--paper-3); }
+.lane-rule { background: var(--line); }
+.lane h3 {
+  margin: 0 0 .15rem;
+  font-size: .7rem;
+  font-family: var(--sans);
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  color: var(--muted);
+}
+.lane-amount {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 3.2vw, 2.7rem);
+  line-height: 1.05;
+  margin: .35rem 0 .55rem;
+  font-variant-numeric: tabular-nums;
+}
+.lane--promised { border-top: 4px solid var(--ink); }
+.lane--observed { border-top: 4px solid var(--line-strong); }
+.lane--observed.lane--broken { border-top-color: var(--accent); }
+.lane--observed.lane--honored { border-top-color: var(--honored); }
+.lane--observed.lane--inconclusive { border-top-color: var(--warning); }
+.lane--observed.lane--infra-error { border-top-color: var(--slate); }
+.lane dl { display: grid; grid-template-columns: auto 1fr; gap: .25rem .8rem; margin: .8rem 0 0; }
+.lane dt { color: var(--muted); font-size: .76rem; }
+.lane dd { margin: 0; font-size: .86rem; }
+.verdict {
+  border-top: 1px solid var(--line);
+  border-left: 5px solid var(--accent);
+  background: var(--accent-surface);
+  padding: 1.15rem 1.3rem;
+}
+.verdict h3 { font-size: 1rem; }
+.verdict-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .35rem 1.25rem; margin: .75rem 0; }
+.verdict-grid dt { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.verdict-grid dd { margin: 0 0 .35rem; }
+.signals { margin: .4rem 0 0; padding-left: 1.1rem; font-size: .88rem; }
+.signals li { margin-bottom: .3rem; }
+.runs {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+.run-card { min-width: 0; padding: 1.1rem 1.3rem 1.25rem; background: var(--paper-2); }
+.run-card + .run-card { border-left: 1px solid var(--line); }
+.run-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .6rem; }
+.run-head h3 { margin: 0; font-size: 1rem; }
+.run-meta { display: grid; grid-template-columns: auto 1fr; gap: .22rem .7rem; margin: 0 0 .75rem; }
+.run-meta dt { color: var(--muted); font-size: .76rem; }
+.run-meta dd { margin: 0; font-size: .84rem; overflow-wrap: anywhere; }
+.evidence { margin-top: .7rem; }
+.evidence p { margin: 0 0 .35rem; font-size: .78rem; color: var(--muted); }
+.evidence code {
+  display: block;
+  background: var(--ink);
+  color: var(--paper-2);
+  font-family: var(--mono);
+  font-size: .76rem;
+  line-height: 1.45;
+  padding: .65rem .75rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.diff {
+  max-width: 100%;
+  background: #241f19;
+  color: #eee6d7;
+  font-family: var(--mono);
+  font-size: .78rem;
+  line-height: 1.5;
+  margin: 0;
+  padding: 1rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.diff-line { display: block; }
+.diff-add { color: #a7d8b3; }
+.diff-del { color: #f0a79a; }
+.diff-meta { color: #b9ac97; }
+.repair-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 1fr 1.35fr 1fr;
+  gap: 1rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+.repair-col { min-width: 0; border: 1px solid var(--line); background: var(--paper-2); padding: 1.1rem 1.2rem; }
+.repair-col h2 { font-size: 1.2rem; }
+.repair-col .scenario { margin: .8rem 0 0; }
+.repair-col .scenario-head { padding: .7rem .8rem; }
+.repair-col .scenario-head h3 { font-size: 1rem; }
+.repair-col .verdict { padding: .8rem .9rem; }
+.agent-loop {
+  border: 1px solid var(--line-strong);
+  background: var(--paper-2);
+  padding: 1.2rem 1.25rem;
+  margin: 1.4rem 0 1.5rem;
+}
+.agent-loop-head { max-width: 58rem; }
+.agent-loop-head h2 { font-size: 1.6rem; margin: .2rem 0 .55rem; }
+.agent-loop-head .lede { margin-bottom: .8rem; }
+.agent-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .9rem;
+  margin-top: 1rem;
+}
+.agent-step {
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--paper-3);
+  padding: .9rem 1rem;
+}
+.agent-step h3 { font-size: 1.05rem; margin: .15rem 0 .55rem; }
+.step-number {
+  margin: 0 0 .35rem;
+  color: var(--accent-dark);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.repair-brief {
+  border: 1px dashed var(--line-strong);
+  background: rgba(255, 255, 255, .45);
+  padding: .65rem .8rem;
+  margin: .6rem 0;
+}
+.repair-brief p:last-child { margin-bottom: 0; }
+.agent-facts { display: grid; gap: .45rem; margin: .6rem 0; }
+.agent-facts div { min-width: 0; }
+.agent-facts dt, .agent-commit dt {
+  color: var(--muted);
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.agent-facts dd { margin: .1rem 0 0; overflow-wrap: anywhere; font-size: .82rem; }
+.agent-commit {
+  display: grid;
+  gap: .3rem;
+  border-top: 1px solid var(--line);
+  padding-top: .55rem;
+  margin: .55rem 0 0;
+}
+.agent-commit dd { margin: .1rem 0 0; overflow-wrap: anywhere; font-size: .82rem; }
+.agent-commit code { font-size: .78rem; }
+.repair-failure td, .repair-failure th { font-size: .78rem; }
+.repair-failure td { vertical-align: top; }
+.gate {
+  border: 1px solid var(--line-strong);
+  border-left: 6px solid var(--slate);
+  background: var(--slate-surface);
+  padding: .8rem 1rem;
+  margin: .8rem 0 0;
+}
+.gate--open {
+  border-left-color: var(--honored);
+  background: var(--honored-surface);
+}
+.gate--closed {
+  border-left-color: var(--warning);
+  background: var(--warning-surface);
+}
+.gate .panel-label { margin-bottom: .2rem; }
+.gate-status { font-size: 1.02rem; margin: 0 0 .3rem; }
+.gate-callout {
+  font-family: var(--serif);
+  font-size: 1.04rem;
+  margin: 0 0 .35rem;
+}
+.gate .meta { margin: 0; }
+.gate-chip {
+  display: inline-block;
+  border: 1px solid currentColor;
+  padding: .04rem .32rem;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.gate-chip--pass { color: var(--honored); background: var(--honored-surface); }
+.gate-chip--fail { color: var(--accent-dark); background: var(--accent-surface); }
+.gauntlet-table td { vertical-align: top; }
+.gauntlet-table .meta { display: block; margin-top: .3rem; }
+.gauntlet-cell--pass { background: rgba(47, 107, 79, .05); }
+.gauntlet-cell--fail { background: rgba(169, 63, 36, .05); }
+.gate-command {
+  background: var(--ink);
+  color: var(--paper-2);
+  padding: .85rem 1rem;
+  font-family: var(--mono);
+  font-size: .8rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+}
+.receipt {
+  max-width: 940px;
+  margin: 0 auto;
+  border: 3px double var(--ink);
+  background: var(--paper-3);
+  padding: 2rem 2.2rem;
+}
+.receipt-head { border-bottom: 2px solid var(--ink); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+.receipt-head h1 { font-size: 2rem; margin: .2rem 0 .6rem; }
+.receipt-statement {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  margin: 0;
+  max-width: 44rem;
+}
+.receipt-status { margin-top: .8rem; }
+.receipt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .35rem 1.5rem;
+  margin: 0 0 1.5rem;
+}
+.receipt-grid dt { font-size: .67rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.receipt-grid dd { margin: 0 0 .5rem; overflow-wrap: anywhere; }
+.receipt section { margin: 1.5rem 0; }
+.receipt h2 { font-size: 1.15rem; border-bottom: 1px solid var(--line); padding-bottom: .35rem; }
+.receipt footer { border-top: 1px solid var(--line); padding-top: .8rem; color: var(--muted); font-size: .8rem; }
+.not-proven { padding-left: 1.1rem; }
+.not-proven li { margin-bottom: .35rem; }
+.button {
+  display: inline-block;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper-2);
+  text-decoration: none;
+  font-size: .85rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  padding: .5rem .85rem;
+}
+.button:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+.button--secondary { background: transparent; color: var(--ink); }
+.button--secondary:hover { background: var(--ink); color: var(--paper-2); }
+.footer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.1rem 1.5rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .78rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.front-line {
+  font-family: var(--serif);
+  font-size: 1.12rem;
+  line-height: 1.45;
+  max-width: 46rem;
+  margin: .8rem 0 0;
+}
+.hero-runs { margin: .7rem 0 1rem; font-size: .92rem; }
+.hero-runs a { font-weight: 700; }
+.loop-band {
+  background: var(--ink);
+  color: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 1rem 1.15rem;
+  margin: .2rem 0 1.8rem;
+}
+.loop-steps {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: .8rem;
+}
+.loop-step { min-width: 0; }
+.loop-kicker {
+  margin: 0;
+  color: #cdbfa9;
+  font-size: .64rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.loop-value {
+  margin: .15rem 0;
+  color: var(--paper-3);
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 3vw, 2.45rem);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.loop-copy {
+  max-width: 19rem;
+  margin: 0 0 .4rem;
+  color: #e4d8c7;
+  font-size: .82rem;
+  line-height: 1.4;
+}
+.loop-copy strong { color: var(--paper-3); }
+.loop-copy code { color: #f1e7d8; background: rgba(255, 255, 255, .08); padding: .05rem .25rem; }
+.loop-step > a {
+  color: var(--paper-3);
+  font-size: .78rem;
+  font-weight: 700;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.loop-arrow { color: #e27b5f; font-size: 1.35rem; font-weight: 700; }
+.loop-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  border-top: 1px solid rgba(245, 239, 228, .22);
+  margin-top: .8rem;
+  padding-top: .75rem;
+}
+.loop-link {
+  border: 1px solid rgba(245, 239, 228, .55);
+  color: var(--paper-2);
+  font-size: .78rem;
+  font-weight: 700;
+  padding: .32rem .58rem;
+  text-decoration: none;
+}
+.loop-link:hover { background: var(--paper-2); color: var(--ink); }
+.run-totals {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: .75rem 0;
+  font-size: .95rem;
+  margin: 1.1rem 0 1rem;
+}
+.read-only-note {
+  border: 1px solid var(--slate);
+  border-left: 5px solid var(--slate);
+  background: var(--slate-surface);
+  padding: .75rem 1rem;
+  margin: 0 0 1rem;
+  font-size: .9rem;
+}
+.live-panel {
+  border: 1px solid var(--line-strong);
+  background: var(--paper-2);
+  padding: 1.1rem 1.2rem;
+  margin: 1.2rem 0 1.5rem;
+}
+.live-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.live-panel-head h2 { margin: .2rem 0 .4rem; }
+.live-panel-head > a { font-size: .85rem; }
+.live-limits { color: var(--muted); font-size: .8rem; margin: .4rem 0 .7rem; }
+.live-state { margin: .5rem 0 .9rem; font-size: .9rem; }
+.live-state--running { color: var(--accent-dark); font-weight: 600; }
+.live-state--failed { color: var(--accent-dark); }
+.live-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; }
+.live-card {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  border: 1px solid var(--line);
+  background: var(--paper-3);
+  padding: .8rem;
+}
+.live-card h3 { margin: 0; font-size: 1rem; }
+.live-card .card-meta { margin: 0; }
+.live-promise { margin: .2rem 0 .6rem; font-family: var(--serif); font-size: 1.15rem; }
+.live-start { margin-top: auto; }
+.live-start .button { width: 100%; text-align: center; cursor: pointer; font-family: var(--sans); }
+.button:disabled { opacity: .55; cursor: not-allowed; }
+.button:disabled:hover { background: var(--ink); border-color: var(--ink); }
+.live-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .2rem 1.5rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: .7rem 0;
+  margin: 1rem 0;
+}
+.live-facts div { margin: .35rem 0; }
+.live-facts dt { font-size: .67rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.live-facts dd { margin: .1rem 0 0; overflow-wrap: anywhere; }
+.live-last-line {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--ink);
+  color: var(--paper-2);
+  padding: .8rem;
+  font-family: var(--mono);
+  font-size: .8rem;
+  max-height: 20rem;
+  overflow: auto;
+}
+.live-result { border: 1px solid var(--honored); background: var(--honored-surface); padding: .8rem 1rem; margin: 1rem 0; }
+.live-result .button { margin: 0; }
+.runs-table th { white-space: normal; vertical-align: bottom; }
+.runs-table td { font-size: .82rem; }
+.runs-table .hash { font-size: .68rem; }
+.audit-group { border-top: 2px solid var(--line-strong); }
+.audit-group:first-of-type { border-top: 0; }
+
+@media (max-width: 900px) {
+  .hero { flex-direction: column; }
+  .loop-steps { grid-template-columns: 1fr; }
+  .loop-arrow { display: none; }
+  .loop-step { border-top: 1px solid rgba(245, 239, 228, .18); padding-top: .75rem; }
+  .loop-step:first-child { border-top: 0; padding-top: 0; }
+  .grid-two, .cards, .receipt-grid, .verdict-grid { grid-template-columns: 1fr; }
+  .live-cards { grid-template-columns: 1fr; }
+  .contract-grid { grid-template-columns: 1fr 1fr; }
+  .repair-grid { grid-template-columns: 1fr; }
+  .agent-steps { grid-template-columns: 1fr; }
+  .live-facts { grid-template-columns: 1fr; }
+  .lanes { grid-template-columns: 1fr; }
+  .lane-rule { height: 1px; }
+  .runs { grid-template-columns: 1fr; }
+  .run-card + .run-card { border-left: 0; border-top: 1px solid var(--line); }
+}
+@media (max-width: 560px) {
+  .site-header { align-items: flex-start; flex-direction: column; }
+  main { padding-top: 1.4rem; }
+  .contract-grid { grid-template-columns: 1fr; }
+  .receipt { padding: 1.2rem; }
+}
+@media print {
+  body { background: #fff; }
+  .site-header, .footer, .skip-link, .button { display: none; }
+  main { padding: 0; }
+  .receipt { border-color: #000; max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="wordmark" href="/">KERN<span>PROMISE AUDIT</span></a>
+  <nav aria-label="Main">
+    <a href="/">Campaign</a>
+    <a href="/gate" aria-current="page">Gate</a>
+    <a href="/audits">Audits</a>
+    <a href="/store/">Storefront</a>
+    <a href="/runs">Runs</a>
+  </nav>
+</header>
+<main id="main">
+<p class="eyebrow">Kern Gate · commercial promise</p>
+<h1>The agent does not decide. Kane does.</h1>
+<p class="lede">A patch is not done because it compiles. It is done when the frozen promise survives the real browser, the boundary, and the control. This is the gate; the page is not the gate.</p>
+<div class="gate gate--open" role="status">
+  <p class="panel-label">Gate status</p>
+  <p class="gate-status"><strong>OPEN</strong> · 3/3 scenarios pass</p>
+  <p class="gate-callout">“The agent may not ship until Kane passes the same objectives.”</p>
+  <p class="meta">Audit <a href="/audits/2026-11-23T12-35-29-692Z-48b993">2026-11-23T12-35-29-692Z-48b993</a> · HONORED · 6/6 objective hashes match</p>
+</div>
+
+<section aria-labelledby="gate-scenarios-heading">
+  <h2 id="gate-scenarios-heading">What the gate checks</h2>
+  <p>The gate reads the audit evidence against the current frozen contract. It does not ask the store’s shipping function what the answer should be.</p>
+  <div class="table-wrap">
+    <table class="repair-failure">
+      <thead><tr><th scope="col">Cart</th><th scope="col" class="num">Promised</th><th scope="col" class="num">Observed</th><th scope="col">Audit</th><th scope="col">Gate</th></tr></thead>
+      <tbody><tr>
+  <td>$60.00 eligible<br><span class="meta">eligible-60</span></td>
+  <td class="num">$0.00</td>
+  <td class="num">$0.00</td>
+  <td>HONORED</td>
+  <td><span class="gate-chip gate-chip--pass">PASS</span></td>
+</tr>
+<tr>
+  <td>$50.00 boundary<br><span class="meta">boundary-50</span></td>
+  <td class="num">$0.00</td>
+  <td class="num">$0.00</td>
+  <td>HONORED</td>
+  <td><span class="gate-chip gate-chip--pass">PASS</span></td>
+</tr>
+<tr>
+  <td>$35.00 control<br><span class="meta">control-35</span></td>
+  <td class="num">$9.00</td>
+  <td class="num">$9.00</td>
+  <td>HONORED</td>
+  <td><span class="gate-chip gate-chip--pass">PASS</span></td>
+</tr></tbody>
+    </table>
+  </div>
+  
+</section>
+
+<section aria-labelledby="gauntlet-heading">
+  <h2 id="gauntlet-heading">Patch gauntlet: only one fix gets through</h2>
+  <p>The exact $50 boundary catches a fix that only frees $60 and up. The $35 control catches a fix that makes all shipping free. The pre-repair rule is the actual defect.</p>
+  <div class="table-wrap">
+    <table class="repair-failure gauntlet-table">
+      <thead><tr><th scope="col">Patch</th><th scope="col">$60.00 eligible</th><th scope="col">$50.00 boundary</th><th scope="col">$35.00 control</th><th scope="col">Result</th></tr></thead>
+      <tbody><tr>
+  <td><strong>Correct cents comparison</strong><br><span class="meta">The actual repaired rule: compare the cents subtotal to the cents threshold.</span></td>
+  <td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $0.00 · observed $0.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $0.00 · observed $0.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $9.00 · observed $9.00</span>
+  </td>
+  <td><span class="gate-chip gate-chip--pass">SHIP</span></td>
+</tr>
+<tr>
+  <td><strong>Make all shipping free</strong><br><span class="meta">Plausible shortcut: remove the shipping charge everywhere.</span></td>
+  <td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $0.00 · observed $0.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $0.00 · observed $0.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--fail">
+    <span class="gate-chip gate-chip--fail">FAIL</span>
+    <span class="meta">expected $9.00 · observed $0.00</span>
+  </td>
+  <td><span class="gate-chip gate-chip--fail">REJECT</span></td>
+</tr>
+<tr>
+  <td><strong>Free only at $60+</strong><br><span class="meta">Plausible overfit: pass the visible $60 cart, miss the exact $50 boundary.</span></td>
+  <td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $0.00 · observed $0.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--fail">
+    <span class="gate-chip gate-chip--fail">FAIL</span>
+    <span class="meta">expected $0.00 · observed $9.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $9.00 · observed $9.00</span>
+  </td>
+  <td><span class="gate-chip gate-chip--fail">REJECT</span></td>
+</tr>
+<tr>
+  <td><strong>The audited pre-repair rule</strong><br><span class="meta">The actual seeded defect: compare cents to a dollar-denominated threshold.</span></td>
+  <td class="gauntlet-cell gauntlet-cell--fail">
+    <span class="gate-chip gate-chip--fail">FAIL</span>
+    <span class="meta">expected $0.00 · observed $9.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--fail">
+    <span class="gate-chip gate-chip--fail">FAIL</span>
+    <span class="meta">expected $0.00 · observed $9.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $9.00 · observed $9.00</span>
+  </td>
+  <td><span class="gate-chip gate-chip--fail">REJECT</span></td>
+</tr></tbody>
+    </table>
+  </div>
+  <p class="meta">This table is deterministic contract coverage using the same cart inputs and oracle. It is not a new Kane browser run. The real Kane evidence is linked below.</p>
+</section>
+
+<section aria-labelledby="gate-run-heading">
+  <h2 id="gate-run-heading">Run the gate</h2>
+  <pre class="gate-command">npm run gate -- --audit recorded/2026-11-23T12-35-29-692Z-48b993/audit.json
+npm run gate -- --run       # real Kane audit; spends credits
+npm run --silent gate -- --json  # machine-readable</pre>
+  <p>The command exits <code>0</code> only when the gate is open. A coding agent can use it as a stop hook: <code>npm run gate -- --audit &lt;path&gt; || exit 1</code>. The agent does not get to self-certify; it gets the observed values, the frozen expectations, and a closed gate.</p>
+  <p class="meta">The gate does not start Kane unless you pass <code>--run</code>. The recorded app and this page never start a run.</p>
+</section>
+
+<section aria-labelledby="gate-evidence-heading">
+  <h2 id="gate-evidence-heading">Evidence</h2>
+  <p>Contract <code>kern-demo-free-shipping-v1</code> · hash <code class="hash">032dbd00ff1f5c236f8c72be4aeba464bb181e71a7cffc138b22ef3e5a4323f4</code></p>
+  <div class="actions">
+    <a class="button button--secondary" href="/repair/2026-11-22T00-53-05-669Z-f5230a">Repair case and agent gate</a>
+    <a class="button button--secondary" href="/audits/2026-11-22T00-53-05-669Z-f5230a">Failed pre-repair audit</a>
+    <a class="button button--secondary" href="/audits/2026-11-23T12-35-29-692Z-48b993">Passing post-repair audit</a>
+    <a class="button button--secondary" href="/store/before/eligible-60">Audited storefront</a>
+    <a class="button button--secondary" href="/store/eligible-60">After the repair</a>
+  </div>
+</section>
+</main>
+<footer class="footer">
+  <span>Kern · read-only proof site</span>
+  <span>Evidence is hash-linked. No screenshots are fabricated.</span>
+</footer>
+</body>
+</html>

@@ -153,6 +153,23 @@ test('repair page reads the real diff from git and shows the hash comparison', a
   assert.match(text, /OPEN/);
 });
 
+test('gate page shows the real audit gate and the patch gauntlet', async () => {
+  const { status, text } = await get(baseUrl, '/gate');
+  assert.equal(status, 200);
+  assert.match(text, /Kern Gate/);
+  assert.match(text, /The agent does not decide\. Kane does\./);
+  assert.match(text, /Gate status/);
+  assert.match(text, /The agent may not ship until Kane passes the same objectives\./);
+  assert.match(text, /Patch gauntlet/);
+  assert.match(text, /Make all shipping free/);
+  assert.match(text, /Free only at \$60\+/);
+  assert.match(text, /The audited pre-repair rule/);
+  assert.match(text, /REJECT/);
+  assert.match(text, /npm run gate/);
+  assert.match(text, new RegExp(BROKEN.auditId));
+  assert.match(text, new RegExp(HONORED.auditId));
+});
+
 test('repair page says when no post-repair audit exists', async () => {
   const onlyBrokenRoot = makeAuditRoot({ honored: false });
   const local = await startServer(onlyBrokenRoot);

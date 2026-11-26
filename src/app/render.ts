@@ -7,6 +7,7 @@ import { latestAudit } from './audits.ts';
 import type { CommitFact, DiffResult, RepairFacts } from './git.ts';
 import type { PolicyInfo } from './data.ts';
 import type { LiveSnapshot } from './live.ts';
+import type { GateResult, GauntletRow } from '../lib/gate.ts';
 import {
   formatCents,
   formatTimestamp,
@@ -85,18 +86,20 @@ function auditContractWarning(audit: AuditSummary, contract: PromiseContract): s
 export function layout(
   title: string,
   body: string,
-  current: 'campaign' | 'audits' | 'runs' | 'audit' | 'repair' | 'check' = 'campaign',
+  current: 'campaign' | 'gate' | 'audits' | 'runs' | 'audit' | 'repair' | 'check' = 'campaign',
   publicMode = false,
   headExtra = '',
 ): string {
   const navCurrent =
     current === 'campaign'
       ? 'campaign'
-      : current === 'runs'
-        ? 'runs'
-        : current === 'check'
-          ? ''
-          : 'audits';
+      : current === 'gate'
+        ? 'gate'
+        : current === 'runs'
+          ? 'runs'
+          : current === 'check'
+            ? ''
+            : 'audits';
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -112,6 +115,7 @@ ${headExtra}
   <a class="wordmark" href="/">KERN<span>PROMISE AUDIT</span></a>
   <nav aria-label="Main">
     <a href="/"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
+    <a href="/gate"${navCurrent === 'gate' ? ' aria-current="page"' : ''}>Gate</a>
     <a href="/audits"${navCurrent === 'audits' ? ' aria-current="page"' : ''}>Audits</a>
     <a href="${publicMode ? '/store/' : STOREFRONT_URL}">Storefront</a>
     <a href="/runs"${navCurrent === 'runs' ? ' aria-current="page"' : ''}>Runs</a>
@@ -253,6 +257,7 @@ function campaignLoopBand(index: AuditIndex, publicMode: boolean): string {
     </div>
   </div>
   <div class="loop-links">
+    <a class="loop-link" href="/gate">The gate</a>
     <a class="loop-link" href="${repairUrl}">Repair case</a>
     ${
       beforeHref
@@ -1201,6 +1206,161 @@ ${repairError}
     </article>
   </div>
 </section>`;
+}
+
+function gateChip(pass: boolean, label: string): string {
+  return `<span class="gate-chip ${pass ? 'gate-chip--pass' : 'gate-chip--fail'}">${escapeHtml(
+    label,
+  )}</span>`;
+}
+
+export function renderGate(input: {
+  contract: PromiseContract;
+  pre: AuditSummary | null;
+  post: AuditSummary | null;
+  gate: GateResult | null;
+  gauntlet: GauntletRow[];
+  publicMode?: boolean;
+}): string {
+  const { contract, pre, post, gate, gauntlet, publicMode = false } = input;
+  const open = gate?.open === true;
+  const comparisons = post?.audit.objectiveHashComparisons ?? [];
+  const matches = comparisons.filter((comparison) => comparison.match).length;
+  const repairUrl = pre ? `/repair/${encodeURIComponent(pre.audit.auditId)}` : null;
+  const preUrl = pre ? `/audits/${encodeURIComponent(pre.audit.auditId)}` : null;
+  const postUrl = post ? `/audits/${encodeURIComponent(post.audit.auditId)}` : null;
+  const beforeStoreUrl = publicMode ? '/store/before/eligible-60' : null;
+  const afterStoreUrl = publicMode ? '/store/eligible-60' : STOREFRONT_URL;
+  const auditId = gate?.auditId ?? post?.audit.auditId ?? '<audit-id>';
+  const auditPath = post?.recorded
+    ? `recorded/${post.audit.auditId}/audit.json`
+    : `.data/audits/${auditId}/audit.json`;
+
+  const gateBlock = `<div class="gate ${open ? 'gate--open' : 'gate--closed'}" role="status">
+  <p class="panel-label">Gate status</p>
+  <p class="gate-status"><strong>${open ? 'OPEN' : 'CLOSED'}</strong>${
+    gate ? ` · ${gate.scenarios.filter((scenario) => scenario.pass).length}/${gate.scenarios.length} scenarios pass` : ''
+  }</p>
+  <p class="gate-callout">“The agent may not ship until Kane passes the same objectives.”</p>
+  <p class="meta">${
+    post
+      ? `Audit <a href="${postUrl}">${escapeHtml(post.audit.auditId)}</a> · ${post.audit.overallStatus} · ${matches}/${comparisons.length} objective hashes match`
+      : 'No completed post-repair audit is available, so the gate is closed.'
+  }</p>
+</div>`;
+
+  const scenarioRows = gate
+    ? gate.scenarios
+        .map(
+          (scenario) => `<tr>
+  <td>${escapeHtml(scenario.label)}<br><span class="meta">${escapeHtml(
+    scenario.scenarioId,
+  )}</span></td>
+  <td class="num">${formatCents(scenario.expectedCents)}</td>
+  <td class="num">${formatCents(scenario.observedCents)}</td>
+  <td>${escapeHtml(scenario.status)}</td>
+  <td>${gateChip(scenario.pass, scenario.pass ? 'PASS' : 'BLOCKED')}</td>
+</tr>`,
+        )
+        .join('\n')
+    : '<tr><td colspan="5">No gate evaluation is available.</td></tr>';
+
+  const reasons =
+    gate && gate.reasons.length > 0
+      ? `<div class="warning" role="alert"><strong>Why the gate is closed</strong><ul class="not-proven">${gate.reasons
+          .map((reason) => `<li>${escapeHtml(reason)}</li>`)
+          .join('')}</ul></div>`
+      : '';
+
+  const candidateRows = gauntlet
+    .map(
+      (row) => `<tr>
+  <td><strong>${escapeHtml(row.label)}</strong><br><span class="meta">${escapeHtml(
+    row.description,
+  )}</span></td>
+  ${row.cells
+    .map(
+      (cell) => `<td class="gauntlet-cell ${cell.pass ? 'gauntlet-cell--pass' : 'gauntlet-cell--fail'}">
+    ${gateChip(cell.pass, cell.pass ? 'PASS' : 'FAIL')}
+    <span class="meta">expected ${formatCents(cell.expectedCents)} · observed ${formatCents(
+      cell.observedCents,
+    )}</span>
+  </td>`,
+    )
+    .join('')}
+  <td>${gateChip(row.pass, row.pass ? 'SHIP' : 'REJECT')}</td>
+</tr>`,
+    )
+    .join('\n');
+
+  return layout(
+    'Kern Gate',
+    `<p class="eyebrow">Kern Gate · commercial promise</p>
+<h1>The agent does not decide. Kane does.</h1>
+<p class="lede">A patch is not done because it compiles. It is done when the frozen promise survives the real browser, the boundary, and the control. This is the gate; the page is not the gate.</p>
+${gateBlock}
+
+<section aria-labelledby="gate-scenarios-heading">
+  <h2 id="gate-scenarios-heading">What the gate checks</h2>
+  <p>The gate reads the audit evidence against the current frozen contract. It does not ask the store’s shipping function what the answer should be.</p>
+  <div class="table-wrap">
+    <table class="repair-failure">
+      <thead><tr><th scope="col">Cart</th><th scope="col" class="num">Promised</th><th scope="col" class="num">Observed</th><th scope="col">Audit</th><th scope="col">Gate</th></tr></thead>
+      <tbody>${scenarioRows}</tbody>
+    </table>
+  </div>
+  ${reasons}
+</section>
+
+<section aria-labelledby="gauntlet-heading">
+  <h2 id="gauntlet-heading">Patch gauntlet: only one fix gets through</h2>
+  <p>The exact $50 boundary catches a fix that only frees $60 and up. The $35 control catches a fix that makes all shipping free. The pre-repair rule is the actual defect.</p>
+  <div class="table-wrap">
+    <table class="repair-failure gauntlet-table">
+      <thead><tr><th scope="col">Patch</th>${Object.values(PRESET_CARTS)
+        .map((preset) => `<th scope="col">${escapeHtml(preset.label)}</th>`)
+        .join('')}<th scope="col">Result</th></tr></thead>
+      <tbody>${candidateRows}</tbody>
+    </table>
+  </div>
+  <p class="meta">This table is deterministic contract coverage using the same cart inputs and oracle. It is not a new Kane browser run. The real Kane evidence is linked below.</p>
+</section>
+
+<section aria-labelledby="gate-run-heading">
+  <h2 id="gate-run-heading">Run the gate</h2>
+  <pre class="gate-command">npm run gate -- --audit ${escapeHtml(auditPath)}
+npm run gate -- --run       # real Kane audit; spends credits
+npm run --silent gate -- --json  # machine-readable</pre>
+  <p>The command exits <code>0</code> only when the gate is open. A coding agent can use it as a stop hook: <code>npm run gate -- --audit &lt;path&gt; || exit 1</code>. The agent does not get to self-certify; it gets the observed values, the frozen expectations, and a closed gate.</p>
+  <p class="meta">The gate does not start Kane unless you pass <code>--run</code>. The recorded app and this page never start a run.</p>
+</section>
+
+<section aria-labelledby="gate-evidence-heading">
+  <h2 id="gate-evidence-heading">Evidence</h2>
+  <p>Contract <code>${escapeHtml(contract.id)}</code> · hash <code class="hash">${escapeHtml(
+    contract.specSha256,
+  )}</code></p>
+  <div class="actions">
+    ${
+      repairUrl
+        ? `<a class="button button--secondary" href="${repairUrl}">Repair case and agent gate</a>`
+        : ''
+    }
+    ${preUrl ? `<a class="button button--secondary" href="${preUrl}">Failed pre-repair audit</a>` : ''}
+    ${postUrl ? `<a class="button button--secondary" href="${postUrl}">Passing post-repair audit</a>` : ''}
+    ${
+      beforeStoreUrl
+        ? `<a class="button button--secondary" href="${beforeStoreUrl}">Audited storefront</a>`
+        : ''
+    }
+    <a class="button button--secondary" href="${afterStoreUrl}">${
+      publicMode ? 'After the repair' : 'Open the store'
+    }</a>
+  </div>
+</section>`,
+    'gate',
+    publicMode,
+  );
 }
 
 export function renderRepair(input: {

@@ -15,7 +15,7 @@ write path in the deployed build.
 
 ```bash
 npm run app:recorded        # public recorded app on :3300
-npm run export:static       # writes site/: 8 proof pages + 4 current + 3 pre-repair storefront pages
+npm run export:static       # writes site/: 9 proof pages + 4 current + 3 pre-repair pages
 ```
 
 `KERN_AUDIT_SOURCE=recorded` forces the export to read `recorded/` instead of a
@@ -35,10 +35,10 @@ deploying the repo root produces the same static output.
 
 ## What is public and what is not
 
-Public: `/`, `/audits`, `/audits/<id>`, `/audits/<id>/receipt`, `/repair/<id>`,
-`/runs`, `/store/`, `/store/eligible-60`, `/store/boundary-50`,
-`/store/control-35`, and the labelled pre-repair pages under
-`/store/before/<cart>`. No run controls, no `/check/*` routes (404), no POST
-forms in the store export.
+Public: `/`, `/gate`, `/audits`, `/audits/<id>`, `/audits/<id>/receipt`,
+`/repair/<id>`, `/runs`, `/store/`, `/store/eligible-60`,
+`/store/boundary-50`, `/store/control-35`, and the labelled pre-repair pages
+under `/store/before/<cart>`. No run controls, no `/check/*` routes (404), no
+POST forms in the store export.
 
 Not deployed: the live store server on 4173, `.data/`, the live check, the tunnel.

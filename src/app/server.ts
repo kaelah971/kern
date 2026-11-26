@@ -11,11 +11,13 @@ import {
 import { loadAppContract, readPolicy } from './data.ts';
 import { readRepairFacts, readShippingDiff } from './git.ts';
 import { getPreset } from '../lib/catalog.ts';
+import { evaluateGate, evaluatePatchGauntlet } from '../lib/gate.ts';
 import { LiveController, LIVE_SCENARIOS, type LiveControllerOptions } from './live.ts';
 import {
   renderAuditDetail,
   renderAuditList,
   renderCampaign,
+  renderGate,
   renderLiveStatus,
   renderNotFound,
   renderRepair,
@@ -256,6 +258,31 @@ export function createAppRequestHandler(
           index,
           publicMode,
           live: live ? live.snapshot() : null,
+        }),
+        headOnly,
+      );
+      return;
+    }
+
+    if (path === '/gate') {
+      const post =
+        index.audits.find((summary) => summary.audit.postRepair === true) ?? null;
+      const pre =
+        post?.audit.answersAuditId
+          ? index.audits.find(
+              (summary) => summary.audit.auditId === post.audit.answersAuditId,
+            ) ?? null
+          : null;
+      sendHtml(
+        res,
+        200,
+        renderGate({
+          contract,
+          pre,
+          post,
+          gate: post ? evaluateGate(post.audit, contract) : null,
+          gauntlet: evaluatePatchGauntlet(contract),
+          publicMode,
         }),
         headOnly,
       );
