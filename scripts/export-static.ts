@@ -10,9 +10,12 @@
  * KERN_RECORDED_ROOT=recorded, so every page carries the recorded banner:
  *
  *   KERN_PUBLIC=1 KERN_RECORDED_ROOT=recorded PORT=3300 npm run app
- *   node scripts/export-static.ts http://127.0.0.1:3300
+ *   npm run export:static
+ *
+ * The storefront is written afterwards by scripts/export-store.ts; its fixed
+ * cart pages are not fetched from the app.
  */
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 const ORIGIN = process.argv[2] ?? 'http://127.0.0.1:3300';
@@ -30,13 +33,22 @@ function linksIn(html: string): string[] {
     const path = match[1];
     if (path.startsWith('/check')) continue;
     if (path.startsWith('/health')) continue;
+    if (path.startsWith('/store')) continue;
     found.add(path.replace(/\/$/, '') || '/');
   }
   return [...found];
 }
 
+function resetOutput(): void {
+  mkdirSync(OUT, { recursive: true });
+  for (const entry of readdirSync(OUT)) {
+    if (entry === '.vercel' || entry === 'vercel.json' || entry === '.gitignore') continue;
+    rmSync(join(OUT, entry), { recursive: true, force: true });
+  }
+}
+
 async function main(): Promise<void> {
-  rmSync(OUT, { recursive: true, force: true });
+  resetOutput();
   const queue = ['/', '/runs', '/audits'];
   const seen = new Set<string>();
   const written: string[] = [];

@@ -109,8 +109,8 @@ ${headExtra}
   <nav aria-label="Main">
     <a href="/"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
     <a href="/audits"${navCurrent === 'audits' ? ' aria-current="page"' : ''}>Audits</a>
+    <a href="${publicMode ? '/store/' : STOREFRONT_URL}">Storefront</a>
     <a href="/runs"${navCurrent === 'runs' ? ' aria-current="page"' : ''}>Runs</a>
-    ${publicMode ? '' : `<a href="${STOREFRONT_URL}">Storefront</a>`}
   </nav>
 </header>
 <main id="main">

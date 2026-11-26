@@ -2,6 +2,25 @@ import { PRESET_CARTS, PRODUCTS } from './catalog.ts';
 import type { CartLineView } from './cart.ts';
 import { formatUsd } from './money.ts';
 
+export type KernSaw = {
+  promisedCents: number;
+  observedCents: number;
+  verdict: string;
+  auditId: string;
+  auditUrl: string;
+  auditLabel: string;
+};
+
+export type StoreRenderOptions = {
+  staticExport?: boolean;
+  kernSaw?: KernSaw;
+  revision?: {
+    active: 'current' | 'before';
+    currentHref: string;
+    beforeHref: string;
+  };
+};
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -20,6 +39,7 @@ const STYLES = `
   --line: #d8cbb6;
   --accent: #a93f24;
   --accent-dark: #7e2b16;
+  --accent-surface: #f6e4dc;
   --serif: Georgia, 'Times New Roman', serif;
   --sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
@@ -36,6 +56,16 @@ body {
     var(--paper);
 }
 a { color: inherit; }
+.demo-banner {
+  background: var(--ink);
+  color: var(--paper-2);
+  border-bottom: 4px solid var(--accent);
+  padding: .55rem 1rem;
+  text-align: center;
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: .035em;
+}
 .site-header {
   display: flex;
   align-items: baseline;
@@ -167,6 +197,67 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .summary-row .amount { font-variant-numeric: tabular-nums; }
 .line-items { margin: 0 0 .75rem; padding: 0 0 .75rem; border-bottom: 1px solid var(--line); }
 .line-item { display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; color: var(--muted); padding: .2rem 0; }
+.kern-saw {
+  max-width: 34rem;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--accent);
+  background: var(--paper-2);
+  padding: 1.1rem 1.2rem;
+  margin: 1.5rem 0 1.25rem;
+}
+.kern-saw h2 { font-size: 1.1rem; margin: 0 0 .6rem; }
+.kern-saw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .75rem;
+  margin: .75rem 0;
+}
+.kern-saw-grid dt {
+  font-size: .66rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+.kern-saw-grid dd {
+  margin: .15rem 0 0;
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+.kern-saw .verdict-text { font-family: var(--sans); font-size: .9rem; font-weight: 700; letter-spacing: .06em; }
+.kern-saw .source { margin: 0; font-size: .82rem; color: var(--muted); }
+.revision-toggle {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .45rem;
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  padding: .35rem .45rem;
+  margin: 0 0 1rem;
+  font-size: .82rem;
+}
+.revision-toggle > span { color: var(--muted); padding: 0 .25rem; }
+.revision-toggle a {
+  text-decoration: none;
+  padding: .3rem .6rem;
+  border: 1px solid transparent;
+}
+.revision-toggle a[aria-current="page"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper-2);
+  font-weight: 600;
+}
+.revision-note {
+  max-width: 34rem;
+  border: 1px solid var(--accent);
+  background: var(--accent-surface);
+  padding: .75rem .9rem;
+  margin: 0 0 1.25rem;
+  font-size: .86rem;
+}
 .stop-note {
   max-width: 34rem;
   border-left: 3px solid var(--accent);
@@ -189,8 +280,30 @@ footer {
 }
 `;
 
-function layout(title: string, body: string, cartCount: number): string {
+function layout(
+  title: string,
+  body: string,
+  cartCount: number,
+  options: StoreRenderOptions = {},
+): string {
   const cartLabel = cartCount > 0 ? `Cart (${cartCount})` : 'Cart';
+  const staticExport = options.staticExport === true;
+  const homeHref = staticExport ? '/store/' : '/';
+  const nav = staticExport
+    ? `<nav><a href="/store/">Shop</a><a href="/">Kern proof site</a></nav>`
+    : `<nav><a href="/">Shop</a><a href="/cart">${cartLabel}</a></nav>`;
+  const banner = staticExport
+    ? `<div class="demo-banner" role="note">Demo storefront. Not a real shop. This is the fixture Kern checks.</div>`
+    : '';
+  const footer = staticExport
+    ? `<footer>
+  <span>Kern Supply Co. static demo storefront · not a real shop</span>
+  <span>Checkout stops at the shipping quote. No payment, no order.</span>
+</footer>`
+    : `<footer>
+  <span>Kern Supply Co. demo storefront · local only</span>
+  <span>Checkout stops at the shipping quote. No payment, no order.</span>
+</footer>`;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -200,38 +313,44 @@ function layout(title: string, body: string, cartCount: number): string {
 <style>${STYLES}</style>
 </head>
 <body>
+${banner}
 <header class="site-header">
-  <a class="wordmark" href="/">KERN<span>SUPPLY CO.</span></a>
-  <nav><a href="/">Shop</a><a href="/cart">${cartLabel}</a></nav>
+  <a class="wordmark" href="${homeHref}">KERN<span>SUPPLY CO.</span></a>
+  ${nav}
 </header>
 <main>
 ${body}
 </main>
-<footer>
-  <span>Kern Supply Co. demo storefront · local only</span>
-  <span>Checkout stops at the shipping quote. No payment, no order.</span>
-</footer>
+${footer}
 </body>
 </html>`;
 }
 
-function productCard(product: (typeof PRODUCTS)[number]): string {
+function productCard(product: (typeof PRODUCTS)[number], staticExport = false): string {
+  const action = staticExport
+    ? ''
+    : `<form method="post" action="/cart/add">
+    <input type="hidden" name="productId" value="${escapeHtml(product.id)}">
+    <button type="submit" aria-label="Add ${escapeHtml(product.name)} to cart">Add to cart</button>
+  </form>`;
   return `<article class="card">
   <div class="swatch" style="--swatch:${escapeHtml(product.swatch)}" role="img" aria-label="${escapeHtml(product.name)}"></div>
   <h3>${escapeHtml(product.name)}</h3>
   <p>${escapeHtml(product.description)}</p>
   <div class="price">${formatUsd(product.priceCents)}</div>
-  <form method="post" action="/cart/add">
-    <input type="hidden" name="productId" value="${escapeHtml(product.id)}">
-    <button type="submit" aria-label="Add ${escapeHtml(product.name)} to cart">Add to cart</button>
-  </form>
+  ${action}
 </article>`;
 }
 
-export function renderHome(cartCount: number): string {
+export function renderHome(cartCount: number, options: StoreRenderOptions = {}): string {
+  const staticExport = options.staticExport === true;
   const presets = Object.values(PRESET_CARTS)
-    .map(
-      (preset) => `<form method="post" action="/cart/preset">
+    .map((preset) =>
+      staticExport
+        ? `<a class="button secondary" href="/store/${escapeHtml(
+            preset.id,
+          )}">View ${escapeHtml(preset.label)} quote</a>`
+        : `<form method="post" action="/cart/preset">
       <input type="hidden" name="preset" value="${escapeHtml(preset.id)}">
       <button class="secondary" type="submit">Load ${escapeHtml(preset.label)} cart</button>
     </form>`,
@@ -246,8 +365,12 @@ export function renderHome(cartCount: number): string {
 </section>
 <p class="intro">Small-batch goods for people who keep notebooks, carry totes, and cook without measuring. Prices in USD.</p>
 <section class="demo-carts" aria-labelledby="demo-heading">
-  <h2 id="demo-heading">Demo fixtures</h2>
-  <p>Deterministic carts for the Kern challenge. Each one loads a real cart and lands on the server-calculated shipping quote.</p>
+  <h2 id="demo-heading">${staticExport ? 'Fixed demo carts' : 'Demo fixtures'}</h2>
+  <p>${
+    staticExport
+      ? `Three fixed carts rendered by the store's own shipping function. Each link opens a static shipping quote.`
+      : 'Deterministic carts for the Kern challenge. Each one loads a real cart and lands on the server-calculated shipping quote.'
+  }</p>
   <div class="preset-row">
 ${presets}
   </div>
@@ -255,10 +378,11 @@ ${presets}
 <section aria-labelledby="products-heading">
   <h2 id="products-heading">Goods</h2>
   <div class="grid">
-${PRODUCTS.map(productCard).join('\n')}
+${PRODUCTS.map((product) => productCard(product, staticExport)).join('\n')}
   </div>
 </section>`,
     cartCount,
+    options,
   );
 }
 
@@ -310,13 +434,48 @@ ${rows}
   );
 }
 
-export function renderCheckout(input: {
-  lines: CartLineView[];
-  subtotalCents: number;
-  shippingCents: number;
-  totalCents: number;
-  cartCount: number;
-}): string {
+function kernSawStrip(saw: KernSaw): string {
+  return `<section class="kern-saw" aria-labelledby="kern-saw-heading">
+  <p class="eyebrow" style="font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 .35rem">From the recorded audit</p>
+  <h2 id="kern-saw-heading">What Kern saw</h2>
+  <dl class="kern-saw-grid">
+    <div><dt>Promised</dt><dd data-kern-saw-promised-cents="${saw.promisedCents}">${formatUsd(
+      saw.promisedCents,
+    )}</dd></div>
+    <div><dt>Observed</dt><dd data-kern-saw-observed-cents="${saw.observedCents}">${formatUsd(
+      saw.observedCents,
+    )}</dd></div>
+    <div><dt>Verdict</dt><dd class="verdict-text">${escapeHtml(saw.verdict)}</dd></div>
+  </dl>
+  <p class="source">${escapeHtml(saw.auditLabel)} · <a href="${escapeHtml(
+    saw.auditUrl,
+  )}">${escapeHtml(saw.auditId)}</a></p>
+</section>`;
+}
+
+function revisionToggle(revision: NonNullable<StoreRenderOptions['revision']>): string {
+  return `<nav class="revision-toggle" aria-label="Store revision">
+  <span>Revision</span>
+  <a href="${escapeHtml(revision.currentHref)}"${
+    revision.active === 'current' ? ' aria-current="page"' : ''
+  }>After the repair</a>
+  <a href="${escapeHtml(revision.beforeHref)}"${
+    revision.active === 'before' ? ' aria-current="page"' : ''
+  }>The revision Kern audited</a>
+</nav>`;
+}
+
+export function renderCheckout(
+  input: {
+    lines: CartLineView[];
+    subtotalCents: number;
+    shippingCents: number;
+    totalCents: number;
+    cartCount: number;
+  },
+  options: StoreRenderOptions = {},
+): string {
+  const staticExport = options.staticExport === true;
   const items = input.lines
     .map(
       (line) => `<div class="line-item">
@@ -327,11 +486,22 @@ export function renderCheckout(input: {
     .join('\n');
 
   const shippingLabel = input.shippingCents === 0 ? 'Free' : 'Standard (3–5 business days)';
+  const toggle = options.revision ? revisionToggle(options.revision) : '';
+  const revisionNote =
+    options.revision?.active === 'before'
+      ? `<div class="revision-note" role="note">You are viewing the pre-repair revision that Kern audited. It is not the current store.</div>`
+      : '';
+  const saw = options.kernSaw ? kernSawStrip(options.kernSaw) : '';
+  const actions = staticExport
+    ? `<a class="button secondary" href="/store/">Back to demo store</a>`
+    : `<a class="button secondary" href="/cart">Back to cart</a>`;
 
   return layout(
     'Shipping quote',
     `<h1>Shipping quote</h1>
 <p class="intro">US destination · standard shipping · USD</p>
+${toggle}
+${revisionNote}
 <div class="summary">
   <div class="line-items">
 ${items}
@@ -349,11 +519,13 @@ ${items}
     <span class="amount" data-testid="total" data-total-cents="${input.totalCents}">${formatUsd(input.totalCents)}</span>
   </div>
 </div>
+${saw}
 <p class="stop-note">This demo stops at the shipping quote. There are no payment fields, no card data, and no order is placed.</p>
 <div class="actions">
-  <a class="button secondary" href="/cart">Back to cart</a>
+  ${actions}
 </div>`,
     input.cartCount,
+    options,
   );
 }
 

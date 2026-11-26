@@ -2,7 +2,7 @@
 
 Kern turns an advertised checkout promise into a frozen, merchant-approved contract, sends Kane CLI through the real storefront in a browser, and compares the rendered charge with a deterministic oracle. When the store is wrong, a bounded source repair is followed by the same challenge rerun unchanged. The demo has one storefront, one `free_shipping_threshold` promise, three carts, and two real audits.
 
-**Live demo:** https://kern-site-mocha.vercel.app — read-only proof site. Every page is a real audit; no account needed. Deployment steps: [`docs/vercel.md`](docs/vercel.md).
+**Live demo:** https://kern-site-mocha.vercel.app — read-only proof site and static demo storefront. Every audit page is real recorded evidence; no account needed. Deployment steps: [`docs/vercel.md`](docs/vercel.md).
 
 ## The proof
 
@@ -91,6 +91,7 @@ A cheap smoke run is `node scripts/kane-audit.ts --scenario control-35 --kind ob
 - A bounded repair and an unchanged post-repair audit gated by all six objective hashes.
 - A read-only server-rendered app on 3000: campaign, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff.
 - `/runs` — every real Kane run in the audit JSON, newest first, grouped by audit; 15 locally with `.data`, 12 in the two-audit `recorded/` bundle.
+- `/store/` — static demo storefront with three fixed cart quotes; `/store/<cart>` shows the quote and the recorded "What Kern saw" values. No add-to-cart or checkout POST is exported.
 - Public `recorded/` copies, a restore-safe pre-repair replay, and a pre-repair store runner for filming.
 
 ## What is not built

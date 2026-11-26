@@ -1,4 +1,4 @@
-# Deploy the read-only proof site
+# Deploy the proof site and demo storefront
 
 Live: **https://kern-site-mocha.vercel.app**
 
@@ -14,13 +14,14 @@ write path in the deployed build.
 ## Build the export
 
 ```bash
-npm run app:recorded        # KERN_PUBLIC=1 KERN_AUDIT_SOURCE=recorded on :3300
-npm run export:static       # writes site/, 8 pages, ~230 KB
+npm run app:recorded        # public recorded app on :3300
+npm run export:static       # writes site/: 8 proof pages + 4 storefront pages
 ```
 
 `KERN_AUDIT_SOURCE=recorded` forces the export to read `recorded/` instead of a
-local `.data/`, so every page carries the recorded banner and the public site never
-depends on the operator's machine.
+local `.data/`, so every proof page carries the recorded banner and the public site
+never depends on the operator's machine. The store pages are static fixtures with
+the recorded "What Kern saw" strip.
 
 ## Deploy
 
@@ -35,6 +36,8 @@ deploying the repo root produces the same static output.
 ## What is public and what is not
 
 Public: `/`, `/audits`, `/audits/<id>`, `/audits/<id>/receipt`, `/repair/<id>`,
-`/runs`. No run controls, no `/check/*` routes (404), no store.
+`/runs`, `/store/`, `/store/eligible-60`, `/store/boundary-50` and
+`/store/control-35`. No run controls, no `/check/*` routes (404), no POST forms
+in the store export.
 
-Not deployed: the storefront, `.data/`, the live check, the tunnel.
+Not deployed: the live store server on 4173, `.data/`, the live check, the tunnel.
