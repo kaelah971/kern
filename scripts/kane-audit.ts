@@ -19,6 +19,10 @@ Options:
   --post-repair          Require all six objective hashes to match the latest
                          complete pre-repair audit before spending credits.
                          Auto-enabled on repair/* branches.
+  --contract <path>      Use a compiled contract JSON instead of the default
+                         contracts/demo-promise.json.
+  --url <url>            Shop this storefront preview instead of the local
+                         127.0.0.1:4173 store. http(s) only.
   -h, --help             Show this help
 `;
 }
@@ -32,11 +36,15 @@ function parseArgs(argv: string[]): {
   kind: Kind;
   reuse: string[];
   postRepair: boolean | undefined;
+  contractPath: string | undefined;
+  storeUrl: string | undefined;
 } {
   let scenario: string | undefined;
   let kind: Kind = 'both';
   const reuse: string[] = [];
   let postRepair: boolean | undefined;
+  let contractPath: string | undefined;
+  let storeUrl: string | undefined;
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -74,10 +82,34 @@ function parseArgs(argv: string[]): {
       postRepair = true;
       continue;
     }
+    if (arg === '--contract') {
+      const value = argv[++index];
+      if (!value) fail('--contract needs a path');
+      contractPath = value;
+      continue;
+    }
+    if (arg === '--url') {
+      const value = argv[++index];
+      if (!value) fail('--url needs a URL');
+      let parsed: URL;
+      try {
+        parsed = new URL(value);
+      } catch {
+        fail(`--url is not a valid URL: "${value}"`);
+      }
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        fail('--url must be http(s)');
+      }
+      if (parsed.username || parsed.password) {
+        fail('--url must not contain credentials');
+      }
+      storeUrl = parsed.toString();
+      continue;
+    }
     fail(`unknown argument "${arg}"`);
   }
 
-  return { scenario, kind, reuse, postRepair };
+  return { scenario, kind, reuse, postRepair, contractPath, storeUrl };
 }
 
 function pad(value: string, width: number): string {
@@ -122,12 +154,16 @@ function printTable(record: AuditRecord): void {
 }
 
 async function main(): Promise<void> {
-  const { scenario, kind, reuse, postRepair } = parseArgs(process.argv.slice(2));
+  const { scenario, kind, reuse, postRepair, contractPath, storeUrl } = parseArgs(
+    process.argv.slice(2),
+  );
   const { record, auditDir } = await runAudit({
     scenarioIds: scenario ? [scenario] : undefined,
     kind,
     reuseCaptureScenarioIds: reuse,
     postRepair,
+    ...(contractPath ? { contractPath } : {}),
+    ...(storeUrl ? { storeUrl } : {}),
     onProgress: (message) => console.error(message),
   });
 

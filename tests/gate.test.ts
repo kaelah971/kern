@@ -32,6 +32,8 @@ test('the patch gauntlet rejects the obvious wrong fixes and accepts the real on
   assert.equal(byId.get('correct')?.pass, true);
   assert.equal(byId.get('all-free')?.pass, false);
   assert.equal(byId.get('sixty-only')?.pass, false);
+  assert.equal(byId.get('ui-only')?.pass, false);
+  assert.equal(byId.get('control-regression')?.pass, false);
   assert.equal(byId.get('pre-fix')?.pass, false);
 
   const control = byId.get('all-free')?.cells.find((cell) => cell.scenarioId === 'control-35');

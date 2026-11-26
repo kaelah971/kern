@@ -8,6 +8,7 @@ import type { CommitFact, DiffResult, RepairFacts } from './git.ts';
 import type { PolicyInfo } from './data.ts';
 import type { LiveSnapshot } from './live.ts';
 import type { GateResult, GauntletRow } from '../lib/gate.ts';
+import type { CompiledContract } from '../lib/contract-compiler.ts';
 import {
   formatCents,
   formatTimestamp,
@@ -86,7 +87,7 @@ function auditContractWarning(audit: AuditSummary, contract: PromiseContract): s
 export function layout(
   title: string,
   body: string,
-  current: 'campaign' | 'gate' | 'audits' | 'runs' | 'audit' | 'repair' | 'check' = 'campaign',
+  current: 'campaign' | 'gate' | 'compile' | 'audits' | 'runs' | 'audit' | 'repair' | 'check' = 'campaign',
   publicMode = false,
   headExtra = '',
 ): string {
@@ -95,7 +96,9 @@ export function layout(
       ? 'campaign'
       : current === 'gate'
         ? 'gate'
-        : current === 'runs'
+        : current === 'compile'
+          ? 'compile'
+          : current === 'runs'
           ? 'runs'
           : current === 'check'
             ? ''
@@ -116,6 +119,7 @@ ${headExtra}
   <nav aria-label="Main">
     <a href="/"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
     <a href="/gate"${navCurrent === 'gate' ? ' aria-current="page"' : ''}>Gate</a>
+    ${publicMode ? '' : `<a href="/compile"${navCurrent === 'compile' ? ' aria-current="page"' : ''}>Compiler</a>`}
     <a href="/audits"${navCurrent === 'audits' ? ' aria-current="page"' : ''}>Audits</a>
     <a href="${publicMode ? '/store/' : STOREFRONT_URL}">Storefront</a>
     <a href="/runs"${navCurrent === 'runs' ? ' aria-current="page"' : ''}>Runs</a>
@@ -953,6 +957,7 @@ ${postRepair}
 
 ${audit.scenarios.map((scenario) => scenarioBlock(scenario, contract)).join('\n')}`,
     'audit',
+    publicMode,
   );
 }
 
@@ -1214,6 +1219,118 @@ function gateChip(pass: boolean, label: string): string {
   )}</span>`;
 }
 
+export type CompilerValues = {
+  id: string;
+  campaignId: string;
+  adTextSnapshot: string;
+  statedInterpretation: string;
+  thresholdDollars: string;
+  destinationOrigin: string;
+  policySource: string;
+  approvedBy: string;
+};
+
+export function renderContractCompiler(input: {
+  current: PromiseContract;
+  values?: Partial<CompilerValues>;
+  result?: CompiledContract | null;
+  error?: string | null;
+  publicMode?: boolean;
+}): string {
+  const { current, values = {}, result = null, error = null, publicMode = false } = input;
+  const value = (key: keyof CompilerValues, fallback: string): string =>
+    escapeHtml(values[key] ?? fallback);
+  const currentThreshold = (current.threshold.cents / 100).toFixed(2);
+  const form = `<form class="compiler-form" method="post" action="/compile">
+  <div class="compiler-grid">
+    <label>Contract id
+      <input name="id" required value="${value('id', `${current.id}-v2`)}">
+    </label>
+    <label>Campaign id
+      <input name="campaignId" required value="${value('campaignId', current.campaignId)}">
+    </label>
+    <label>Approved by
+      <input name="approvedBy" required value="${value('approvedBy', current.approvedBy)}">
+    </label>
+    <label>Threshold (USD)
+      <input name="thresholdDollars" required inputmode="decimal" pattern="[0-9]+([.][0-9]{1,2})?" value="${value(
+        'thresholdDollars',
+        currentThreshold,
+      )}">
+    </label>
+    <label>Destination origin
+      <input name="destinationOrigin" required type="url" value="${value(
+        'destinationOrigin',
+        current.destinationOrigin,
+      )}">
+    </label>
+    <label>Policy source
+      <input name="policySource" required value="${value('policySource', current.baselineSource)}">
+    </label>
+  </div>
+  <label>Ad snapshot
+    <textarea name="adTextSnapshot" required rows="3">${value(
+      'adTextSnapshot',
+      current.adTextSnapshot,
+    )}</textarea>
+  </label>
+  <label>Merchant's stated interpretation
+    <textarea name="statedInterpretation" required rows="4">${value(
+      'statedInterpretation',
+      current.statedInterpretation,
+    )}</textarea>
+  </label>
+  <p class="meta">Freezing creates a new JSON contract under <code>.data/contracts/</code>. The public site has no write path; this is a local operator tool.</p>
+  <button class="button" type="submit">Freeze contract</button>
+</form>`;
+
+  const resultBlock = result
+    ? `<section class="compiler-result" aria-labelledby="compiled-heading">
+  <p class="eyebrow">Frozen contract</p>
+  <h2 id="compiled-heading">${escapeHtml(result.contract.id)} · v${result.contract.version}</h2>
+  <p>Spec SHA-256 <code class="hash">${escapeHtml(result.contract.specSha256)}</code></p>
+  ${result.file ? `<p>File <code>${escapeHtml(result.file)}</code></p>` : ''}
+  <h3>Generated carts</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Role</th><th scope="col">Cart</th><th scope="col" class="num">Subtotal</th><th scope="col" class="num">Promised</th></tr></thead>
+    <tbody>${result.cartPlan
+      .map(
+        (cart) => `<tr><td>${escapeHtml(cart.role)}</td><td>${escapeHtml(
+          cart.label,
+        )}</td><td class="num">${formatCents(cart.subtotalCents)}</td><td class="num">${formatCents(
+          cart.expectedShippingCents,
+        )}</td></tr>`,
+      )
+      .join('')}</tbody>
+  </table></div>
+  ${result.warnings.map((warning) => `<div class="warning" role="status">${escapeHtml(warning)}</div>`).join('')}
+  <h3>Run against a preview</h3>
+  <pre class="gate-command">node scripts/kane-audit.ts --contract ${escapeHtml(
+    result.file ?? `.data/contracts/${result.contract.id}.json`,
+  )} --url ${escapeHtml(result.contract.destinationOrigin)}
+npm run gate -- --contract ${escapeHtml(
+        result.file ?? `.data/contracts/${result.contract.id}.json`,
+      )} --run --url ${escapeHtml(result.contract.destinationOrigin)}</pre>
+  <p class="meta">The audit still needs the preview to expose the three generated carts. The local demo store is fixed at $60/$50/$35; if the generated plan differs, the warning above applies.</p>
+</section>`
+    : '';
+
+  return layout(
+    'Contract compiler',
+    `<p class="eyebrow">Operator tool · local only</p>
+<h1>Compile the promise before you chase the code.</h1>
+<p class="lede">Turn an ad, a threshold basis, a destination and a policy source into a frozen contract. Kern generates the eligible, boundary and control carts from the same contract.</p>
+${error ? `<div class="warning" role="alert"><strong>Could not freeze the contract.</strong> ${escapeHtml(error)}</div>` : ''}
+${resultBlock}
+<section aria-labelledby="compiler-form-heading">
+  <h2 id="compiler-form-heading">Promise terms</h2>
+  ${form}
+</section>`,
+    'compile',
+    publicMode,
+  );
+}
+
 export function renderGate(input: {
   contract: PromiseContract;
   pre: AuditSummary | null;
@@ -1330,6 +1447,7 @@ ${gateBlock}
   <h2 id="gate-run-heading">Run the gate</h2>
   <pre class="gate-command">npm run gate -- --audit ${escapeHtml(auditPath)}
 npm run gate -- --run       # real Kane audit; spends credits
+npm run gate -- --contract .data/contracts/<id>.json --run --url <preview>
 npm run --silent gate -- --json  # machine-readable</pre>
   <p>The command exits <code>0</code> only when the gate is open. A coding agent can use it as a stop hook: <code>npm run gate -- --audit &lt;path&gt; || exit 1</code>. The agent does not get to self-certify; it gets the observed values, the frozen expectations, and a closed gate.</p>
   <p class="meta">The gate does not start Kane unless you pass <code>--run</code>. The recorded app and this page never start a run.</p>

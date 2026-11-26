@@ -35,6 +35,7 @@ export function objectiveSha256(text: string): string {
 export function buildScenarioObjectives(
   contract: PromiseContract,
   scenarioId: string,
+  originOverride?: string,
 ): ScenarioObjectives {
   const preset = getPreset(scenarioId);
   if (!preset) {
@@ -42,7 +43,7 @@ export function buildScenarioObjectives(
   }
 
   const oracleExpectedCents = expectedShippingCents(contract, preset.expectedSubtotalCents);
-  const origin = `${contract.destinationOrigin.replace(/\/+$/, '')}/`;
+  const origin = `${(originOverride ?? contract.destinationOrigin).replace(/\/+$/, '')}/`;
   const label = preset.label;
 
   const observe = [
@@ -76,8 +77,11 @@ export function buildScenarioObjectives(
   };
 }
 
-export function buildAllScenarioObjectives(contract: PromiseContract): ScenarioObjectives[] {
+export function buildAllScenarioObjectives(
+  contract: PromiseContract,
+  originOverride?: string,
+): ScenarioObjectives[] {
   return Object.keys(PRESET_CARTS).map((scenarioId) =>
-    buildScenarioObjectives(contract, scenarioId),
+    buildScenarioObjectives(contract, scenarioId, originOverride),
   );
 }

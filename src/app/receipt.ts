@@ -1,6 +1,8 @@
 import type { AuditRecord, AuditStatus, RunAudit } from '../lib/audit.ts';
 import type { PromiseContract } from '../lib/contract.ts';
 import type { PolicyInfo } from './data.ts';
+import type { GateResult } from '../lib/gate.ts';
+import type { RepairFacts } from './git.ts';
 import { formatCents, formatTimestamp } from './data.ts';
 import { escapeHtml, layout, sessionId, statusChip } from './render.ts';
 import { isRecorded, type RecordedAudit } from './audits.ts';
@@ -67,10 +69,16 @@ function runRows(audit: AuditRecord): string {
   return rows.join('\n');
 }
 
+export type ReceiptContext = {
+  gate?: GateResult | null;
+  repair?: RepairFacts | null;
+};
+
 export function renderReceiptBody(
   audit: AuditRecord,
   contract: PromiseContract,
   policy: PolicyInfo | null,
+  context: ReceiptContext = {},
 ): string {
   const statement = receiptStatusStatement(audit.overallStatus);
   const hashWarning =
@@ -116,6 +124,39 @@ ${
       : `<p><strong>Post-repair audit.</strong> No pre-repair audit id is recorded. Objective hashes match: <strong>${audit.objectiveHashesMatch ? 'yes' : 'no'}</strong>.</p>`
     : '';
 
+  const comparisons = audit.objectiveHashComparisons ?? [];
+  const matches = comparisons.filter((comparison) => comparison.match).length;
+  const gate = context.gate ?? null;
+  const repair = context.repair ?? null;
+  const repairGate = audit.postRepair
+    ? `<section aria-labelledby="receipt-gate">
+  <h2 id="receipt-gate">Repair and gate</h2>
+  <p><strong>Patch that passed:</strong> ${
+    repair?.fix
+      ? `<code>${escapeHtml(repair.fix.shortSha)}</code> ${escapeHtml(repair.fix.subject)}`
+      : 'Fix commit metadata is not available from git in this build.'
+  }</p>
+  <p><strong>Human approval:</strong> ${
+    repair?.merge
+      ? `merge <code>${escapeHtml(repair.merge.shortSha)}</code> by ${escapeHtml(
+          repair.merge.author,
+        )} · ${formatTimestamp(repair.merge.committedAt)}`
+      : 'No merge commit metadata is available.'
+  }</p>
+  <p><strong>Unchanged objectives:</strong> <strong>${matches}/${comparisons.length}</strong> pre/post objective hashes match${
+    audit.objectiveHashesMatch ? '; the audit records the full match' : ''
+  }.</p>
+  <p><strong>Kane gate:</strong> ${
+    gate
+      ? gate.open
+        ? '<strong>OPEN</strong> for this tested scope.'
+        : `<strong>CLOSED</strong>${gate.reasons.length ? `: ${gate.reasons.map(escapeHtml).join('; ')}` : '.'}`
+      : 'No gate evaluation is available.'
+  }</p>
+  <p class="gate-callout">“The agent may not ship until Kane passes the same objectives.”</p>
+</section>`
+    : '';
+
   const body = `<article class="receipt">
   <header class="receipt-head">
     <p class="eyebrow">Promise Receipt</p>
@@ -139,6 +180,7 @@ ${
   </dl>
 
   ${postRepair}
+  ${repairGate}
 
   <section aria-labelledby="receipt-ad">
     <h2 id="receipt-ad">Ad snapshot</h2>
@@ -218,10 +260,11 @@ export function renderReceiptPage(
   contract: PromiseContract,
   policy: PolicyInfo | null,
   publicMode = false,
+  context: ReceiptContext = {},
 ): string {
   return layout(
     'Promise Receipt',
-    renderReceiptBody(audit, contract, policy),
+    renderReceiptBody(audit, contract, policy, context),
     'audit',
     publicMode,
   );

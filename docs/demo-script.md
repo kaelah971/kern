@@ -44,7 +44,7 @@ banner is absent; on a public clone it shows `recorded/` and the banner.
 | 2:30–2:55 | Click **Promise Receipt** on the post-repair audit. Point at the contract hash, the pre-repair audit ID, the $0/$0/$9 table, and the evidence hashes. Scroll to **What this does not prove**. | “The receipt is scoped: verified for the tested conditions at the recorded time, not certified. It names the pre-repair audit and every evidence hash. And it says what it does not prove — one store, one promise, one moment.” |
 | 2:55–3:15 | Switch to **http://127.0.0.1:4173**. Click **Load $60.00 eligible cart**. The current repaired checkout shows $0.00 shipping. | “This is the repaired store. The same fixed cart that the audited revision charged $9.00 now shows $0.00.” |
 | 3:15–3:35 | Open **https://kern-site-mocha.vercel.app/store/**. Point at the banner and the three fixed carts. Open **eligible-60** ($0.00), then click **The revision Kern audited** and show the $9.00 page and its “not the current store” notice. | “The public store is the same fixture, statically exported from the store’s own templates. The current $60 quote is $0.00; the audited revision is $9.00. The page labels the old revision and links both to the recorded audit.” |
-| 3:35–3:50 | Open **http://127.0.0.1:3000/gate**. Point at **Gate OPEN**, the four-patch gauntlet, and the three REJECT rows. | “The gate is the product. The correct fix passes all three carts; all-free fails the $35 control, $60-only fails the $50 boundary, and the audited rule fails the promise. The agent does not decide; Kane does.” |
+| 3:35–3:50 | Open **http://127.0.0.1:3000/gate**. Point at **Gate OPEN**, the six-patch gauntlet, and the three REJECT rows. | “The gate is the product. The correct fix passes all three carts; all-free fails the $35 control, $60-only fails the $50 boundary, and the audited rule fails the promise. The agent does not decide; Kane does.” |
 | 3:50–4:00 | Back to the receipt or gate page. Hold on the “What this does not prove” / gate line. | “One store, one promise type, USD/US. Hash-linked, not signed. The control still pays $9, so the fix did not just make shipping free. Kane gates the patch.” |
 
 ## Optional operator panel (do not start a run)
@@ -54,6 +54,15 @@ If you show it, use a separate local app with the store running and do **not**
 click Start unless you intend to spend Kane credits. The completed recorded
 audits already carry the evidence. The panel is there to show the product can
 start the same audit script; the recorded demo does not start it.
+
+## Optional local-only product surfaces
+
+- **Contract compiler:** `/compile` on the local app (not public). It freezes a
+  contract and writes `.data/contracts/`; it does not run Kane. The public site
+  404s the route.
+- **Agent hook:** `hooks/claude-code-stop.mjs` blocks Claude Code when the gate is
+  closed. Pi uses `npm run gate -- --audit <path> || exit 1`. Do not enable it in
+  a recorded-only demo unless the audit named by `KERN_AUDIT_PATH` exists.
 
 ## After the demo
 

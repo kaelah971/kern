@@ -1,5 +1,6 @@
 import { createServer as createHttpServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { pathToFileURL } from 'node:url';
+import { join, relative } from 'node:path';
 import type { AddressInfo } from 'node:net';
 import {
   findPostRepairAudit,
@@ -12,11 +13,13 @@ import { loadAppContract, readPolicy } from './data.ts';
 import { readRepairFacts, readShippingDiff } from './git.ts';
 import { getPreset } from '../lib/catalog.ts';
 import { evaluateGate, evaluatePatchGauntlet } from '../lib/gate.ts';
+import { compileContract, freezeContract } from '../lib/contract-compiler.ts';
 import { LiveController, LIVE_SCENARIOS, type LiveControllerOptions } from './live.ts';
 import {
   renderAuditDetail,
   renderAuditList,
   renderCampaign,
+  renderContractCompiler,
   renderGate,
   renderLiveStatus,
   renderNotFound,
@@ -133,6 +136,7 @@ export type AppServerOptions = {
   publicMode?: boolean;
   liveMode?: boolean;
   live?: LiveControllerOptions;
+  contractRoot?: string;
 };
 
 export function createAppRequestHandler(
@@ -145,6 +149,7 @@ export function createAppRequestHandler(
   const live = liveMode
     ? new LiveController({ repoRoot, ...options.live })
     : null;
+  const contractRoot = options.contractRoot ?? join(repoRoot, '.data', 'contracts');
 
   async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const method = req.method ?? 'GET';
@@ -162,8 +167,19 @@ export function createAppRequestHandler(
       return;
     }
 
+    if (path === '/compile' && publicMode) {
+      sendHtml(
+        res,
+        404,
+        renderNotFound('Page not found', 'The contract compiler is local-only.', publicMode),
+        headOnly,
+      );
+      return;
+    }
+
     const isLiveRunPost = liveMode && path === '/check/run' && method === 'POST';
-    if (!isLiveRunPost && method !== 'GET' && !headOnly) {
+    const isCompilePost = !publicMode && path === '/compile' && method === 'POST';
+    if (!isLiveRunPost && !isCompilePost && method !== 'GET' && !headOnly) {
       sendHtml(
         res,
         405,
@@ -193,6 +209,67 @@ export function createAppRequestHandler(
 
     const contract = loadAppContract();
     const policy = readPolicy(repoRoot);
+
+    if (!publicMode && path === '/compile') {
+      if (method === 'POST') {
+        if (!isSameOrigin(req)) {
+          sendText(res, 403, 'Forbidden: the compiler request must come from this local app.');
+          return;
+        }
+        let form: URLSearchParams;
+        try {
+          form = await readForm(req);
+        } catch {
+          sendText(res, 400, 'Invalid compiler request.');
+          return;
+        }
+        const values = {
+          id: form.get('id') ?? '',
+          campaignId: form.get('campaignId') ?? '',
+          adTextSnapshot: form.get('adTextSnapshot') ?? '',
+          statedInterpretation: form.get('statedInterpretation') ?? '',
+          thresholdDollars: form.get('thresholdDollars') ?? '',
+          destinationOrigin: form.get('destinationOrigin') ?? '',
+          policySource: form.get('policySource') ?? '',
+          approvedBy: form.get('approvedBy') ?? '',
+        };
+        const thresholdCents = Math.round(Number(values.thresholdDollars) * 100);
+        try {
+          const result = compileContract({
+            id: values.id,
+            campaignId: values.campaignId,
+            adTextSnapshot: values.adTextSnapshot,
+            statedInterpretation: values.statedInterpretation,
+            thresholdCents,
+            destinationOrigin: values.destinationOrigin,
+            policySource: values.policySource,
+            approvedBy: values.approvedBy,
+          });
+          const file = freezeContract(result.contract, contractRoot);
+          result.file = relative(repoRoot, file).split(String.fromCharCode(92)).join('/');
+          sendHtml(res, 200, renderContractCompiler({ current: contract, values, result }));
+        } catch (error) {
+          sendHtml(
+            res,
+            400,
+            renderContractCompiler({
+              current: contract,
+              values,
+              error: error instanceof Error ? error.message : String(error),
+            }),
+          );
+        }
+        return;
+      }
+
+      sendHtml(
+        res,
+        200,
+        renderContractCompiler({ current: contract, publicMode: false }),
+        headOnly,
+      );
+      return;
+    }
 
     if (liveMode && live) {
       if (path === '/check') {
@@ -318,10 +395,22 @@ export function createAppRequestHandler(
         );
         return;
       }
+      const receiptAudit = loaded.summary.audit;
       sendHtml(
         res,
         200,
-        renderReceiptPage(loaded.summary.audit, contract, policy, publicMode),
+        renderReceiptPage(
+          receiptAudit,
+          contract,
+          policy,
+          publicMode,
+          receiptAudit.postRepair
+            ? {
+                gate: evaluateGate(receiptAudit, contract),
+                repair: readRepairFacts(repoRoot),
+              }
+            : {},
+        ),
         headOnly,
       );
       return;

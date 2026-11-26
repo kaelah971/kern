@@ -24,10 +24,24 @@ import { formatUsd } from '../src/lib/money.ts';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
-type Args = { audit: string | null; run: boolean; json: boolean; help: boolean };
+type Args = {
+  audit: string | null;
+  run: boolean;
+  json: boolean;
+  help: boolean;
+  contract: string | null;
+  url: string | null;
+};
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { audit: null, run: false, json: false, help: false };
+  const args: Args = {
+    audit: null,
+    run: false,
+    json: false,
+    help: false,
+    contract: null,
+    url: null,
+  };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === '--run') args.run = true;
@@ -37,6 +51,23 @@ function parseArgs(argv: string[]): Args {
       const next = argv[index + 1];
       if (!next) throw new Error('--audit requires a path');
       args.audit = next;
+      index += 1;
+    } else if (arg === '--contract') {
+      const next = argv[index + 1];
+      if (!next) throw new Error('--contract requires a path');
+      args.contract = next;
+      index += 1;
+    } else if (arg === '--url') {
+      const next = argv[index + 1];
+      if (!next) throw new Error('--url requires a URL');
+      const parsed = new URL(next);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        throw new Error('--url must be http(s)');
+      }
+      if (parsed.username || parsed.password) {
+        throw new Error('--url must not contain credentials');
+      }
+      args.url = parsed.toString();
       index += 1;
     } else {
       throw new Error(`unknown argument: ${arg}`);
@@ -67,6 +98,8 @@ function usage(): string {
 Usage:
   npm run gate                         # newest audit under .data/audits or recorded/
   npm run gate -- --audit <path>       # specific audit.json or audit directory
+  npm run gate -- --contract <path>    # use a compiled contract JSON
+  npm run gate -- --url <url>          # preview URL for --run
   npm run gate -- --run                # run a real Kane audit first (spends credits)
   npm run gate -- --json               # machine-readable result
   npm run gate -- --help
@@ -95,11 +128,14 @@ export function main(argv = process.argv.slice(2)): number {
   try {
     if (args.run) {
       console.error('KERN GATE: --run starts a real Kane audit and spends credits.');
-      const audit = spawnSync(
-        process.execPath,
-        [join(ROOT, 'scripts', 'kane-audit.ts')],
-        { cwd: ROOT, stdio: 'inherit', windowsHide: true },
-      );
+      const auditArgs = [join(ROOT, 'scripts', 'kane-audit.ts')];
+      if (args.contract) auditArgs.push('--contract', resolve(ROOT, args.contract));
+      if (args.url) auditArgs.push('--url', args.url);
+      const audit = spawnSync(process.execPath, auditArgs, {
+        cwd: ROOT,
+        stdio: 'inherit',
+        windowsHide: true,
+      });
       if (audit.error) throw audit.error;
       if (audit.status !== 0) {
         console.error(`KERN GATE: audit failed with exit ${audit.status ?? 'unknown'}`);
@@ -117,7 +153,9 @@ export function main(argv = process.argv.slice(2)): number {
     }
 
     const audit = readAudit(auditPath);
-    const contract = loadContract();
+    const contract = loadContract(
+      args.contract ? resolve(ROOT, args.contract) : undefined,
+    );
     const gate = evaluateGate(audit, contract);
 
     if (args.json) {

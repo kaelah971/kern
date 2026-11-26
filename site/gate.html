@@ -767,6 +767,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   <nav aria-label="Main">
     <a href="/">Campaign</a>
     <a href="/gate" aria-current="page">Gate</a>
+    
     <a href="/audits">Audits</a>
     <a href="/store/">Storefront</a>
     <a href="/runs">Runs</a>
@@ -864,6 +865,34 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   <td><span class="gate-chip gate-chip--fail">REJECT</span></td>
 </tr>
 <tr>
+  <td><strong>Label the charge as Free</strong><br><span class="meta">A UI-only hide: the label changes, but the customer is still charged $9.00.</span></td>
+  <td class="gauntlet-cell gauntlet-cell--fail">
+    <span class="gate-chip gate-chip--fail">FAIL</span>
+    <span class="meta">expected $0.00 · observed $9.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--fail">
+    <span class="gate-chip gate-chip--fail">FAIL</span>
+    <span class="meta">expected $0.00 · observed $9.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $9.00 · observed $9.00</span>
+  </td>
+  <td><span class="gate-chip gate-chip--fail">REJECT</span></td>
+</tr>
+<tr>
+  <td><strong>Fix the threshold, free the control</strong><br><span class="meta">Makes $60 and $50 free but accidentally gives the $35 control free shipping too.</span></td>
+  <td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $0.00 · observed $0.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--pass">
+    <span class="gate-chip gate-chip--pass">PASS</span>
+    <span class="meta">expected $0.00 · observed $0.00</span>
+  </td><td class="gauntlet-cell gauntlet-cell--fail">
+    <span class="gate-chip gate-chip--fail">FAIL</span>
+    <span class="meta">expected $9.00 · observed $0.00</span>
+  </td>
+  <td><span class="gate-chip gate-chip--fail">REJECT</span></td>
+</tr>
+<tr>
   <td><strong>The audited pre-repair rule</strong><br><span class="meta">The actual seeded defect: compare cents to a dollar-denominated threshold.</span></td>
   <td class="gauntlet-cell gauntlet-cell--fail">
     <span class="gate-chip gate-chip--fail">FAIL</span>
@@ -886,6 +915,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   <h2 id="gate-run-heading">Run the gate</h2>
   <pre class="gate-command">npm run gate -- --audit recorded/2026-11-23T12-35-29-692Z-48b993/audit.json
 npm run gate -- --run       # real Kane audit; spends credits
+npm run gate -- --contract .data/contracts/<id>.json --run --url <preview>
 npm run --silent gate -- --json  # machine-readable</pre>
   <p>The command exits <code>0</code> only when the gate is open. A coding agent can use it as a stop hook: <code>npm run gate -- --audit &lt;path&gt; || exit 1</code>. The agent does not get to self-certify; it gets the observed values, the frozen expectations, and a closed gate.</p>
   <p class="meta">The gate does not start Kane unless you pass <code>--run</code>. The recorded app and this page never start a run.</p>

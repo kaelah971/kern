@@ -59,7 +59,7 @@ npm install && npm test && npm run demo
 What to click:
 
 1. `/` — the above-the-fold loop band (**Kane found $9.00 → Pi changed one line → Kane re-ran 6/6, gate open**), then the ad snapshot, the merchant's interpretation, the frozen contract, the policy source behind $9.00, the three carts, and the latest audit.
-2. **Gate** — the evidence gate, the exact asked/observed table, and the patch gauntlet: only the correct fix passes all three carts.
+2. **Gate** — the evidence gate, the exact promised/observed table, and the six-patch gauntlet: only the correct fix passes all three carts.
 3. **Audits** — every readable audit, newest first, with status, source, post-repair provenance, runs and credits.
 4. **Runs** — every real Kane run, grouped by audit, with session, exit, result, credits, evidence hash and verdict. On the read-only deployment this page carries the operator-machine note and no run controls.
 5. **`2026-11-22T00-53-05-669Z-f5230a`** — Journey X-Ray: $60 Promised $0.00 / Observed $9.00, Kane's confirmed verdict; the $50 boundary and $35 control follow.
@@ -90,11 +90,14 @@ A cheap smoke run is `node scripts/kane-audit.ts --scenario control-35 --kind ob
 - A frozen promise contract with SHA-256, a deterministic oracle, and boundary tests at 4,999 / 5,000 / 5,001 cents.
 - A two-run Kane audit engine (observe + assert), strict NDJSON/USD parsing, fail-closed statuses, evidence copy and hash.
 - A bounded repair and an unchanged post-repair audit gated by all six objective hashes. The `/repair` page shows the mixed evidence chain: exact failure → Pi's bounded scope → actual commit → human merge → unchanged Kane rerun → gate.
-- A public/recorded read-only app on 3000: campaign, gate, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff. **81/81 tests pass.**
+- A public/recorded read-only app on 3000: campaign, gate, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff. **88/88 tests pass.**
 - `npm run demo` — one command starts the recorded app and the repaired store and opens both; no Kane account or credits needed.
 - An operator-only local check panel (`KERN_LIVE=1`): fixed scenarios, one child at a time, balance/store guards, and a real audit link when a check completes. The public deployment returns 404.
-- `/gate` — the evidence gate and a four-patch gauntlet. The correct repair passes all three carts; all-free, $60-only and the audited pre-repair rule are rejected. The page labels the gauntlet as contract coverage, not a new Kane run.
-- `npm run gate` — a real gate CLI. It exits `0` only when the audit is open, with `--audit`, `--json` and an explicit `--run` that spends Kane credits. The coding agent can use the exit code as a stop hook.
+- `/gate` — the evidence gate and a six-patch gauntlet. The correct repair passes all three carts; all-free, $60-only, UI-only, control-regression and the audited pre-repair rule are rejected. The page labels the gauntlet as contract coverage, not a new Kane run.
+- `npm run gate` — a real gate CLI. It exits `0` only when the audit is open, with `--audit`, `--contract`, `--url`, `--json`, and an explicit `--run` that spends Kane credits. The coding agent can use the exit code as a stop hook.
+- `/compile` — local-only contract compiler. The merchant enters ad, interpretation, threshold, destination, policy source and approver; Kern freezes a contract, hashes it, writes it under `.data/contracts/`, and generates the eligible, boundary and control cart plan. The public site returns 404.
+- Preview support: `kane-audit.ts --contract <path> --url <preview>` and `npm run gate -- --contract <path> --run --url <preview>` — the browser objectives point at the preview; the contract and gate still judge. No preview is called in the recorded demo.
+- `hooks/claude-code-stop.mjs` — a sample Stop hook: a closed Kern gate returns a Claude Code block decision; Pi can use `npm run gate -- --audit <path> || exit 1`.
 - `/runs` — every real Kane run in the audit JSON, newest first, grouped by audit; 15 locally with `.data`, 12 in the two-audit `recorded/` bundle.
 - `/store/` — static demo storefront with three fixed cart quotes; `/store/<cart>` shows the quote and the recorded "What Kern saw" values. No add-to-cart or checkout POST is exported.
 - `/store/before/<cart>` — the audited `ed3dbaf` revision's quotes, labelled **“The revision Kern audited”**; the current pages link to it under **“After the repair.”** The before page states that it is not the current store.
@@ -102,7 +105,7 @@ A cheap smoke run is `node scripts/kane-audit.ts --scenario control-35 --kind ob
 
 ## What is not built
 
-- Campaign wizard or contract-authoring UI.
+- A general campaign wizard beyond the local contract compiler.
 - Automated in-app coding-agent repair or approval UI. The repair was terminal-driven by Pi; the actual commit, scope and gate are shown as evidence, with no invented transcript.
 - Database, auth, or multi-tenancy.
 - Public/hosted live Kane execution. The local operator-only check exists; the public site is read-only.
@@ -137,6 +140,7 @@ The pre-repair characterization lives at `tests/replay/pre-repair.test.ts` and i
 - [`docs/proof-ledger.md`](docs/proof-ledger.md) — real runs, sessions, exits, reasons, evidence hashes, spend.
 - [`docs/decisions.md`](docs/decisions.md) — scope, boundary, claim rules.
 - [`docs/demo-script.md`](docs/demo-script.md) — 3:30 shot list.
+- [`hooks/README.md`](hooks/README.md) — Claude Code Stop-hook adapter and the Pi command.
 - [`docs/vercel.md`](docs/vercel.md) — read-only Vercel deployment, audit-root resolution, simulation result.
 - [`docs/publish.md`](docs/publish.md) — publication commands, scan findings, post drafts.
 - [`recorded/README.md`](recorded/README.md) — what was stripped, how to verify the originals.

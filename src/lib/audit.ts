@@ -348,6 +348,7 @@ async function runLive(
   objectives: ScenarioObjectives,
   kind: RunKind,
   runDir: string,
+  storeUrl: string,
   log: (message: string) => void,
 ): Promise<RunAudit> {
   log(`[${scenarioId}] ${kind}: running live`);
@@ -357,7 +358,7 @@ async function runLive(
     kind,
     objective: objectives[kind],
     runDir,
-    storeUrl: STORE_URL,
+    storeUrl,
     maxSteps,
     timeoutSeconds,
   });
@@ -623,6 +624,7 @@ function assembleRecord(input: {
   finishedAt: string | null;
   contract: PromiseContract;
   scenarios: ScenarioAudit[];
+  storeUrl: string;
   partial?: boolean;
   postRepairContext?: PostRepairContext | null;
 }): AuditRecord {
@@ -640,7 +642,7 @@ function assembleRecord(input: {
           objectiveHashComparisons: input.postRepairContext.comparisons,
         }
       : {}),
-    storeUrl: STORE_URL,
+    storeUrl: input.storeUrl,
     contract: {
       id: input.contract.id,
       version: input.contract.version,
@@ -660,6 +662,8 @@ export type AuditOptions = {
   kind?: 'observe' | 'assert' | 'both';
   reuseCaptureScenarioIds?: string[];
   postRepair?: boolean;
+  contractPath?: string;
+  storeUrl?: string;
   onProgress?: (message: string) => void;
 };
 
@@ -670,7 +674,8 @@ export type AuditOutcome = {
 
 export async function runAudit(options: AuditOptions = {}): Promise<AuditOutcome> {
   const log = options.onProgress ?? (() => {});
-  const contract: PromiseContract = loadContract();
+  const contract: PromiseContract = loadContract(options.contractPath);
+  const storeUrl = options.storeUrl ?? STORE_URL;
   const kind = options.kind ?? 'both';
   const scenarioIds = options.scenarioIds ?? Object.keys(PRESET_CARTS);
   const reuseIds = new Set(options.reuseCaptureScenarioIds ?? []);
@@ -705,8 +710,8 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditOutcome
     );
   }
 
-  log('preflight: checking the store and Kane authentication');
-  await preflightOrThrow(STORE_URL);
+  log(`preflight: checking the store at ${storeUrl} and Kane authentication`);
+  await preflightOrThrow(storeUrl);
   log('preflight: store reachable, Kane authenticated');
 
   const startedAt = new Date().toISOString();
@@ -717,7 +722,7 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditOutcome
   const scenarios: ScenarioAudit[] = [];
 
   for (const scenarioId of scenarioIds) {
-    const objectives = buildScenarioObjectives(contract, scenarioId);
+    const objectives = buildScenarioObjectives(contract, scenarioId, storeUrl);
     const scenarioDir = join(auditDir, scenarioId);
     mkdirSync(scenarioDir, { recursive: true });
     const notes: string[] = [];
@@ -734,7 +739,7 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditOutcome
       );
     } else {
       if (kind === 'observe' || kind === 'both') {
-        observe = await runLive(scenarioId, objectives, 'observe', scenarioDir, log);
+        observe = await runLive(scenarioId, objectives, 'observe', scenarioDir, storeUrl, log);
       }
 
       if (kind === 'assert' || kind === 'both') {
@@ -742,7 +747,7 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditOutcome
           notes.push('assert skipped after observe had no terminal run_end');
           log(`[${scenarioId}] assert: skipped because observe had no run_end`);
         } else {
-          assertRun = await runLive(scenarioId, objectives, 'assert', scenarioDir, log);
+          assertRun = await runLive(scenarioId, objectives, 'assert', scenarioDir, storeUrl, log);
         }
       } else {
         notes.push('assert not requested (--kind observe)');
@@ -811,6 +816,7 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditOutcome
       finishedAt: null,
       contract,
       scenarios,
+      storeUrl,
       partial: true,
       postRepairContext,
     });
@@ -828,6 +834,7 @@ export async function runAudit(options: AuditOptions = {}): Promise<AuditOutcome
     finishedAt,
     contract,
     scenarios,
+    storeUrl,
     postRepairContext,
   });
 

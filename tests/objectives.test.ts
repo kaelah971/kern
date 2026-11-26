@@ -87,3 +87,17 @@ test('changing the destination origin changes both objectives', () => {
   assert.match(after.observe, /http:\/\/127\.0\.0\.1:9999\//);
   assert.match(after.assert, /http:\/\/127\.0\.0\.1:9999\//);
 });
+
+test('a preview origin override changes both objectives without changing the contract', () => {
+  const preview = buildScenarioObjectives(
+    contract,
+    'eligible-60',
+    'https://preview.example/',
+  );
+  const current = buildScenarioObjectives(contract, 'eligible-60');
+  assert.notEqual(preview.observe, current.observe);
+  assert.notEqual(preview.assert, current.assert);
+  assert.match(preview.observe, /https:\/\/preview\.example\//);
+  assert.match(preview.assert, /https:\/\/preview\.example\//);
+  assert.equal(contract.destinationOrigin, 'http://127.0.0.1:4173');
+});

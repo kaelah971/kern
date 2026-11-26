@@ -159,6 +159,19 @@ const CANDIDATES: Array<{
     shipping: (subtotalCents) => (subtotalCents >= 6_000 ? 0 : STANDARD_SHIPPING_CENTS),
   },
   {
+    id: 'ui-only',
+    label: 'Label the charge as Free',
+    description: 'A UI-only hide: the label changes, but the customer is still charged $9.00.',
+    shipping: () => STANDARD_SHIPPING_CENTS,
+  },
+  {
+    id: 'control-regression',
+    label: 'Fix the threshold, free the control',
+    description: 'Makes $60 and $50 free but accidentally gives the $35 control free shipping too.',
+    shipping: (subtotalCents) =>
+      subtotalCents === 3_500 ? 0 : getStandardShippingCents(subtotalCents),
+  },
+  {
     id: 'pre-fix',
     label: 'The audited pre-repair rule',
     description: 'The actual seeded defect: compare cents to a dollar-denominated threshold.',
