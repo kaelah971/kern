@@ -91,7 +91,7 @@ A cheap smoke run is `node scripts/kane-audit.ts --scenario control-35 --kind ob
 - A frozen promise contract with SHA-256, a deterministic oracle, and boundary tests at 4,999 / 5,000 / 5,001 cents.
 - A two-run Kane audit engine (observe + assert), strict NDJSON/USD parsing, fail-closed statuses, evidence copy and hash.
 - A bounded repair and an unchanged post-repair audit gated by all six objective hashes. The `/repair` page shows the mixed evidence chain: exact failure → Pi's bounded scope → actual commit → human merge → unchanged Kane rerun → gate.
-- A public/recorded read-only app on 3000: campaign, gate, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff. **89/89 tests pass.**
+- A public/recorded read-only app on 3000: campaign, gate, audit list, Journey X-Ray, Promise Receipt, and the closed-loop diff. **90/90 tests pass.**
 - `npm run demo` — one command starts the recorded app and the repaired store and opens both; no Kane account or credits needed.
 - An operator-only local check panel (`KERN_LIVE=1`): fixed scenarios, one child at a time, balance/store guards, and a real audit link when a check completes. The public deployment returns 404.
 - `/gate` — the evidence gate and a six-patch gauntlet. The correct repair passes all three carts; all-free, $60-only, UI-only, control-regression and the audited pre-repair rule are rejected. The page labels the gauntlet as contract coverage, not a new Kane run.

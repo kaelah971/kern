@@ -129,6 +129,7 @@ a:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
     <a class="logo" href="/"><span class="logo-mark">K</span>KERN</a>
     <nav class="nav-links" aria-label="Main">
       <a href="#product">Product</a>
+      <a href="/why-kane">Why Kane</a>
       <a href="#tests">Tests</a>
       <a href="/gate">Gate</a>
       <a href="/audits">Audits</a>
@@ -151,7 +152,7 @@ a:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
         <a class="btn btn-secondary" href="https://github.com/kaelah971/kern#readme" rel="noopener">Read the README</a>
       </div>
       <div class="hero-meta">
-        <span>89/89 tests pass</span>
+        <span>90/90 tests pass</span>
         <span>12 real runs</span>
         <span>6/6 objective hashes</span>
         <span>hash-linked evidence</span>
@@ -209,7 +210,7 @@ a:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
       <span>TESTMU</span>
       <span>SHA-256</span>
       <span>6 OBJECTIVES</span>
-      <span>89 TESTS</span>
+      <span>90 TESTS</span>
     </div>
 
     <section class="section" id="product" aria-labelledby="product-heading">
@@ -226,6 +227,20 @@ a:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
         <article class="feature"><div class="feature-icon">05</div><h3>Unchanged objectives</h3><p>The repair is accepted only when all six pre/post objective hashes match. Editing the test is not a repair.</p></article>
         <article class="feature"><div class="feature-icon">06</div><h3>Scoped promise receipt</h3><p>The patch, approval, observed values, evidence hashes and “what this does not prove” live in one receipt.</p></article>
       </div>
+    </section>
+
+    <section class="section" id="why-kane" aria-labelledby="why-kane-heading">
+      <div class="section-head">
+        <p class="eyebrow">The witness</p>
+        <h2 id="why-kane-heading">Kane CLI is not a checkbox at the end.</h2>
+        <p>Kane is the only component that opens the customer checkout and reads the rendered quote. Kern freezes the promise and decides; Kane supplies the independent browser truth.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature"><div class="feature-icon">01</div><h3>It sees the checkout</h3><p>A unit test can agree with the bug. Kane reads the actual rendered subtotal and shipping line the customer sees.</p></article>
+        <article class="feature"><div class="feature-icon">02</div><h3>It carries the evidence</h3><p>Every run has a terminal run_end, exit code, extracted values and evidence hash. The gate is built on those artifacts.</p></article>
+        <article class="feature"><div class="feature-icon">03</div><h3>It gates the repair</h3><p>Pi can change the source, but not the challenge. Kane reruns the same six objectives before the gate can open.</p></article>
+      </div>
+      <div style="text-align:center;margin-top:18px"><a class="btn btn-secondary" href="/why-kane">Why Kane CLI →</a></div>
     </section>
 
     <section class="test-section" id="tests" aria-labelledby="tests-heading">
@@ -269,7 +284,7 @@ a:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
         <h2 id="pages-heading">Everything is open.</h2>
         <p>The demo app, the gate, the raw audits, the storefront, the receipts and the README.</p>
       </div>
-      <div class="pages-grid"><a class="page-link" href="/campaign">Demo app<span>the full proof</span></a><a class="page-link" href="/gate">Gate<span>the decision</span></a><a class="page-link" href="/audits">Audits<span>all records</span></a><a class="page-link" href="/runs">Runs<span>all Kane evidence</span></a><a class="page-link" href="/store/">Storefront<span>current quotes</span></a><a class="page-link" href="/repair/2026-11-22T00-53-05-669Z-f5230a">Closed loop<span>failure → patch → rerun</span></a><a class="page-link" href="/audits/2026-11-23T12-35-29-692Z-48b993/receipt">Promise receipt<span>scoped proof</span></a><a class="page-link" href="https://github.com/kaelah971/kern#readme" rel="noopener">README<span>the source</span></a><a class="page-link" href="/store/before/eligible-60">Audited storefront<span>the old $9.00</span></a></div>
+      <div class="pages-grid"><a class="page-link" href="/why-kane">Why Kane<span>the witness</span></a><a class="page-link" href="/campaign">Demo app<span>the full proof</span></a><a class="page-link" href="/gate">Gate<span>the decision</span></a><a class="page-link" href="/audits">Audits<span>all records</span></a><a class="page-link" href="/runs">Runs<span>all Kane evidence</span></a><a class="page-link" href="/store/">Storefront<span>current quotes</span></a><a class="page-link" href="/repair/2026-11-22T00-53-05-669Z-f5230a">Closed loop<span>failure → patch → rerun</span></a><a class="page-link" href="/audits/2026-11-23T12-35-29-692Z-48b993/receipt">Promise receipt<span>scoped proof</span></a><a class="page-link" href="https://github.com/kaelah971/kern#readme" rel="noopener">README<span>the source</span></a><a class="page-link" href="/store/before/eligible-60">Audited storefront<span>the old $9.00</span></a></div>
     </section>
   </main>
 

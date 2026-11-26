@@ -87,14 +87,16 @@ function auditContractWarning(audit: AuditSummary, contract: PromiseContract): s
 export function layout(
   title: string,
   body: string,
-  current: 'campaign' | 'gate' | 'compile' | 'audits' | 'runs' | 'audit' | 'repair' | 'check' = 'campaign',
+  current: 'campaign' | 'why' | 'gate' | 'compile' | 'audits' | 'runs' | 'audit' | 'repair' | 'check' = 'campaign',
   publicMode = false,
   headExtra = '',
 ): string {
   const navCurrent =
     current === 'campaign'
       ? 'campaign'
-      : current === 'gate'
+      : current === 'why'
+        ? 'why'
+        : current === 'gate'
         ? 'gate'
         : current === 'compile'
           ? 'compile'
@@ -120,6 +122,7 @@ ${headExtra}
   <div class="header-right">
     <nav aria-label="Main">
       <a href="/campaign"${navCurrent === 'campaign' ? ' aria-current="page"' : ''}>Campaign</a>
+      <a href="/why-kane"${navCurrent === 'why' ? ' aria-current="page"' : ''}>Why Kane</a>
       <a href="/gate"${navCurrent === 'gate' ? ' aria-current="page"' : ''}>Gate</a>
       ${publicMode ? '' : `<a href="/compile"${navCurrent === 'compile' ? ' aria-current="page"' : ''}>Compiler</a>`}
       <a href="/audits"${navCurrent === 'audits' ? ' aria-current="page"' : ''}>Audits</a>
@@ -1332,6 +1335,159 @@ ${resultBlock}
   ${form}
 </section>`,
     'compile',
+    publicMode,
+  );
+}
+
+export function renderWhyKane(input: {
+  contract: PromiseContract;
+  index: AuditIndex;
+  pre: AuditSummary | null;
+  post: AuditSummary | null;
+  gate: GateResult | null;
+  publicMode?: boolean;
+}): string {
+  const { contract, index, pre, post, gate, publicMode = false } = input;
+  const comparisons = post?.audit.objectiveHashComparisons ?? [];
+  const matches = comparisons.filter((comparison) => comparison.match).length;
+  const gateOpen = gate?.open === true;
+  const runCount = index.audits.reduce(
+    (total, summary) =>
+      total +
+      summary.audit.scenarios.reduce(
+        (count, scenario) => count + (scenario.observe ? 1 : 0) + (scenario.assert ? 1 : 0),
+        0,
+      ),
+    0,
+  );
+  const preUrl = pre ? `/audits/${encodeURIComponent(pre.audit.auditId)}` : '/audits';
+  const postUrl = post ? `/audits/${encodeURIComponent(post.audit.auditId)}` : '/audits';
+  const repairUrl = pre ? `/repair/${encodeURIComponent(pre.audit.auditId)}` : '/repair';
+  const evidenceRows = Object.values(PRESET_CARTS)
+    .map((preset) => {
+      const preScen = pre?.audit.scenarios.find((scenario) => scenario.scenarioId === preset.id);
+      const postScen = post?.audit.scenarios.find((scenario) => scenario.scenarioId === preset.id);
+      return `<tr>
+  <td>${escapeHtml(preset.label)}</td>
+  <td class="num">${formatCents(postScen?.oracle.expectedShippingCents ?? preScen?.oracle.expectedShippingCents)}</td>
+  <td class="num">${formatCents(preScen?.oracle.observedShippingCents)}</td>
+  <td class="num">${formatCents(postScen?.oracle.observedShippingCents)}</td>
+  <td>${postScen ? statusChip(postScen.status) : '—'}</td>
+</tr>`;
+    })
+    .join('\n');
+  const storeBefore = publicMode ? '/store/before/eligible-60' : null;
+  const storeAfter = publicMode ? '/store/eligible-60' : STOREFRONT_URL;
+
+  return layout(
+    'Why Kane CLI',
+    `<p class="eyebrow">Why Kane CLI</p>
+<div class="hero">
+  <div>
+    <h1>The checkout is the truth.<br>Kane is the only one who sees it.</h1>
+    <p class="lede">Kern does not ask the agent to grade its own work. It sends Kane through the real rendered checkout, then uses that outside observation as the evidence the gate depends on. A unit test can agree with the bug; Kane reads what the customer actually sees.</p>
+    <div class="actions">
+      <a class="button" href="/gate">Open the gate</a>
+      <a class="button button--secondary" href="${postUrl}">See the passing audit</a>
+      <a class="button button--secondary" href="https://github.com/kaelah971/kern#readme" rel="noopener">Read the README</a>
+    </div>
+  </div>
+  <aside>
+    <p class="panel-label">The witness</p>
+    <p><strong>Kane CLI</strong></p>
+    <p class="meta">Real Chrome · plain-English objectives · run_end + final_state · evidence packs</p>
+    <p class="meta">${runCount} recorded runs · ${matches}/${comparisons.length} post-repair objective hashes</p>
+  </aside>
+</div>
+
+<section aria-labelledby="why-center">
+  <h2 id="why-center">Why Kane is the center</h2>
+  <div class="cards">
+    <article class="card">
+      <p class="eyebrow">Observe</p>
+      <h3>The promise lives in the browser.</h3>
+      <p class="card-meta">The shipping quote is rendered by the store. A unit test or an API response can miss what the checkout displays to the customer. Kane opens the real page and reads the actual quote.</p>
+    </article>
+    <article class="card">
+      <p class="eyebrow">Decide</p>
+      <h3>The oracle keeps Kane honest.</h3>
+      <p class="card-meta">Kane is the independent witness, not the judge. The frozen contract and deterministic oracle decide what the observed value means. The boundary and control carts make the verdict falsifiable.</p>
+    </article>
+    <article class="card">
+      <p class="eyebrow">Gate</p>
+      <h3>The patch has to face the same witness.</h3>
+      <p class="card-meta">Pi may change the source, but it cannot change the challenge. Kane reruns the same six objectives. Only then can the gate open and the receipt be issued.</p>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="why-jobs">
+  <h2 id="why-jobs">Three jobs only Kane does here</h2>
+  <div class="feature-grid">
+    <article class="feature"><div class="feature-icon">01</div><h3>It reads the rendered checkout</h3><p>Not a mock, not a hand-entered number, not the store’s internal shipping function. Kane reads the line the customer sees and returns it as an observation.</p></article>
+    <article class="feature"><div class="feature-icon">02</div><h3>It carries the evidence</h3><p>Each run has a terminal run_end, exit code, final state and evidence hash. The gate can show what was observed and where it came from.</p></article>
+    <article class="feature"><div class="feature-icon">03</div><h3>It independently rechecks the fix</h3><p>The post-repair audit is not a retyped test. It is Kane running the same objectives against the repaired store, with all six pre/post hashes compared.</p></article>
+  </div>
+</section>
+
+<section aria-labelledby="why-division">
+  <h2 id="why-division">Kane’s job vs. Kern’s job</h2>
+  <div class="grid-two">
+    <div class="panel panel--ad">
+      <p class="panel-label">Kane does</p>
+      <ul class="not-proven">
+        <li>Opens the real browser and follows the fixed customer journey.</li>
+        <li>Reads the rendered subtotal and shipping quote.</li>
+        <li>Returns the terminal run, extracted values, evidence and credits.</li>
+        <li>Reruns the unchanged objectives after the repair.</li>
+      </ul>
+    </div>
+    <div class="panel panel--interpretation">
+      <p class="panel-label">Kern does</p>
+      <ul class="not-proven">
+        <li>Freezes the ad and the merchant’s stated interpretation.</li>
+        <li>Defines the eligible, boundary and control carts.</li>
+        <li>Owns the deterministic oracle and the scope of the receipt.</li>
+        <li>Blocks the agent until Kane’s unchanged rerun passes.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="warning" role="note"><strong>This is not a Kane wrapper.</strong> The product is the loop around the witness: contract, oracle, boundary, control, gate and receipt. But remove Kane and the loop loses the only independent view of the customer checkout. That is why Kane is not a logo in the footer.</div>
+</section>
+
+<section aria-labelledby="why-evidence">
+  <h2 id="why-evidence">The evidence Kane produced</h2>
+  <div class="table-wrap">
+    <table class="repair-failure">
+      <thead><tr><th scope="col">Cart</th><th scope="col" class="num">Promised</th><th scope="col" class="num">Kane observed before</th><th scope="col" class="num">Kane observed after</th><th scope="col">After status</th></tr></thead>
+      <tbody>${evidenceRows}</tbody>
+    </table>
+  </div>
+  <p><strong>${matches}/${comparisons.length}</strong> post-repair objective hashes match. ${gateOpen ? statusChip('HONORED') : statusChip('INCONCLUSIVE')} ${gateOpen ? 'The gate is open for this tested scope.' : 'The gate is closed.'}</p>
+  <div class="actions">
+    <a class="button button--secondary" href="${preUrl}">Failed pre-repair audit</a>
+    <a class="button button--secondary" href="${postUrl}">Passing post-repair audit</a>
+    <a class="button button--secondary" href="${repairUrl}">Repair case and gate</a>
+    ${
+      storeBefore
+        ? `<a class="button button--secondary" href="${storeBefore}">Audited storefront</a>`
+        : ''
+    }
+    <a class="button button--secondary" href="${storeAfter}">${
+      publicMode ? 'After the repair' : 'Open the store'
+    }</a>
+  </div>
+</section>
+
+<section aria-labelledby="why-without">
+  <h2 id="why-without">What would be weaker without Kane</h2>
+  <div class="gate gate--open" role="status">
+    <p class="panel-label">The line</p>
+    <p class="gate-callout">“A unit test can agree with the bug. Kane has to look at the checkout the customer sees.”</p>
+    <p class="meta">No Kane, no rendered observation. No rendered observation, no promise gate — only a self-reported test result.</p>
+  </div>
+</section>`,
+    'why',
     publicMode,
   );
 }

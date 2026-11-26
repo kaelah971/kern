@@ -11,7 +11,7 @@ git ls-files .data .testmuai
 git ls-files recorded
 ```
 
-- `npm test` must be green (currently **89 tests**; the replay
+- `npm test` must be green (currently **90 tests**; the replay
   characterization is excluded and runs via `npm run demo:replay-pre-repair`).
 - `git status` must be clean.
 - `git ls-files .data .testmuai` must print nothing.
@@ -23,7 +23,7 @@ git ls-files recorded
 
 Run from `C:\dev\kern` at commit `515e6cf` (before the fixture sanitation,
 static export, storefront and operator check; the recorded fallback is
-unchanged in substance). The current suite is **89/89**.
+unchanged in substance). The current suite is **90/90**.
 
 ```bash
 git clone . ../kern-clone-verify
@@ -36,7 +36,7 @@ PORT=3100 npm run app
 Result:
 
 - `.data` absent in the clone.
-- This historical clone predates the static storefront and operator check. The current suite is **89 tests, 89 pass, 0 fail**.
+- This historical clone predates the static storefront and operator check. The current suite is **90 tests, 90 pass, 0 fail**.
 - `GET /health`: `{"ok":true,"app":"kern","auditRoot":"C:\\dev\\kern-clone-verify\\recorded","auditSource":"recorded"}`.
 - `/` 200 with the recorded banner; `/audits` 200 with the banner and exactly
   the two canonical audit IDs.
@@ -99,7 +99,8 @@ git push -u origin main
 ```
 
 The public proof site is **https://tryoutkern.vercel.app**, the gate is
-**https://tryoutkern.vercel.app/gate**, and the storefront is
+**https://tryoutkern.vercel.app/gate** and the “why Kane” page is
+**https://tryoutkern.vercel.app/why-kane**, and the storefront is
 **https://tryoutkern.vercel.app/store/**. The operator-only
 live check is local; the public site returns 404 for `/check/*`.
 

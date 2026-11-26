@@ -68,6 +68,7 @@ export function renderLanding(input: {
     .join('');
 
   const allPages: Array<[string, string, string]> = [
+    ['/why-kane', 'Why Kane', 'the witness'],
     ['/campaign', 'Demo app', 'the full proof'],
     ['/gate', 'Gate', 'the decision'],
     ['/audits', 'Audits', 'all records'],
@@ -102,6 +103,7 @@ export function renderLanding(input: {
     <a class="logo" href="/"><span class="logo-mark">K</span>KERN</a>
     <nav class="nav-links" aria-label="Main">
       <a href="#product">Product</a>
+      <a href="/why-kane">Why Kane</a>
       <a href="#tests">Tests</a>
       <a href="/gate">Gate</a>
       <a href="/audits">Audits</a>
@@ -124,7 +126,7 @@ export function renderLanding(input: {
         <a class="btn btn-secondary" href="${README_URL}" rel="noopener">Read the README</a>
       </div>
       <div class="hero-meta">
-        <span>89/89 tests pass</span>
+        <span>90/90 tests pass</span>
         <span>${runCount} real runs</span>
         <span>6/6 objective hashes</span>
         <span>hash-linked evidence</span>
@@ -198,7 +200,7 @@ export function renderLanding(input: {
       <span>TESTMU</span>
       <span>SHA-256</span>
       <span>6 OBJECTIVES</span>
-      <span>89 TESTS</span>
+      <span>90 TESTS</span>
     </div>
 
     <section class="section" id="product" aria-labelledby="product-heading">
@@ -215,6 +217,20 @@ export function renderLanding(input: {
         <article class="feature"><div class="feature-icon">05</div><h3>Unchanged objectives</h3><p>The repair is accepted only when all six pre/post objective hashes match. Editing the test is not a repair.</p></article>
         <article class="feature"><div class="feature-icon">06</div><h3>Scoped promise receipt</h3><p>The patch, approval, observed values, evidence hashes and “what this does not prove” live in one receipt.</p></article>
       </div>
+    </section>
+
+    <section class="section" id="why-kane" aria-labelledby="why-kane-heading">
+      <div class="section-head">
+        <p class="eyebrow">The witness</p>
+        <h2 id="why-kane-heading">Kane CLI is not a checkbox at the end.</h2>
+        <p>Kane is the only component that opens the customer checkout and reads the rendered quote. Kern freezes the promise and decides; Kane supplies the independent browser truth.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature"><div class="feature-icon">01</div><h3>It sees the checkout</h3><p>A unit test can agree with the bug. Kane reads the actual rendered subtotal and shipping line the customer sees.</p></article>
+        <article class="feature"><div class="feature-icon">02</div><h3>It carries the evidence</h3><p>Every run has a terminal run_end, exit code, extracted values and evidence hash. The gate is built on those artifacts.</p></article>
+        <article class="feature"><div class="feature-icon">03</div><h3>It gates the repair</h3><p>Pi can change the source, but not the challenge. Kane reruns the same six objectives before the gate can open.</p></article>
+      </div>
+      <div style="text-align:center;margin-top:18px"><a class="btn btn-secondary" href="/why-kane">Why Kane CLI →</a></div>
     </section>
 
     <section class="test-section" id="tests" aria-labelledby="tests-heading">

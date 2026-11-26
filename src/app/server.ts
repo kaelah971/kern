@@ -26,6 +26,7 @@ import {
   renderRepair,
   renderRunsList,
   renderServerError,
+  renderWhyKane,
 } from './render.ts';
 import { renderReceiptPage } from './receipt.ts';
 import { renderLanding } from './landing.ts';
@@ -361,6 +362,31 @@ export function createAppRequestHandler(
           index,
           publicMode,
           live: live ? live.snapshot() : null,
+        }),
+        headOnly,
+      );
+      return;
+    }
+
+    if (path === '/why-kane') {
+      const post =
+        index.audits.find((summary) => summary.audit.postRepair === true) ?? null;
+      const pre =
+        post?.audit.answersAuditId
+          ? index.audits.find(
+              (summary) => summary.audit.auditId === post.audit.answersAuditId,
+            ) ?? null
+          : null;
+      sendHtml(
+        res,
+        200,
+        renderWhyKane({
+          contract,
+          index,
+          pre,
+          post,
+          gate: post ? evaluateGate(post.audit, contract) : null,
+          publicMode,
         }),
         headOnly,
       );

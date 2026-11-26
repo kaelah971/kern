@@ -40,6 +40,7 @@ const checks = [
   ['/campaign', [/Every ad makes a promise/, /Recorded audit: replay of real runs/, /See all 12 real runs/]],
   ['/runs', [/<strong>12<\/strong> runs/, /Live checks run on the operator's machine/]],
   ['/gate', [/Kern Gate/, /Patch gauntlet/, /Gate status/]],
+  ['/why-kane', [/Why Kane CLI/, /The checkout is the truth/, /Three jobs only Kane does here/]],
   ['/audits/2026-11-22T00-53-05-669Z-f5230a', [/Journey X-Ray/, /Recorded audit: replay of real runs/]],
   ['/audits/2026-11-22T00-53-05-669Z-f5230a/receipt', [/Promise Receipt/, /Recorded audit: replay of real runs/]],
 ];

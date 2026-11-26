@@ -50,16 +50,35 @@ test('the landing page is the reference-style front door with the demo and READM
   assert.match(text, /The checkout has to/);
   assert.match(text, /Open the demo app/);
   assert.match(text, /Read the README/);
-  assert.match(text, /89\/89 tests pass/);
+  assert.match(text, /90\/90 tests pass/);
   assert.match(text, /Kane finds/);
   assert.match(text, /Three tests\. One promise\./);
   assert.match(text, /Everything is open\./);
+  assert.match(text, /Everything is open\./);
+  assert.match(text, /Why Kane CLI/);
+  assert.match(text, /href="\/why-kane"/);
   assert.match(text, /href="\/campaign"/);
   assert.match(text, /href="\/gate"/);
   assert.match(text, /href="\/repair\/2026-11-22T00-53-05-669Z-f5230a"/);
   assert.match(text, /href="\/audits\/2026-11-23T12-35-29-692Z-48b993\/receipt"/);
   assert.match(text, /BROKEN/);
   assert.match(text, /HONORED/);
+});
+
+test('the why-Kane page makes the browser witness explicit', async () => {
+  const { status, text } = await get(baseUrl, '/why-kane');
+  assert.equal(status, 200);
+  assert.match(text, /Why Kane CLI/);
+  assert.match(text, /The checkout is the truth\./);
+  assert.match(text, /Kane is the only one who sees it\./);
+  assert.match(text, /Why Kane is the center/);
+  assert.match(text, /Three jobs only Kane does here/);
+  assert.match(text, /Kane’s job vs\. Kern’s job/);
+  assert.match(text, /The evidence Kane produced/);
+  assert.match(text, /6\/6/);
+  assert.match(text, /This is not a Kane wrapper\./);
+  assert.match(text, new RegExp(BROKEN.auditId));
+  assert.match(text, new RegExp(HONORED.auditId));
 });
 
 test('campaign page shows the ad, the interpretation, the contract and the latest audit', async () => {
