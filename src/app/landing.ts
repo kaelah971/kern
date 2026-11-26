@@ -69,6 +69,7 @@ export function renderLanding(input: {
 
   const allPages: Array<[string, string, string]> = [
     ['/why-kane', 'Why Kane', 'the witness'],
+    ['/promises', 'Promise proof', '4 classes · 18 runs'],
     ['/campaign', 'Demo app', 'the full proof'],
     ['/gate', 'Gate', 'the decision'],
     ['/audits', 'Audits', 'all records'],
@@ -104,6 +105,7 @@ export function renderLanding(input: {
     <nav class="nav-links" aria-label="Main">
       <a href="#product">Product</a>
       <a href="/why-kane">Why Kane</a>
+      <a href="/promises">Promises</a>
       <a href="#tests">Tests</a>
       <a href="/gate">Gate</a>
       <a href="/audits">Audits</a>
@@ -120,16 +122,17 @@ export function renderLanding(input: {
     <section class="hero" aria-labelledby="hero-title">
       <div class="badge"><strong>Kane CLI</strong> · the checkout promise gate</div>
       <h1 id="hero-title">An ad makes a promise.<br>The checkout has to<br><span class="accent">keep it.</span></h1>
-      <p class="hero-sub">Kern freezes the merchant’s offer, sends Kane through the real rendered checkout, and blocks the agent’s fix until the same promise passes unchanged. No screenshot theater. No self-certified “done.”</p>
+      <p class="hero-sub">Kern freezes the merchant’s offer, sends Kane through the real rendered checkout, and blocks the agent’s fix until the same promise passes unchanged — across free shipping, percentage discounts, bundles and delivery. No screenshot theater. No self-certified “done.”</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="/campaign">Open the demo app ↗</a>
         <a class="btn btn-secondary" href="${README_URL}" rel="noopener">Read the README</a>
+        <a class="btn btn-secondary" href="/promises">See the promise proof</a>
       </div>
       <div class="hero-meta">
-        <span>90/90 tests pass</span>
-        <span>${runCount} real runs</span>
-        <span>6/6 objective hashes</span>
-        <span>hash-linked evidence</span>
+        <span>100/100 tests pass</span>
+        <span>4 promise classes</span>
+        <span>${runCount + 18} real runs</span>
+        <span>9/9 new proof honored</span>
       </div>
       ${
         publicMode
@@ -199,9 +202,24 @@ export function renderLanding(input: {
       <span>CHROME</span>
       <span>TESTMU</span>
       <span>SHA-256</span>
-      <span>6 OBJECTIVES</span>
-      <span>90 TESTS</span>
+      <span>4 PROMISES</span>
+      <span>100 TESTS</span>
     </div>
+
+    <section class="section" id="promises" aria-labelledby="promises-heading">
+      <div class="section-head">
+        <p class="eyebrow">The promise library</p>
+        <h2 id="promises-heading">One witness. Four promises.</h2>
+        <p>The ad can promise a shipping threshold, a percentage discount, a bundle or a delivery date. Kern gives each one a boundary case and a control.</p>
+      </div>
+      <div class="promise-grid">
+        <article class="promise-card"><span>01 · Shipping</span><h3>$50 threshold</h3><p>$60 and the exact $50 qualify; the $35 control keeps paying $9.</p></article>
+        <article class="promise-card"><span>02 · Percentage</span><h3>20% over $50</h3><p>$60 gets $12 off; the exact boundary gets $10; the $35 control gets $0.</p></article>
+        <article class="promise-card"><span>03 · Bundle</span><h3>Tote + notebook</h3><p>The complete bundle gets 15%; tote-only and notebook-only get $0.</p></article>
+        <article class="promise-card"><span>04 · Delivery</span><h3>2pm / 2 days</h3><p>The cutoff and weekends move the date: Nov 30, Dec 1, Dec 2.</p></article>
+      </div>
+      <p class="promise-proof-link"><a class="btn btn-secondary" href="/promises">Open the 18-run proof →</a></p>
+    </section>
 
     <section class="section" id="product" aria-labelledby="product-heading">
       <div class="section-head">
@@ -210,12 +228,12 @@ export function renderLanding(input: {
         <p>Most tests check whether the code still works. Kern checks whether the customer still gets what the ad promised.</p>
       </div>
       <div class="feature-grid">
-        <article class="feature"><div class="feature-icon">01</div><h3>Frozen promise contract</h3><p>The ad and the merchant’s interpretation stay separate. The threshold, basis, destination and policy are hash-linked before a run.</p></article>
-        <article class="feature"><div class="feature-icon">02</div><h3>Kane in the real checkout</h3><p>Kane reads the rendered subtotal and shipping quote. The store’s own code never decides whether the promise passed.</p></article>
-        <article class="feature"><div class="feature-icon">03</div><h3>Boundary + control</h3><p>The exact $50 boundary catches a $60-only fix. The $35 control catches a fix that makes all shipping free.</p></article>
-        <article class="feature"><div class="feature-icon">04</div><h3>An agent gate, not a report</h3><p>The gate exits non-zero. Claude Code can stop-block; Pi can run the same command. The agent cannot self-certify.</p></article>
-        <article class="feature"><div class="feature-icon">05</div><h3>Unchanged objectives</h3><p>The repair is accepted only when all six pre/post objective hashes match. Editing the test is not a repair.</p></article>
-        <article class="feature"><div class="feature-icon">06</div><h3>Scoped promise receipt</h3><p>The patch, approval, observed values, evidence hashes and “what this does not prove” live in one receipt.</p></article>
+        <article class="feature"><div class="feature-icon">01</div><h3>Four promise classes</h3><p>Free shipping, percentage discounts, bundles and delivery estimates. One witness, one boundary-and-control discipline.</p></article>
+        <article class="feature"><div class="feature-icon">02</div><h3>Frozen promise contract</h3><p>The ad and the merchant’s interpretation stay separate. The terms and policy are hash-linked before a run.</p></article>
+        <article class="feature"><div class="feature-icon">03</div><h3>Kane in the real checkout</h3><p>Kane reads the rendered price, discount, bundle total or delivery date. The store’s own code never decides whether the promise passed.</p></article>
+        <article class="feature"><div class="feature-icon">04</div><h3>Boundary + control</h3><p>Every class gets an eligible case, the exact edge and a control. The offer cannot be “fixed” by giving it to everyone.</p></article>
+        <article class="feature"><div class="feature-icon">05</div><h3>An agent gate, not a report</h3><p>The gate exits non-zero. Claude Code can stop-block; Pi can run the same command. The agent cannot self-certify.</p></article>
+        <article class="feature"><div class="feature-icon">06</div><h3>Scoped promise proof</h3><p>The promise, observed values, evidence hashes, code change and “what this does not prove” live in one record.</p></article>
       </div>
     </section>
 
@@ -223,22 +241,22 @@ export function renderLanding(input: {
       <div class="section-head">
         <p class="eyebrow">The witness</p>
         <h2 id="why-kane-heading">Kane CLI is not a checkbox at the end.</h2>
-        <p>Kane is the only component that opens the customer checkout and reads the rendered quote. Kern freezes the promise and decides; Kane supplies the independent browser truth.</p>
+        <p>Kane is the only component that opens the customer checkout and reads the rendered value. Kern freezes the promise and decides; Kane supplies the independent browser truth.</p>
       </div>
       <div class="feature-grid">
-        <article class="feature"><div class="feature-icon">01</div><h3>It sees the checkout</h3><p>A unit test can agree with the bug. Kane reads the actual rendered subtotal and shipping line the customer sees.</p></article>
+        <article class="feature"><div class="feature-icon">01</div><h3>It sees the checkout</h3><p>A unit test can agree with the bug. Kane reads the actual rendered price, discount, bundle total or delivery date the customer sees.</p></article>
         <article class="feature"><div class="feature-icon">02</div><h3>It carries the evidence</h3><p>Every run has a terminal run_end, exit code, extracted values and evidence hash. The gate is built on those artifacts.</p></article>
-        <article class="feature"><div class="feature-icon">03</div><h3>It gates the repair</h3><p>Pi can change the source, but not the challenge. Kane reruns the same six objectives before the gate can open.</p></article>
+        <article class="feature"><div class="feature-icon">03</div><h3>It gates the repair</h3><p>Pi can change the source, but not the challenge. Kane reruns the same objectives after a change before the gate can open.</p></article>
       </div>
-      <div style="text-align:center;margin-top:18px"><a class="btn btn-secondary" href="/why-kane">Why Kane CLI →</a></div>
+      <div style="text-align:center;margin-top:18px"><a class="btn btn-secondary" href="/why-kane">Why Kane CLI →</a> <a class="btn btn-secondary" href="/promises">See the 18-run proof →</a></div>
     </section>
 
     <section class="test-section" id="tests" aria-labelledby="tests-heading">
       <div class="section">
         <div class="section-head">
           <p class="eyebrow">The evidence</p>
-          <h2 id="tests-heading">Three tests. One promise.</h2>
-          <p>These are the exact recorded cart outcomes, not illustrative numbers. The before/after pair is the same challenge.</p>
+          <h2 id="tests-heading">Four promise classes. Two proofs.</h2>
+          <p>The first proof is the shipping repair below. The second is 18 real Kane runs across percentage discounts, bundles and delivery.</p>
         </div>
         <div class="table-wrap">
           <table class="test-table">
@@ -246,7 +264,11 @@ export function renderLanding(input: {
             <tbody>${testRows}</tbody>
           </table>
         </div>
-        <div class="test-note"><span>${recordedCount} recorded audits · ${runCount} real runs · no live Kane on this page</span><span><a href="/audits">Open the audits</a> · <a href="/runs">Open every run</a></span></div>
+        <div class="proof-band">
+          <div><p class="eyebrow">The second proof</p><h3>18 real Kane runs. 9/9 scenarios HONORED.</h3><p>Percentage discounts, bundles and delivery estimates — with every session, exit and evidence hash on the public proof page.</p></div>
+          <a class="btn btn-primary" href="/promises">Open the promise proof →</a>
+        </div>
+        <div class="test-note"><span>${recordedCount} recorded shipping audits · ${runCount} shipping runs + 18 promise runs</span><span><a href="/audits">Open the audits</a> · <a href="/promises">Open the promise proof</a></span></div>
       </div>
     </section>
 
@@ -262,7 +284,7 @@ export function renderLanding(input: {
 
   <footer class="footer">
     <span>Kern · evidence, not adjectives. Recorded evidence is labelled in the app.</span>
-    <span><a href="${README_URL}" rel="noopener">README</a> · <a href="/campaign">Demo app</a> · <a href="/runs">All runs</a></span>
+    <span><a href="${README_URL}" rel="noopener">README</a> · <a href="/campaign">Demo app</a> · <a href="/promises">Promise proof</a> · <a href="/runs">All runs</a></span>
   </footer>
 </div>
 </body>

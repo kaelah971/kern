@@ -102,6 +102,21 @@ a:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
 .page-link:hover { border-color: var(--ink); }
 .footer { max-width: 1120px; margin: 0 auto; padding: 26px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 10px; }
 .footer a { text-decoration: none; font-weight: 650; color: var(--ink); }
+
+.promise-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.promise-card { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 14px; }
+.promise-card > span { display: block; color: var(--accent); font-family: var(--mono); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.promise-card h3 { font-size: 15px; margin: 7px 0 5px; letter-spacing: -.02em; }
+.promise-card p { color: var(--muted); font-size: 11px; margin: 0; }
+.promise-proof-link { text-align: center; margin: 16px 0 0; }
+.proof-band { display: flex; align-items: center; justify-content: space-between; gap: 20px; background: var(--ink); color: #fff; border-radius: 20px; padding: 18px 20px; margin-top: 16px; }
+.proof-band .eyebrow { color: var(--accent-2); margin-bottom: 5px; }
+.proof-band h3 { font-size: 20px; line-height: 1.1; margin: 0 0 5px; letter-spacing: -.03em; }
+.proof-band p { color: #b9c6bf; font-size: 11px; line-height: 1.5; margin: 0; max-width: 620px; }
+.proof-band .btn-primary { background: #fff; color: var(--ink); border-color: #fff; flex: 0 0 auto; }
+@media (max-width: 900px) { .promise-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .promise-grid { grid-template-columns: 1fr; } .proof-band { align-items: flex-start; flex-direction: column; } }
+
 @media (max-width: 900px) {
   .page { margin: 0; border-radius: 0; border-left: 0; border-right: 0; }
   .nav { flex-wrap: wrap; }

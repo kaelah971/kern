@@ -760,6 +760,28 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 }
 
 
+.proof-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 1.5rem;
+  padding: .7rem .9rem;
+  border: 1px solid #b8d3c2;
+  background: #e8f4ec;
+  color: #2b5f44;
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: .72rem;
+  line-height: 1.4;
+  letter-spacing: .03em;
+}
+.proof-strip b { color: #173f2b; text-transform: uppercase; letter-spacing: .08em; }
+.proof-strip a { color: #173f2b; font-weight: 700; text-decoration: none; border-bottom: 1px solid #7fae91; white-space: nowrap; }
+.proof-strip a:hover { border-bottom-color: #173f2b; }
+
+
 :root {
   --paper: #e8e8e4;
   --paper-2: #ffffff;
@@ -1100,9 +1122,10 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   </div>
 </header>
 <main id="main">
+<div class="proof-strip" role="note"><span><b>Promise proof</b> 4 promise classes · 18 real Kane runs · 9/9 HONORED</span><a href="/promises">Open the proof →</a></div>
 <p class="eyebrow">Kern Gate · commercial promise</p>
 <h1>The agent does not decide. Kane does.</h1>
-<p class="lede">A patch is not done because it compiles. It is done when the frozen promise survives the real browser, the boundary, and the control. This is the gate; the page is not the gate.</p>
+<p class="lede">A patch is not done because it compiles. It is done when the frozen promise survives the real browser, the boundary, and the control. This page covers the free-shipping gate; the four-class promise proof is separate.</p>
 <div class="gate gate--open" role="status">
   <p class="panel-label">Gate status</p>
   <p class="gate-status"><strong>OPEN</strong> · 3/3 scenarios pass</p>
@@ -1245,6 +1268,11 @@ npm run gate -- --contract .data/contracts/<id>.json --run --url <preview>
 npm run --silent gate -- --json  # machine-readable</pre>
   <p>The command exits <code>0</code> only when the gate is open. A coding agent can use it as a stop hook: <code>npm run gate -- --audit &lt;path&gt; || exit 1</code>. The agent does not get to self-certify; it gets the observed values, the frozen expectations, and a closed gate.</p>
   <p class="meta">The gate does not start Kane unless you pass <code>--run</code>. The recorded app and this page never start a run.</p>
+</section>
+
+<section aria-labelledby="promise-gate-heading">
+  <h2 id="promise-gate-heading">The new promise classes</h2>
+  <p>The same gate now has a deterministic command for percentage discounts, bundles and delivery estimates: <code>npm run promises</code>. Its real proof is 18 Kane runs, 9/9 HONORED, on <a href="/promises">the promise proof page</a>. <code>npm run promise:audit</code> runs a fresh 18-run audit and spends credits.</p>
 </section>
 
 <section aria-labelledby="gate-evidence-heading">

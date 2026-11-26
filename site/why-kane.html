@@ -760,6 +760,28 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 }
 
 
+.proof-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 1.5rem;
+  padding: .7rem .9rem;
+  border: 1px solid #b8d3c2;
+  background: #e8f4ec;
+  color: #2b5f44;
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: .72rem;
+  line-height: 1.4;
+  letter-spacing: .03em;
+}
+.proof-strip b { color: #173f2b; text-transform: uppercase; letter-spacing: .08em; }
+.proof-strip a { color: #173f2b; font-weight: 700; text-decoration: none; border-bottom: 1px solid #7fae91; white-space: nowrap; }
+.proof-strip a:hover { border-bottom-color: #173f2b; }
+
+
 :root {
   --paper: #e8e8e4;
   --paper-2: #ffffff;
@@ -1100,6 +1122,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   </div>
 </header>
 <main id="main">
+<div class="proof-strip" role="note"><span><b>Promise proof</b> 4 promise classes · 18 real Kane runs · 9/9 HONORED</span><a href="/promises">Open the proof →</a></div>
 <p class="eyebrow">Why Kane CLI</p>
 <div class="hero">
   <div>
@@ -1107,7 +1130,8 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
     <p class="lede">Kern does not ask the agent to grade its own work. It sends Kane through the real rendered checkout, then uses that outside observation as the evidence the gate depends on. A unit test can agree with the bug; Kane reads what the customer actually sees.</p>
     <div class="actions">
       <a class="button" href="/gate">Open the gate</a>
-      <a class="button button--secondary" href="/audits/2026-11-23T12-35-29-692Z-48b993">See the passing audit</a>
+      <a class="button button--secondary" href="/promises">See the 18-run promise proof</a>
+      <a class="button button--secondary" href="/audits/2026-11-23T12-35-29-692Z-48b993">See the shipping audit</a>
       <a class="button button--secondary" href="https://github.com/kaelah971/kern#readme" rel="noopener">Read the README</a>
     </div>
   </div>
@@ -1115,7 +1139,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
     <p class="panel-label">The witness</p>
     <p><strong>Kane CLI</strong></p>
     <p class="meta">Real Chrome · plain-English objectives · run_end + final_state · evidence packs</p>
-    <p class="meta">12 recorded runs · 6/6 post-repair objective hashes</p>
+    <p class="meta">30 real runs · 9/9 promise proof · 6/6 shipping hashes</p>
   </aside>
 </div>
 
@@ -1125,7 +1149,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
     <article class="card">
       <p class="eyebrow">Observe</p>
       <h3>The promise lives in the browser.</h3>
-      <p class="card-meta">The shipping quote is rendered by the store. A unit test or an API response can miss what the checkout displays to the customer. Kane opens the real page and reads the actual quote.</p>
+      <p class="card-meta">The price, discount, bundle total or delivery date is rendered by the store. A unit test or an API response can miss what the checkout displays. Kane opens the real page and reads the actual value.</p>
     </article>
     <article class="card">
       <p class="eyebrow">Decide</p>
@@ -1135,7 +1159,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
     <article class="card">
       <p class="eyebrow">Gate</p>
       <h3>The patch has to face the same witness.</h3>
-      <p class="card-meta">Pi may change the source, but it cannot change the challenge. Kane reruns the same six objectives. Only then can the gate open and the receipt be issued.</p>
+      <p class="card-meta">Pi may change the source, but it cannot change the challenge. Kane reruns the same objectives after the change. Only then can the gate open and the receipt be issued.</p>
     </article>
   </div>
 </section>
@@ -1149,6 +1173,12 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   </div>
 </section>
 
+<section aria-labelledby="why-promises">
+  <h2 id="why-promises">The witness now covers four promises</h2>
+  <p>Kane has read the rendered shipping quote, the 20% discount, the bundle price and the delivery estimate. The new class proof is 18 real Kane runs across 9 scenarios — 9/9 HONORED — with every session, exit and evidence hash on its own page.</p>
+  <div class="actions"><a class="button" href="/promises">Open the promise proof →</a></div>
+</section>
+
 <section aria-labelledby="why-division">
   <h2 id="why-division">Kane’s job vs. Kern’s job</h2>
   <div class="grid-two">
@@ -1156,7 +1186,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
       <p class="panel-label">Kane does</p>
       <ul class="not-proven">
         <li>Opens the real browser and follows the fixed customer journey.</li>
-        <li>Reads the rendered subtotal and shipping quote.</li>
+        <li>Reads the rendered price, discount, bundle total, delivery date or shipping quote.</li>
         <li>Returns the terminal run, extracted values, evidence and credits.</li>
         <li>Reruns the unchanged objectives after the repair.</li>
       </ul>

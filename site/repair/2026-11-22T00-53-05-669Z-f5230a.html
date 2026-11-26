@@ -760,6 +760,28 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 }
 
 
+.proof-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 1.5rem;
+  padding: .7rem .9rem;
+  border: 1px solid #b8d3c2;
+  background: #e8f4ec;
+  color: #2b5f44;
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: .72rem;
+  line-height: 1.4;
+  letter-spacing: .03em;
+}
+.proof-strip b { color: #173f2b; text-transform: uppercase; letter-spacing: .08em; }
+.proof-strip a { color: #173f2b; font-weight: 700; text-decoration: none; border-bottom: 1px solid #7fae91; white-space: nowrap; }
+.proof-strip a:hover { border-bottom-color: #173f2b; }
+
+
 :root {
   --paper: #e8e8e4;
   --paper-2: #ffffff;
@@ -1100,6 +1122,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   </div>
 </header>
 <main id="main">
+<div class="proof-strip" role="note"><span><b>Promise proof</b> 4 promise classes · 18 real Kane runs · 9/9 HONORED</span><a href="/promises">Open the proof →</a></div>
 <p class="eyebrow">Closed loop</p>
 <h1>What failed, what changed, what reran.</h1>
 <p class="lede">Pre-repair audit <a href="/audits/2026-11-22T00-53-05-669Z-f5230a">2026-11-22T00-53-05-669Z-f5230a</a>. The diff is read from git; the objective hashes are read from the audit artifacts.</p>

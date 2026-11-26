@@ -136,6 +136,7 @@ ${headExtra}
   </div>
 </header>
 <main id="main">
+${current === 'promises' ? '' : `<div class="proof-strip" role="note"><span><b>Promise proof</b> 4 promise classes · 18 real Kane runs · 9/9 HONORED</span><a href="/promises">Open the proof →</a></div>`}
 ${body}
 </main>
 <footer class="footer">
@@ -353,6 +354,7 @@ ${auditContractWarning(latest, contract)}`
     'Campaign',
     `<p class="eyebrow">Campaign · ${escapeHtml(contract.campaignId)}</p>
 ${campaignLoopBand(index, publicMode)}
+<div class="read-only-note" role="note"><strong>This campaign is the free-shipping proof.</strong> The four-class promise proof — discounts, bundles and delivery — is on <a href="/promises">/promises</a>.</div>
 <div class="hero">
   <div>
     <h1>Every ad makes a promise.<br>The checkout has to keep it.</h1>
@@ -613,7 +615,7 @@ ${rows}
     'Audits',
     `<p class="eyebrow">All records</p>
 <h1>Audits</h1>
-<p class="lede">Every readable <code>audit.json</code> under <code>.data/audits</code>, newest first. Missing or unreadable files are called out rather than filled in.</p>
+<p class="lede">Every readable shipping <code>audit.json</code> under <code>.data/audits</code>, newest first. Missing or unreadable files are called out rather than filled in. The four-class promise proof is at <a href="/promises">/promises</a>.</p>
 ${incompleteWarnings(index)}
 ${recordedNotice}
 ${content}`,
@@ -721,7 +723,7 @@ export function renderRunsList(index: AuditIndex, publicMode = false): string {
     'Runs',
     `<p class="eyebrow">Every Kane run</p>
 <h1>Runs</h1>
-<p class="lede">Every real Kane run in the audit JSON on disk, newest first, grouped by audit. No rows are invented.</p>
+<p class="lede">Every real shipping Kane run in the audit JSON on disk, newest first, grouped by audit. No rows are invented. The 18-run four-class proof is at <a href="/promises">/promises</a>.</p>
 ${readOnly}
 ${recordedNotice}
 <p class="run-totals"><strong>${totalRuns}</strong> runs · <strong>${totalCredits.toFixed(
@@ -1391,7 +1393,8 @@ export function renderWhyKane(input: {
     <p class="lede">Kern does not ask the agent to grade its own work. It sends Kane through the real rendered checkout, then uses that outside observation as the evidence the gate depends on. A unit test can agree with the bug; Kane reads what the customer actually sees.</p>
     <div class="actions">
       <a class="button" href="/gate">Open the gate</a>
-      <a class="button button--secondary" href="${postUrl}">See the passing audit</a>
+      <a class="button button--secondary" href="/promises">See the 18-run promise proof</a>
+      <a class="button button--secondary" href="${postUrl}">See the shipping audit</a>
       <a class="button button--secondary" href="https://github.com/kaelah971/kern#readme" rel="noopener">Read the README</a>
     </div>
   </div>
@@ -1399,7 +1402,7 @@ export function renderWhyKane(input: {
     <p class="panel-label">The witness</p>
     <p><strong>Kane CLI</strong></p>
     <p class="meta">Real Chrome · plain-English objectives · run_end + final_state · evidence packs</p>
-    <p class="meta">${runCount} recorded runs · ${matches}/${comparisons.length} post-repair objective hashes</p>
+    <p class="meta">${runCount + 18} real runs · 9/9 promise proof · ${matches}/${comparisons.length} shipping hashes</p>
   </aside>
 </div>
 
@@ -1409,7 +1412,7 @@ export function renderWhyKane(input: {
     <article class="card">
       <p class="eyebrow">Observe</p>
       <h3>The promise lives in the browser.</h3>
-      <p class="card-meta">The shipping quote is rendered by the store. A unit test or an API response can miss what the checkout displays to the customer. Kane opens the real page and reads the actual quote.</p>
+      <p class="card-meta">The price, discount, bundle total or delivery date is rendered by the store. A unit test or an API response can miss what the checkout displays. Kane opens the real page and reads the actual value.</p>
     </article>
     <article class="card">
       <p class="eyebrow">Decide</p>
@@ -1419,7 +1422,7 @@ export function renderWhyKane(input: {
     <article class="card">
       <p class="eyebrow">Gate</p>
       <h3>The patch has to face the same witness.</h3>
-      <p class="card-meta">Pi may change the source, but it cannot change the challenge. Kane reruns the same six objectives. Only then can the gate open and the receipt be issued.</p>
+      <p class="card-meta">Pi may change the source, but it cannot change the challenge. Kane reruns the same objectives after the change. Only then can the gate open and the receipt be issued.</p>
     </article>
   </div>
 </section>
@@ -1433,6 +1436,12 @@ export function renderWhyKane(input: {
   </div>
 </section>
 
+<section aria-labelledby="why-promises">
+  <h2 id="why-promises">The witness now covers four promises</h2>
+  <p>Kane has read the rendered shipping quote, the 20% discount, the bundle price and the delivery estimate. The new class proof is 18 real Kane runs across 9 scenarios — 9/9 HONORED — with every session, exit and evidence hash on its own page.</p>
+  <div class="actions"><a class="button" href="/promises">Open the promise proof →</a></div>
+</section>
+
 <section aria-labelledby="why-division">
   <h2 id="why-division">Kane’s job vs. Kern’s job</h2>
   <div class="grid-two">
@@ -1440,7 +1449,7 @@ export function renderWhyKane(input: {
       <p class="panel-label">Kane does</p>
       <ul class="not-proven">
         <li>Opens the real browser and follows the fixed customer journey.</li>
-        <li>Reads the rendered subtotal and shipping quote.</li>
+        <li>Reads the rendered price, discount, bundle total, delivery date or shipping quote.</li>
         <li>Returns the terminal run, extracted values, evidence and credits.</li>
         <li>Reruns the unchanged objectives after the repair.</li>
       </ul>
@@ -1578,7 +1587,7 @@ export function renderGate(input: {
     'Kern Gate',
     `<p class="eyebrow">Kern Gate · commercial promise</p>
 <h1>The agent does not decide. Kane does.</h1>
-<p class="lede">A patch is not done because it compiles. It is done when the frozen promise survives the real browser, the boundary, and the control. This is the gate; the page is not the gate.</p>
+<p class="lede">A patch is not done because it compiles. It is done when the frozen promise survives the real browser, the boundary, and the control. This page covers the free-shipping gate; the four-class promise proof is separate.</p>
 ${gateBlock}
 
 <section aria-labelledby="gate-scenarios-heading">
@@ -1615,6 +1624,11 @@ npm run gate -- --contract .data/contracts/<id>.json --run --url <preview>
 npm run --silent gate -- --json  # machine-readable</pre>
   <p>The command exits <code>0</code> only when the gate is open. A coding agent can use it as a stop hook: <code>npm run gate -- --audit &lt;path&gt; || exit 1</code>. The agent does not get to self-certify; it gets the observed values, the frozen expectations, and a closed gate.</p>
   <p class="meta">The gate does not start Kane unless you pass <code>--run</code>. The recorded app and this page never start a run.</p>
+</section>
+
+<section aria-labelledby="promise-gate-heading">
+  <h2 id="promise-gate-heading">The new promise classes</h2>
+  <p>The same gate now has a deterministic command for percentage discounts, bundles and delivery estimates: <code>npm run promises</code>. Its real proof is 18 Kane runs, 9/9 HONORED, on <a href="/promises">the promise proof page</a>. <code>npm run promise:audit</code> runs a fresh 18-run audit and spends credits.</p>
 </section>
 
 <section aria-labelledby="gate-evidence-heading">

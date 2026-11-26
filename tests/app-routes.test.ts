@@ -50,9 +50,9 @@ test('the landing page is the reference-style front door with the demo and READM
   assert.match(text, /The checkout has to/);
   assert.match(text, /Open the demo app/);
   assert.match(text, /Read the README/);
-  assert.match(text, /90\/90 tests pass/);
+  assert.match(text, /100\/100 tests pass/);
   assert.match(text, /Kane finds/);
-  assert.match(text, /Three tests\. One promise\./);
+  assert.match(text, /Four promise classes\. Two proofs\./);
   assert.match(text, /Everything is open\./);
   assert.match(text, /Everything is open\./);
   assert.match(text, /Why Kane CLI/);
