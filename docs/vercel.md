@@ -1,6 +1,6 @@
 # Deploy the proof site and demo storefront
 
-Live: **https://kern-site-mocha.vercel.app**
+Live: **https://tryoutkern.vercel.app**
 
 ## Why static
 

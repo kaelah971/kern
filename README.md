@@ -2,7 +2,7 @@
 
 Kern turns an advertised checkout promise into a frozen, merchant-approved contract, sends Kane CLI through the real storefront in a browser, and compares the rendered charge with a deterministic oracle. When the store is wrong, a bounded source repair is followed by the same challenge rerun unchanged. The demo has one storefront, one `free_shipping_threshold` promise, three carts, and two real audits.
 
-**Live demo:** https://kern-site-mocha.vercel.app — read-only proof site and static demo storefront. Every audit page is real recorded evidence; no account needed. Deployment steps: [`docs/vercel.md`](docs/vercel.md).
+**Live demo:** https://tryoutkern.vercel.app — read-only proof site and static demo storefront. Every audit page is real recorded evidence; no account needed. Deployment steps: [`docs/vercel.md`](docs/vercel.md).
 
 ## The proof
 
@@ -67,7 +67,7 @@ What to click:
 7. **Closed loop** — the actual `git diff ed3dbaf HEAD -- src/lib/shipping.ts`, then the post-repair audit and the 6/6 objective-hash comparison.
 8. **`2026-11-23T12-35-29-692Z-48b993` → Promise Receipt** — the scoped status, contract hash, pre-repair audit id, per-scenario and per-run evidence, and the “what this does not prove” section.
 
-The public storefront is **https://kern-site-mocha.vercel.app/store/**. A 3:30–4:00 recording plan is in [`docs/demo-script.md`](docs/demo-script.md), including the static before/after toggle and the optional operator panel.
+The public storefront is **https://tryoutkern.vercel.app/store/**. A 3:30–4:00 recording plan is in [`docs/demo-script.md`](docs/demo-script.md), including the static before/after toggle and the optional operator panel.
 
 ## Run it yourself with Kane
 

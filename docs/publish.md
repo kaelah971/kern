@@ -98,9 +98,9 @@ git remote set-url origin git@github.com:<your-github-user>/kern.git
 git push -u origin main
 ```
 
-The public proof site is **https://kern-site-mocha.vercel.app**, the gate is
-**https://kern-site-mocha.vercel.app/gate**, and the storefront is
-**https://kern-site-mocha.vercel.app/store/**. The operator-only
+The public proof site is **https://tryoutkern.vercel.app**, the gate is
+**https://tryoutkern.vercel.app/gate**, and the storefront is
+**https://tryoutkern.vercel.app/store/**. The operator-only
 live check is local; the public site returns 404 for `/check/*`.
 
 For the submission “about” field: the coding agent was **Pi** (terminal-driven),
@@ -149,8 +149,8 @@ Open the GitHub repository page and confirm:
 > The app replays recorded copies of the two audits, so you can inspect the
 > X-Ray, the agent gate, the diff and the receipt without a Kane account. The
 > public storefront is a static export of the same fixture at
-> https://kern-site-mocha.vercel.app/store/ (current) and
-> https://kern-site-mocha.vercel.app/store/before/eligible-60 (the audited
+> https://tryoutkern.vercel.app/store/ (current) and
+> https://tryoutkern.vercel.app/store/before/eligible-60 (the audited
 > revision): [repo link]
 >
 > Limits: one demo store, one promise type, USD/US; evidence is hash-linked,
