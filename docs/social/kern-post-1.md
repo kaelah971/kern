@@ -24,4 +24,4 @@ Attach **`kern-post-1.png`** to the post.
 
 `kern-post-1.png` — 1600 × 900, no links in the image.
 
-Alt text: Cream grid card. Headline: “Passed” is a claim. The checkout is the proof. A Kane audit card shows the $60 eligible and $50 boundary carts failing at $9.00 before the repair and passing at $0.00 after, while the $35 control stays $9.00. Bottom stats: $9.00 → $0.00, $35 control still $9.00, 6/6 unchanged objectives.
+Alt text: Dark green card with mint type. Headline: “Passed” is a claim. The checkout is the proof. A Kane audit card shows the $60 eligible and $50 boundary carts failing at $9.00 before the repair and passing at $0.00 after, while the $35 control stays $9.00. Bottom stats: $9.00 → $0.00, $35 control still $9.00, 6/6 unchanged objectives.
