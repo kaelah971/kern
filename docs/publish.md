@@ -23,7 +23,7 @@ git ls-files recorded
 
 Run from `C:\dev\kern` at commit `515e6cf` (before the fixture sanitation,
 static export, storefront and operator check; the recorded fallback is
-unchanged in substance). The current suite is **90/90**.
+unchanged in substance). The current suite is **100/100**.
 
 ```bash
 git clone . ../kern-clone-verify
@@ -154,7 +154,7 @@ Open the GitHub repository page and confirm:
 > https://tryoutkern.vercel.app/store/before/eligible-60 (the audited
 > revision): [repo link]
 >
-> Limits: one demo store, one promise type, USD/US; evidence is hash-linked,
+> Limits: one demo store, four promise classes, USD/US; evidence is hash-linked,
 > not signed; verified for the tested conditions, not certified.
 
 ## 5. Post 2 — the vendor receipt

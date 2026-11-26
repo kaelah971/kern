@@ -16,7 +16,7 @@ Attach **`kern-post-1.png`** to the post.
 >
 > It keeps the coding agent honest too. The agent cannot edit the challenge to get a pass. If the promise fails, the gate blocks the result, and a Claude Code Stop hook can stop the agent from saying “done” until Kane’s rerun passes.
 >
-> The public proof is recorded; the local demo is real. Twelve recorded runs. 90/90 tests. Full details soon as we prepare the submission.
+> The public proof is recorded; the local demo is real. Twelve recorded shipping runs. The same witness now covers percentage discounts, bundles and delivery estimates: 18 more real Kane runs, 9/9 honored. 100/100 tests. Full details soon as we prepare the submission.
 >
 > @testmuai #KaneCLI
 

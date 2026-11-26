@@ -16,7 +16,9 @@ Attach **`docs/screenshots/04-receipt.png`** or a short clip from the demo.
 >
 > In the demo, the pre-repair checkout charged $9 on the $60 and $50 carts. The $35 control paid $9 correctly. One line of shipping code was wrong. Pi made the bounded fix; a human merged it; Kane reran the same six objectives. $60 and $50 came back $0. The control stayed $9. All 6/6 objective hashes matched. The gate opened.
 >
-> The part I care about most is the receipt. When something goes wrong, the vendor can show the promise, the cart, the quote, the code revision and the evidence — and say exactly what the test does not prove. Not a recording of every shopper. A reproducible customer-side record for the conditions that matter.
+> Kern now covers four promise classes. The three new ones — a 20% discount, a bundle and a delivery estimate — were checked with 18 real Kane runs across nine scenarios; all nine were honored. Those are correct-feature proofs, not repair cases. The public page shows every session and every evidence hash.
+
+The part I care about most is the receipt. When something goes wrong, the vendor can show the promise, the cart, the quote, the code revision and the evidence — and say exactly what the test does not prove. Not a recording of every shopper. A reproducible customer-side record for the conditions that matter.
 >
 > That is what @testmuai’s Kane CLI makes possible: a real browser witness, not a logo.
 >

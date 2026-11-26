@@ -8,7 +8,7 @@ Kern is an independent open-source project built on **Kane CLI** from **TestMu A
 
 ## 1. About field (short)
 
-Kern is the promise firewall for checkout, built independently on **Kane CLI** from **TestMu AI**. A store advertises free shipping over $50; a coding agent changes the shipping rule; a $60 cart is charged $9. Kern freezes the ad and the merchant's interpretation into a versioned contract, sends **Kane CLI** through the real rendered checkout on eligible, exact-boundary and control carts, and refuses to open the gate until Kane reruns the same six objectives. **Pi** made the bounded one-line repair; a human merged it; **Kane was the independent browser witness**. The Promise Receipt shows what was promised, what the checkout did, which code passed, and what it does not prove.
+Kern is the promise firewall for checkout, built independently on **Kane CLI** from **TestMu AI**. A store advertises free shipping over $50; a coding agent changes the shipping rule; a $60 cart is charged $9. Kern freezes the ad and the merchant's interpretation into a versioned contract, sends **Kane CLI** through the real rendered checkout on eligible, exact-boundary and control carts, and refuses to open the gate until Kane reruns the same six objectives. **Pi** made the bounded one-line repair; a human merged it; **Kane was the independent browser witness**. The Promise Receipt shows what was promised, what the checkout did, which code passed, and what it does not prove. The same loop now covers percentage discounts, bundles and delivery estimates; Kane's 18-run audit of those classes returned 9/9 honored.
 
 **One-line version:** The checkout is the proof. Kane is the witness. Kern is the gate.
 
@@ -113,17 +113,28 @@ The demo promise is **$50.00 free standard shipping, after-discount merchandise 
 
 The pre-repair audit is **BROKEN**. The post-repair audit is **HONORED**, answers the first, and all **6/6** objective hashes match. The repair was one line: remove the `* 100` that compared a cents subtotal with a dollar-denominated threshold. Pi made the bounded change; a human merged it; Kane reran the unchanged six objectives. The control stayed at $9.00, so the fix did not simply make shipping free.
 
-Evidence note: the pre-repair $60 row is a provided real Kane capture; the $50 and $35 rows are live. A separate live $60 audit repeats the $60 observation. The post-repair audit is all live.
+The shipping loop is the repair case. A separate promise audit (`2026-11-26T13-53-49-423Z-0525db`) added three more classes with **18 real Kane runs across 9 scenarios**. All 9 scenarios were HONORED. Every scenario has a session ID, exit 0, an evidence SHA-256 and an objective SHA-256.
+
+| Promise | Eligible | Exact edge | Control |
+|---|---|---|---|
+| 20% off orders over $50 | $60 cart → **$12.00 discount** | $50 cart → **$10.00** | $35 cart → **$0.00** |
+| 15% off tote + notebook | complete bundle → **$9.00 discount** | tote only → **$0.00** | notebook only → **$0.00** |
+| 2pm / 2 business days | Thu 13:00 UTC → **Nov 30** | Thu 15:00 UTC → **Dec 1** | Sat 10:00 UTC → **Dec 2** |
+
+These are **correct-feature proofs**, not defect/repair cases. They show the same boundary-and-control discipline holds for the new classes. Only free shipping has the seeded defect and the one-line repair.
+
+Evidence note (shipping): the pre-repair $60 row is a provided real Kane capture; the $50 and $35 rows are live. A separate live $60 audit repeats the $60 observation. The post-repair audit is all live.
 
 ### What this does not prove
 
 Kern is deliberately narrow, and the receipt says so:
 
 - one owned demo storefront;
-- one promise type: free shipping over an after-discount threshold;
-- three fixed carts;
-- US destination, USD, standard shipping;
-- one recorded time;
+- four promise classes: free shipping (the repair case), percentage discount, bundle and delivery estimate (correct-feature proofs);
+- the shipping promise is over an after-discount threshold; the other classes use their own fixed fixtures;
+- three fixed shipping carts, plus three scenarios for each new class;
+- US destination, USD, standard shipping; the delivery date is a deterministic, holiday-free fixture, not a carrier estimate;
+- one recorded time per audit;
 - no real orders, payments, refunds or fulfilment;
 - evidence is **hash-linked, not signed**;
 - the public site replays recorded audits; the local demo is the real store;
@@ -137,7 +148,7 @@ Kern is not a price monitor. It is not a promotion-config checker. It is not a g
 
 It starts where the customer starts — the ad — and ends where the promise becomes real — the rendered checkout. It uses a boundary and a control so a repair cannot cheat in either direction. It requires the same challenge to pass after the repair. It turns the evidence into a receipt a support lead can use. And it makes Kane the stop condition for the coding agent.
 
-The next promise types are percent discounts, bundles, member pricing and delivery estimates. The architecture is designed for them; P0 proves one promise end to end rather than claiming all of them.
+Percent discounts, bundles and delivery estimates are now proven as correct features, with the same eligible, edge and control discipline. Member pricing, tax, currency and third-party checkout platforms are the next extensions; the architecture is designed for them, but Kern does not claim them yet.
 
 ### The checkout is the proof
 
@@ -150,7 +161,7 @@ Kern is that record. Kane is the witness. The gate is how the agent earns “don
 **Gate:** https://tryoutkern.vercel.app/gate  
 **Receipt:** https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993/receipt  
 **Repo:** https://github.com/kaelah971/kern  
-**Demo video:** [add the YouTube link]
+**Demo video:** [add the YouTube link] — local master `docs/demo/kern-demo.mp4` (3:30).
 
 ---
 
@@ -158,7 +169,7 @@ Kern is that record. Kane is the witness. The gate is how the agent earns “don
 
 Every discount is a promise. The customer sees it in the ad and expects it at checkout. Too often the checkout does something else: the code is green, the rule exists, the page loads, and the customer is still charged the wrong amount.
 
-Kern freezes the ad and the merchant’s interpretation, builds an eligible cart, the exact boundary and a control, and sends **Kane CLI** (TestMu AI) through the real rendered checkout. The deterministic oracle decides. If the promise is broken, **Pi** makes a bounded source repair, a human approves it, and Kane reruns the same six objectives. The gate opens only when the evidence matches. The Promise Receipt shows what was promised, what the checkout did, which code passed, and what it does not prove.
+Kern freezes the ad and the merchant’s interpretation, builds an eligible cart, the exact boundary and a control, and sends **Kane CLI** (TestMu AI) through the real rendered checkout. The deterministic oracle decides. If the promise is broken, **Pi** makes a bounded source repair, a human approves it, and Kane reruns the same six objectives. The gate opens only when the evidence matches. The Promise Receipt shows what was promised, what the checkout did, which code passed, and what it does not prove. The same discipline now covers four promise classes; the three new classes were checked with 18 real Kane runs across nine scenarios, all nine honored.
 
 The checkout is the proof. Kane is the witness. Kern is the gate.
 
@@ -199,6 +210,6 @@ Attach the receipt screenshot (`docs/screenshots/04-receipt.png`) or a short cli
 - **Gate:** https://tryoutkern.vercel.app/gate
 - **Receipt:** https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993/receipt
 - **Repo:** https://github.com/kaelah971/kern
-- **Video:** `docs/demo/kern-demo.mp4` — upload to YouTube, then replace the placeholder.
+- **Video:** `docs/demo/kern-demo.mp4` — 3:30 master; upload to YouTube, then replace the placeholder.
 - **Post 1:** `docs/social/kern-post-1.md` + `docs/social/kern-post-1.png`
 - **Post 2:** the draft above; attach the receipt screenshot or a short clip.
