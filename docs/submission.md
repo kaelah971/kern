@@ -157,6 +157,7 @@ Every store already has an ad. Every store already has a checkout. The missing p
 Kern is that record. Kane is the witness. The gate is how the agent earns “done.”
 
 **Live:** https://tryoutkern.vercel.app  
+**Promise proof:** https://tryoutkern.vercel.app/promises  
 **Why Kane:** https://tryoutkern.vercel.app/why-kane  
 **Gate:** https://tryoutkern.vercel.app/gate  
 **Receipt:** https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993/receipt  
@@ -206,6 +207,7 @@ Attach the receipt screenshot (`docs/screenshots/04-receipt.png`) or a short cli
 
 - **Live site:** https://tryoutkern.vercel.app
 - **Demo app:** https://tryoutkern.vercel.app/campaign
+- **Promise proof:** https://tryoutkern.vercel.app/promises
 - **Why Kane:** https://tryoutkern.vercel.app/why-kane
 - **Gate:** https://tryoutkern.vercel.app/gate
 - **Receipt:** https://tryoutkern.vercel.app/audits/2026-11-23T12-35-29-692Z-48b993/receipt
