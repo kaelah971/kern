@@ -11,6 +11,7 @@ Start with the root [README](../README.md) and the [Why Kane CLI brief](../WHY_K
 
 ## Design and architecture
 
+- [MCP server](mcp.md) — read-only tools for Claude Code, Cursor, Codex and other MCP clients; no Kane credits.
 - [System design PDF](system-design/kern-system-design.pdf) — information architecture, user flow, system architecture, technical architecture and tooling.
 - [Architecture PDF](architecture/kern-architecture.pdf) — the full system map and start-to-finish connection map.
 - [Architecture notes](architecture.md) — the original design brief.

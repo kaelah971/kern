@@ -8,7 +8,7 @@ An ad makes a promise. A coding agent changes the checkout. Kern freezes the pro
 
 Kern is an independent open-source project built on Kane CLI. It is not an official TestMu AI product.
 
-**Live:** [tryoutkern.vercel.app](https://tryoutkern.vercel.app) · [Demo video](https://youtu.be/HNdahWD_ehE?si=dqqkRTZ1gteTkAMm) · [Promise proof](https://tryoutkern.vercel.app/promises) · [Live demo](https://tryoutkern.vercel.app/campaign) · [Why Kane CLI](https://tryoutkern.vercel.app/why-kane) · [Gate](https://tryoutkern.vercel.app/gate) · [Store](https://tryoutkern.vercel.app/store/) · [GitHub](https://github.com/kaelah971/kern)
+**Live:** [tryoutkern.vercel.app](https://tryoutkern.vercel.app) · [Demo video](https://youtu.be/HNdahWD_ehE?si=dqqkRTZ1gteTkAMm) · [Promise proof](https://tryoutkern.vercel.app/promises) · [Live demo](https://tryoutkern.vercel.app/campaign) · [Why Kane CLI](https://tryoutkern.vercel.app/why-kane) · [Gate](https://tryoutkern.vercel.app/gate) · [MCP](docs/mcp.md) · [Store](https://tryoutkern.vercel.app/store/) · [GitHub](https://github.com/kaelah971/kern)
 
 ---
 
@@ -141,9 +141,37 @@ cd kern
 npm install
 npm test
 npm run demo
+npm run kern -- status
 ```
 
 `npm run demo` starts the recorded-audit app on `http://127.0.0.1:3000` and the real repaired store on `http://127.0.0.1:4173`, then opens both. It starts no Kane run.
+
+### Use Kern from an MCP client
+
+Kern now ships a **read-only MCP server** for Claude Code, Cursor, Codex and any other MCP client. It exposes the frozen contract, the recorded shipping audits, the shipping gate and the deterministic promise gate. It never starts Kane, edits files or spends credits.
+
+Claude Code:
+
+```bash
+claude mcp add kern -- node /absolute/path/to/kern/scripts/mcp.ts
+```
+
+Generic MCP client:
+
+```json
+{
+  "mcpServers": {
+    "kern": {
+      "command": "node",
+      "args": ["/absolute/path/to/kern/scripts/mcp.ts"]
+    }
+  }
+}
+```
+
+Tools: `kern_status`, `kern_gate`, `kern_promise_gate`, `kern_audits`. A closed gate is a valid result, not a tool error. See [the MCP server guide](docs/mcp.md).
+
+Live Kane runs are still explicit CLI commands (`npm run gate -- --run` or `KERN_LIVE=1`) and are the only paths that spend Kane credits.
 
 ## The gate
 
@@ -335,7 +363,8 @@ The suite covers the oracle boundary at 4,999 / 5,000 / 5,001 cents, the real ca
 ```text
 src/app/          read-only proof app, live-check controller, gate/compiler UI
 src/lib/          contract, oracle, cart, shipping, promises, audit engine, gate, Kane adapter
-scripts/          export, demo, gate, audit, promise audit, replay and verification scripts
+src/mcp/          read-only MCP server over the recorded proof
+scripts/          export, demo, gate, audit, promise audit, MCP and verification scripts
 hooks/            Claude Code Stop-hook adapter
 tests/            node:test suite, fixtures, excluded replay characterization
 contracts/        frozen demo promise
@@ -360,6 +389,7 @@ The local app is `npm run app`; the one-command demo is `npm run demo`.
 - The free-shipping path has the seeded defect and real repair. The three new classes are correct-feature proofs on fixed local test pages; they are not defect/repair cases.
 - The public live site is static proof. Real Kane execution is local and operator-controlled.
 - The public site does not expose a live Kane runner. The operator-only check is gated by `KERN_LIVE=1`.
+- The MCP server is read-only; live Kane runs are explicit CLI commands and spend credits.
 - The repair was terminal-driven by Pi and human-approved. It was not an in-app autonomous repair.
 - Evidence is **hash-linked, not signed or certified**.
 - Recorded copies keep evidence SHA-256 values, not the `.evidence` files.
