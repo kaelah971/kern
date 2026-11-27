@@ -150,6 +150,8 @@ It starts where the customer starts — the ad — and ends where the promise be
 
 Percent discounts, bundles and delivery estimates are now proven as correct features, with the same eligible, edge and control discipline. Member pricing, tax, currency and third-party checkout platforms are the next extensions; the architecture is designed for them, but Kern does not claim them yet.
 
+The repo also ships a read-only MCP server. A coding agent can inspect the recorded audits, the shipping gate and the deterministic promise gate without starting Kane or spending credits. Live Kane runs remain explicit CLI commands; the MCP surface cannot move the challenge or spend credits.
+
 ### The checkout is the proof
 
 Every store already has an ad. Every store already has a checkout. The missing piece is the independent record that connects them.
